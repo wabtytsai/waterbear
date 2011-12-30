@@ -285,7 +285,7 @@ function tab_select(event){
         update_scripts_view();
     }
 }
-$('.tab_bar').delegate('.chrome_tab', 'click', tab_select);
+$('.tab_bar').delegate('.tab', 'click', tab_select);
 
 // Expose this to draggging and saving functionality
 window.show_workspace = function(){

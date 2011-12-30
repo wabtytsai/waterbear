@@ -1,0 +1,121 @@
+@tab_bg: lighten(#ccc, 11%);					//#959DA5;
+@tab: darken(#ccc, 10%); 					//#464646
+@text_color: lighten(#222, 25%);
+@selected_tab: #4D736D;						//#efefef;
+@selected_text_color: #fff;
+@border: #ccc;
+
+
+@width_between_tabs: 15px;
+
+@c_w: 9px;
+@c_h: 8px;
+@tab_h: 30px;
+
+
+
+.tab_bar {
+    position:absolute;
+    left:15%;
+    right:0;
+    top:0px;
+    height:@tab_h;
+    background:@tab_bg;
+    border-bottom:1px solid @border;
+    margin:0;
+    padding:5px 16px 0;
+    list-style:none;
+    z-index: 3;
+    
+    
+    .tab {
+	float:left;
+	margin:0 @width_between_tabs 0 0;
+	position:relative;
+	padding:0;
+	border-bottom: 1px solid @border;
+	cursor: pointer;
+	
+	&:before, &:after {
+	    content:'';
+	    width:@c_w;
+	    height:@c_h;
+	    position:absolute;
+	    z-index:2;
+	    bottom:0;
+	    background:@tab;
+/*	    border-bottom: 1px solid @border;*/
+	}
+	&:before {left:-8px;}
+	&:after {right:-8px;}
+	&.selected{
+	    span {
+		background:@selected_tab;
+		color:@selected_text_color;
+		//height:30px;
+		//text-shadow:lighten(@selected_text_color, 30%) 0 1px 0;
+		-webkit-background-clip: padding-box;
+		border-color: @border;
+/*		&:before, &:after{
+		    bottom:0;
+		}*/
+	    }
+	    &:before, &:after {
+		background:@selected_tab;
+		bottom:0;
+		-webkit-background-clip: padding-box;
+	    }
+	}
+
+	span {
+	    display:block;
+	    color:@text_color;
+	    text-decoration:none;
+	    padding:0 15px;
+	    line-height:@tab_h;
+	    height:(@tab_h)-1;
+	    font-weight:bold;
+	    background:@tab;
+	    border:1px solid @border;
+	    border-bottom:none;
+	    -webkit-background-clip: padding-box;
+	    -webkit-font-smoothing:antialiased;
+	    -webkit-border-top-left-radius:8px;
+	    -webkit-border-top-right-radius:8px;
+	    -moz-border-radius:8px 8px 0 0;
+	    border-top-left-radius:8px;
+	    border-top-right-radius:8px;
+	    //text-shadow: darken(@text_color, 30%) 0 -1px 0;
+	    position:relative;
+
+	    &:before, &:after {
+		content:'';
+		width:(@c_w)+1;
+		height:(@c_h)+1;
+		position:absolute;
+		z-index:3;
+		bottom:-1px;
+		background:@tab_bg;
+		overflow:hidden;
+		border-bottom:1px solid @border;
+		-webkit-background-clip: padding-box;
+
+	    }
+	     &:before {
+		left:-11px;
+		border-bottom-right-radius:8px;
+		-webkit-border-bottom-right-radius:8px;
+		-moz-border-radius-bottomright:8px;
+		border-right:1px solid @border;
+	    }
+
+	    &:after {
+		right:-11px;
+		border-bottom-left-radius:8px;
+		-webkit-border-bottom-left-radius:8px;
+		-moz-border-radius-bottomleft:8px;
+		border-left:1px solid @border;
+	    }
+	}
+    }
+}
