@@ -302,3 +302,18 @@ html, body {
 }
 
 
+.button{
+    border: 2px solid black;
+    border-radius: 5px;
+    color: white;
+    background-color: #4D736D;
+    padding: 2px 5px;
+    margin: 3px 5px;
+    display: inline-block;
+    text-decoration: none;
+}
+.button:hover{
+/*    text-decoration: underline;*/
+    background-color: #59857E;
+    border-color: #222;
+}
