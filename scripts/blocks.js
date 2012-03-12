@@ -104,7 +104,8 @@ $.fn.extend({
             label: this.data('label').replace(/##/gm, '_' + this.id()),
             script: this.data('script').replace(/##/gm, '_' + this.id()),
             subContainerLabels: this.data('subContainerLabels'),
-            containers: this.data('containers')
+            containers: this.data('containers'),
+            position: this.data('position')
         };
         // FIXME: Move specific type handling to raphael_demo.js
         if (this.is('.trigger')){desc.trigger = true;}

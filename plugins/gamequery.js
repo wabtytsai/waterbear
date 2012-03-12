@@ -9,7 +9,7 @@
 // Pre-load dependencies
 yepnope({
     load: [ 'plugins/gamequery.css',
-            //'jquery/1.7/jquery.js',
+            //'lib/jquery-1.7.1.min.js',
             'lib/jquery.gamequery.js',
             'lib/beautify.js',
             'lib/highlight.js',
@@ -99,7 +99,7 @@ jQuery.fn.extend({
       var mainscript = this.map(function(){ return $(this).extract_script_filtered('main');}).get().join('');
       var loopscript = this.map(function(){ return $(this).extract_script_filtered('loop');}).get().join('');
       
-      var structured = anyscript+'\n$(function(){$("#stage").playground({});\n'+mainscript+'\n'+loopscript+'\n$.playground.startGame();\n});';
+      var structured = anyscript+'\n$(function(){$(".stage").playground({ keyTracker: true});\n'+mainscript+'\n'+loopscript+'\n$.playground().startGame();\n});';
       return structured;
   },
   
@@ -190,7 +190,7 @@ var menus = {
             trigger: true,
             slot: false,
             containers: 1,
-            script: 'var count## = 0; registerCallback(function(){count##++; local.count## = count##;[[1]]},1000/{{1}});',
+            script: 'var count## = 0; registerCallback(function(){count##++; count## = count##;[[1]]},1000/{{1}});',
             help: 'this trigger will run the attached blocks every time this key is pressed'
         },
         */
@@ -200,14 +200,7 @@ var menus = {
             trigger: true,
             slot: false,
             containers: 1,
-            locals: [
-                {
-                    label: 'count##',
-                    script: 'local.count##',
-                    type: 'number'
-                }
-            ],
-            script: 'var count## = 0; $.playground().registerCallback(function(){count##++; local.count## = count##;[[1]]},1000/{{1}});',
+            script: '$.playground().registerCallback(function(){[[1]]},1000/{{1}});',
             help: 'this trigger will run the attached blocks periodically, put the main game loop here'
         },
         {
@@ -219,12 +212,12 @@ var menus = {
         {
             label: 'repeat [number:10]', 
             containers: 1, 
-            script: 'for (local.index## = 0; local.index## < {{1}}; local.index##++){[[1]]};',
+            script: 'for (index## = 0; index## < {{1}}; index##++){[[1]]};',
             help: 'repeat the contained blocks so many times',
             locals: [
                 {
                     label: 'loop index##',
-                    script: 'local.index##',
+                    script: 'index##',
                     type: 'number'
                 }
             ]
@@ -269,60 +262,60 @@ var menus = {
         },
         {
             label: 'variable string## [string]',
-            script: 'local.string## = {{1}};',
+            script: 'string## = {{1}};',
             returns: {
                 label: 'string##',
-                script: 'local.string##',
+                script: 'string##',
                 type: 'string'
             },
             help: 'create a reference to re-use the string'
         },
         {
             label: 'variable number## [number]',
-            script: 'local.number## = {{1}};',
+            script: 'number## = {{1}};',
             returns: {
                 label: 'number##',
-                script: 'local.number##',
+                script: 'number##',
                 type: 'number'
             },
             help: 'create a reference to re-use the number'
         },
         {
             label: 'variable boolean## [boolean]',
-            script: 'local.boolean## = {{1}};',
+            script: 'boolean## = {{1}};',
             returns: {
                 label: 'boolean##',
-                script: 'local.boolean##',
+                script: 'boolean##',
                 type: 'boolean'
             },
             help: 'create a reference to re-use the boolean'
         },
         {
             label: 'variable array## [array]',
-            script: 'local.array## = {{1}};',
+            script: 'array## = {{1}};',
             returns: {
                 label: 'array##',
-                script: 'local.array## = {{1}}',
+                script: 'array## = {{1}}',
                 type: 'array'
             },
             help: 'create a reference to re-use the array'
         },
         {
             label: 'variable object## [object]',
-            script: 'local.object## = {{1}};',
+            script: 'object## = {{1}};',
             returns: {
                 label: 'object##',
-                script: 'local.object##',
+                script: 'object##',
                 type: 'object'
             },
             help: 'create a reference to re-use the object'
         },
         {
             label: 'variable color## [color]',
-            script: 'local.color## = {{1}};',
+            script: 'color## = {{1}};',
             returns: {
                 label: 'color##',
-                script: 'local.color##',
+                script: 'color##',
                 type: 'color'
             },
             help: 'create a reference to re-use the color'
@@ -330,10 +323,10 @@ var menus = {
         /*
         {
             label: 'variable image## [image]',
-            script: 'local.image## = {{1}};',
+            script: 'image## = {{1}};',
             returns: {
                 label: 'image##',
-                script: 'local.image##',
+                script: 'image##',
                 type: 'image'
             },
             help: 'create a reference to re-use the image'
@@ -341,80 +334,80 @@ var menus = {
         // 'shape', 'point', 'size', 'rect', 'gradient', 'pattern', 'imagedata', 'any'
         {
             label: 'variable shape## [shape]',
-            script: 'local.shape## = {{1}};',
+            script: 'shape## = {{1}};',
             returns: {
                 label: 'shape##',
-                script: 'local.shape##',
+                script: 'shape##',
                 type: 'shape'
             },
             help: 'create a reference to re-use the shape'
         },
         {
             label: 'variable point## [point]',
-            script: 'local.point## = {{1}};',
+            script: 'point## = {{1}};',
             returns: {
                 label: 'point##',
-                script: 'local.point##',
+                script: 'point##',
                 type: 'point'
             },
             help: 'create a reference to re-use the point'
         },
         {
             label: 'variable size## [size]',
-            script: 'local.size## = {{1}};',
+            script: 'size## = {{1}};',
             returns: {
                 label: 'size##',
-                script: 'local.size##',
+                script: 'size##',
                 type: 'size'
             },
             help: 'create a reference to re-use the size'
         },
         {
             label: 'variable rect## [rect]',
-            script: 'local.rect## = {{1}};',
+            script: 'rect## = {{1}};',
             returns: {
                 label: 'rect##',
-                script: 'local.rect##',
+                script: 'rect##',
                 type: 'rect'
             },
             help: 'create a reference to re-use the rect'
         },
         {
             label: 'variable gradient## [gradient]',
-            script: 'local.gradient## = {{1}};',
+            script: 'gradient## = {{1}};',
             returns: {
                 label: 'gradient##',
-                script: 'local.gradient##',
+                script: 'gradient##',
                 type: 'gradient'
             },
             help: 'create a reference to re-use the gradient'
         },
         {
             label: 'variable pattern## [pattern]',
-            script: 'local.pattern## = {{1}};',
+            script: 'pattern## = {{1}};',
             returns: {
                 label: 'pattern##',
-                script: 'local.pattern##',
+                script: 'pattern##',
                 type: 'pattern'
             },
             help: 'create a reference to re-use the pattern'
         },
         {
             label: 'variable imagedata## [imagedata]',
-            script: 'local.imagedata## = {{1}};',
+            script: 'imagedata## = {{1}};',
             returns: {
                 label: 'imagedata##',
-                script: 'local.imagedata##',
+                script: 'imagedata##',
                 type: 'imagedata'
             },
             help: 'create a reference to re-use the imagedata'
         },
         {
             label: 'variable any## [any]',
-            script: 'local.any## = {{1}};',
+            script: 'any## = {{1}};',
             returns: {
                 label: 'any##',
-                script: 'local.any##',
+                script: 'any##',
                 type: 'any'
             },
             help: 'create a reference to re-use the any'
@@ -424,21 +417,21 @@ var menus = {
     array: menu('Arrays', [
         {
             label: 'new array##',
-            script: 'local.array## = [];',
+            script: 'array## = [];',
             help: 'Create an empty array',
             returns: {
                 label: 'array##',
-                script: 'local.array##',
+                script: 'array##',
                 type: 'array'
             }
         },
         {
             label: 'new array with array## [array]',
-            script: 'local.array## = {{1}}.slice();',
+            script: 'array## = {{1}}.slice();',
             help: 'create a new array with the contents of another array',
             returns: {
                 label: 'array##',
-                script: 'local.array##',
+                script: 'array##',
                 type: 'array'
             }
         },
@@ -497,18 +490,18 @@ var menus = {
         },
         {
             label: 'array [array] for each',
-            script: '$.each({{1}}, function(idx, item){local.index = idx; local.item = item; [[1]] });',
+            script: '$.each({{1}}, function(idx, item){index = idx; item = item; [[1]] });',
             containers: 1,
             locals: [
                 {
                     label: 'index',
-                    script: 'local.index',
+                    script: 'index',
                     help: 'index of current item in array',
                     type: 'number'
                 },
                 {
                     label: 'item',
-                    script: 'local.item',
+                    script: 'item',
                     help: 'the current item in the iteration',
                     type: 'any'
                 }
@@ -519,10 +512,10 @@ var menus = {
     objects: menu('Objects', [
         {
             label: 'new object##',
-            script: 'local.object## = {};',
+            script: 'object## = {};',
             returns: {
                 label: 'object##',
-                script: 'local.object##',
+                script: 'object##',
                 type: 'object'
             },
             help: 'create a new, empty object'
@@ -540,18 +533,18 @@ var menus = {
         },
         {
             label: 'object [object] for each',
-            script: '$.each({{1}}, function(key, item){local.key = key; local.item = item; [[1]] });',
+            script: '$.each({{1}}, function(key, item){key = key; item = item; [[1]] });',
             containers: 1,
             locals: [
                 {
                     label: 'key',
-                    script: 'local.key',
+                    script: 'key',
                     help: 'key of current item in object',
                     type: 'string'
                 },
                 {
                     label: 'item',
-                    script: 'local.item',
+                    script: 'item',
                     help: 'the current item in the iteration',
                     type: 'any'
                 }
@@ -622,11 +615,11 @@ var menus = {
     sensing: menu('Sensing', [
         {
             label: 'ask [string:What\'s your name?] and wait',
-            script: 'local.answer## = prompt({{1}});',
+            script: 'answer## = prompt({{1}});',
             returns: {
                 label: 'answer##',
                 type: 'string',
-                script: 'local.answer'
+                script: 'answer'
             },
             help: 'Prompt the user for information'
         },
@@ -652,7 +645,7 @@ var menus = {
         {
             label: 'key [choice:keys] pressed?', 
             'type': 'boolean', 
-            script: '$.gameQuery.keyTracker[newString({{1}}).toUpperCase().charCodeAt(0)]',
+            script: '$.gameQuery.keyTracker[new String({{1}}).toUpperCase().charCodeAt(0)]',
             help: 'is the given key down when this block is run?'
         },
         
@@ -862,7 +855,7 @@ var menus = {
         {
             label: 'new image##  [image]',
             script: 'var image## = new $.gameQuery.Animation({imageURL: {{1}}});',
-            //script: 'local.sprite## = Gamequery.e().addComponent("2D, DOM");',
+            //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
             returns: {
                 label: 'image##',
                 script: 'image##',
@@ -872,9 +865,9 @@ var menus = {
         },
         
         {
-          label: 'new animation##  [image] frames [number:1] width of cell [number:32] fps [number:30] ',
+          label: 'new animation##  [image] frames [number:1] width of cell [number:32] fps [number:15] ',
           script: 'var animation## = new $.gameQuery.Animation({imageURL: {{1}}, numberOfFrame: {{2}}, delta:{{3}}, rate: (1000 / {{4}}), type: $.gameQuery.ANIMATION_HORIZONTAL });',
-            //script: 'local.sprite## = Gamequery.e().addComponent("2D, DOM");',
+            //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
             returns: {
                 label: 'animation##',
                 script: 'animation##',
@@ -886,8 +879,8 @@ var menus = {
         
         {
           label: 'new animation##  of XEON running ',
-          script: 'var animation## = new $.gameQuery.Animation({imageURL: "./images/xeon-walking.png", numberOfFrame: 4, delta:68, rate: (1000 / 30), type: $.gameQuery.ANIMATION_HORIZONTAL });',
-            //script: 'local.sprite## = Gamequery.e().addComponent("2D, DOM");',
+          script: 'var animation## = new $.gameQuery.Animation({imageURL: "./images/xeon-walking.png", numberOfFrame: 4, delta:68, rate: (1000 / 15), type: $.gameQuery.ANIMATION_HORIZONTAL });',
+            //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
             returns: {
                 label: 'animation##',
                 script: 'animation##',
@@ -906,14 +899,36 @@ var menus = {
         */
         {
           label: 'new sprite## based on [image] height [number:32] width [number:32] x [number:0] y [number:0]',
-            script: '$.playground.addSprite("sprite##",{animation: {{1}}, height:{{2}}, width: {{3}}, posx: {{4}},posy:{{5}}});',
+            script: '$.playground().addSprite("sprite##",{animation: {{1}}, height:{{2}}, width: {{3}}, posx: {{4}},posy:{{5}}}); var sprite## = $("sprite##");',
             returns: {
                 label: 'sprite##',
-                script: 'sprite##',
+                script: '$("#sprite##")',
                 type: 'sprite'
             },
             help: 'create a new sprite'
         },
+        
+        {
+          label: 'move [sprite] by [number:0] x and [number:0] y',
+          script: '{{1}}.xy({{2}},{{3}},true);',
+          help: 'move sprite'
+        },
+        
+        {
+            label: 'for each sprite colliding with [sprite]',
+            script: '{{1}}.collision().each(function(){[[1]] });',
+            containers: 1,
+            locals: [
+                {
+                    label: 'colliding_sprite',
+                    script: '$(this)',
+                    help: 'sprite colliding with selected sprite',
+                    type: 'sprite'
+                },
+            ],
+            help: 'run the blocks with each sprite colliding with our sprite'
+        }
+        
     ]),
     /*
     point: menu('Point', [
