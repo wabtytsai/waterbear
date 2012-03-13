@@ -10,11 +10,12 @@
 yepnope({
     load: [ 'plugins/gamequery.css',
             //'lib/jquery-1.7.1.min.js',
-            'lib/jquery.gamequery.js',
             'lib/beautify.js',
             'lib/highlight.js',
             'lib/highlight-javascript.js',
-            'lib/highlight-github.css'
+            'lib/highlight-github.css',
+            'lib/jquery.gamequery.js',
+            'lib/jquery.gamequery.soundwrapper.html5.js'
     ],
     complete: setup
 });
@@ -156,7 +157,9 @@ window.choice_lists = {
     easing: ['>', '<', '<>', 'backIn', 'backOut', 'bounce', 'elastic'],
     fontweight: ['normal', 'bold', 'inherit'],
     globalCompositeOperators: ['source-over', 'source-atop', 'source-in', 'source-out', 'destination-atop', 'destination-in', 'destination-out', 'destination-over', 'lighter', 'copy', 'xor'],
-    repetition: ['repeat', 'repeat-x', 'repeat-y', 'no-repeat']
+    repetition: ['repeat', 'repeat-x', 'repeat-y', 'no-repeat'],
+    stills:['./images/xeon/still.png', './images/xeon/shooting.png'],
+    animations:['./images/xeon/walking.png']
 };
 
 // Hints for building blocks
@@ -853,25 +856,48 @@ var menus = {
     ]),
     sprites: menu('Sprites', [
         {
-            label: 'new image##  [image]',
-            script: 'var image## = new $.gameQuery.Animation({imageURL: {{1}}});',
+            label: 'new still## [string]',
+            script: 'var still## = new $.gameQuery.Animation({imageURL: {{1}}});',
             //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
             returns: {
-                label: 'image##',
-                script: 'image##',
-                type: 'image'
+                label: 'still##',
+                script: 'still##',
+                type: 'animation'
+            },
+            help: 'create a new image'
+        },
+        {
+          label: 'new still## [choice:stills]',
+            script: 'var still## = new $.gameQuery.Animation({imageURL: {{1}}});',
+            //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
+            returns: {
+                label: 'still##',
+                script: 'still##',
+                type: 'animation'
             },
             help: 'create a new image'
         },
         
         {
-          label: 'new animation##  [image] frames [number:1] width of cell [number:32] fps [number:15] ',
+          label: 'new animation##  [string] frames [number:1] width of cell [number:32] fps [number:15] ',
           script: 'var animation## = new $.gameQuery.Animation({imageURL: {{1}}, numberOfFrame: {{2}}, delta:{{3}}, rate: (1000 / {{4}}), type: $.gameQuery.ANIMATION_HORIZONTAL });',
             //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
             returns: {
                 label: 'animation##',
                 script: 'animation##',
-                type: 'image'
+                type: 'animation'
+            },
+            help: 'create a new animation'
+        },
+        
+        {
+          label: 'new animation##  [choice:animations] frames [number:1] width of cell [number:32] fps [number:15] ',
+          script: 'var animation## = new $.gameQuery.Animation({imageURL: {{1}}, numberOfFrame: {{2}}, delta:{{3}}, rate: (1000 / {{4}}), type: $.gameQuery.ANIMATION_HORIZONTAL });',
+            //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
+            returns: {
+                label: 'animation##',
+                script: 'animation##',
+                type: 'animation'
             },
             help: 'create a new animation'
         },
@@ -879,26 +905,18 @@ var menus = {
         
         {
           label: 'new animation##  of XEON running ',
-          script: 'var animation## = new $.gameQuery.Animation({imageURL: "./images/xeon-walking.png", numberOfFrame: 4, delta:68, rate: (1000 / 15), type: $.gameQuery.ANIMATION_HORIZONTAL });',
+          script: 'var animation## = new $.gameQuery.Animation({imageURL: "./images/xeon/walking.png", numberOfFrame: 4, delta:68, rate: (1000 / 4), type: $.gameQuery.ANIMATION_HORIZONTAL });',
             //script: 'sprite## = Gamequery.e().addComponent("2D, DOM");',
             returns: {
                 label: 'animation##',
                 script: 'animation##',
-                type: 'image'
+                type: 'animation'
             },
             help: 'create a new of xeon running'
         },
-        
-       /*
-	var redExplosion = new $.gameQuery.Animation({	imageURL: "./explosion.png",
-									numberOfFrame: 10,
-									delta: 60,
-									rate: 60,
-									distance: 60,
-									type: $.gameQuery.ANIMATION_VERTICAL | $.gameQuery.ANIMATION_CALLBACK});
-        */
+  
         {
-          label: 'new sprite## based on [image] height [number:32] width [number:32] x [number:0] y [number:0]',
+          label: 'new sprite## based on [animation] height [number:32] width [number:32] x [number:0] y [number:0]',
             script: '$.playground().addSprite("sprite##",{animation: {{1}}, height:{{2}}, width: {{3}}, posx: {{4}},posy:{{5}}}); var sprite## = $("sprite##");',
             returns: {
                 label: 'sprite##',
@@ -909,10 +927,42 @@ var menus = {
         },
         
         {
+          label: 'change animation on [sprite] to [animation]',
+          script: '{{1}}.setAnimation({{2}});',
+          help: 'change animation on sprite'
+        },
+              
+        {
           label: 'move [sprite] by [number:0] x and [number:0] y',
           script: '{{1}}.xy({{2}},{{3}},true);',
           help: 'move sprite'
         },
+        
+        {
+          label: 'new sound## [string] loops [boolean] ',
+          script: 'var sound## = new $.gameQuery.SoundWrapper({{1}}, {{2}});',
+            returns: {
+                label: 'sound##',
+                script: 'sound##',
+                type: 'sound'
+            },
+            help: 'create a new sound'
+        },
+        
+        {
+          label: 'change sound on [sprite] to [sound]',
+          script: '{{1}}.addSound({{2}});',
+          help: 'change sound on sprite'
+        },
+        
+        
+        {
+          label: 'play sound on [sprite]',
+          script: '{{1}}.playSound();',
+          help: 'play sound on sprite'
+        },
+        
+        
         
         {
             label: 'for each sprite colliding with [sprite]',
@@ -927,7 +977,16 @@ var menus = {
                 },
             ],
             help: 'run the blocks with each sprite colliding with our sprite'
+        },
+        
+        
+        {
+            label: 'remove [sprite]',
+            script: '{{1}}.remove();',
+            help: 'remove sprite'
+
         }
+        
         
     ]),
     /*
