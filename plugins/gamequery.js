@@ -238,12 +238,12 @@ var menus = {
             script: '$(".stage").bind({{1}}, function(){[[1]]});',
             help: 'add a listener for the given message, run these blocks when it is received'
         },
-        {
+        /*{
             label: 'forever if [boolean:false]', 
             containers: 1,  
             script: 'while({{1}}){[[1]]}',
             help: 'repeat until the condition is false'
-        },
+        },*/
         {
             label: 'if [boolean]', 
             containers: 1, 
@@ -257,12 +257,13 @@ var menus = {
             script: 'if({{1}}){[[1]]}else{[[2]]}',
             help: 'run the first set of blocks if the condition is true, otherwise run the second set'
         },
+        /*
         {
             label: 'repeat until [boolean]', 
             containers: 1, 
             script: 'while(!({{1}})){[[1]]}',
             help: 'repeat forever until condition is true'
-        },
+        },*/
     ], true),
         
     variables: menu('Variables', [
@@ -434,7 +435,7 @@ var menus = {
             help: 'create a reference to re-use the any'
         },
         */
-    ], true),
+    ], false),
     /*
     array: menu('Arrays', [
         {
@@ -636,7 +637,7 @@ var menus = {
     ], false),
     
     sensing: menu('Sensing', [
-        {
+        /*{
             label: 'ask [string:What\'s your name?] and wait',
             script: 'answer## = prompt({{1}});',
             returns: {
@@ -645,7 +646,7 @@ var menus = {
                 script: 'answer'
             },
             help: 'Prompt the user for information'
-        },
+        },*/
         /*{
             label: 'mouse x', 
             'type': 'number', 
@@ -957,6 +958,22 @@ var menus = {
           script: '{{1}}.xy({{2}},{{3}},true);',
           help: 'move sprite'
         },
+        
+        {
+          label: '[sprite] X pos',
+          script: '{{1}}.x()',
+          'type': 'number', 
+          help: 'Sprites current X position'
+        },
+        
+        
+        {
+          label: '[sprite] Y pos',
+          script: '{{1}}.y()',
+          'type': 'number', 
+          help: 'Sprites current Y position'
+        },
+        
         
         {
           label: 'new sound## [string] loops [boolean] ',
