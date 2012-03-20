@@ -159,7 +159,7 @@ window.choice_lists = {
     globalCompositeOperators: ['source-over', 'source-atop', 'source-in', 'source-out', 'destination-atop', 'destination-in', 'destination-out', 'destination-over', 'lighter', 'copy', 'xor'],
     repetition: ['repeat', 'repeat-x', 'repeat-y', 'no-repeat'],
     stills:['./images/xeon/still.png', './images/xeon/shooting.png'],
-    animations:['./images/xeon/walking.png']
+    animations:['./images/xeon/walking-right.png', './images/xeon/walking-left.png']
 };
 
 // Hints for building blocks
@@ -263,6 +263,11 @@ var menus = {
             script: 'while(!({{1}})){[[1]]}',
             help: 'repeat forever until condition is true'
         },
+    ], true),
+        
+    variables: menu('Variables', [
+        
+        
         {
             label: 'variable string## [string]',
             script: 'string## = {{1}};',
@@ -274,6 +279,12 @@ var menus = {
             help: 'create a reference to re-use the string'
         },
         {
+            label: 'set [string] = [string]',
+            script: '{{1}} = {{2}};',
+            help: 'set a string variable to something else'
+        },
+
+        {
             label: 'variable number## [number]',
             script: 'number## = {{1}};',
             returns: {
@@ -282,6 +293,13 @@ var menus = {
                 type: 'number'
             },
             help: 'create a reference to re-use the number'
+        },
+        
+        
+        {
+            label: 'set [number] = [number]',
+            script: '{{1}} = {{2}};',
+            help: 'set a number variable to something else'
         },
         {
             label: 'variable boolean## [boolean]',
@@ -333,7 +351,7 @@ var menus = {
                 type: 'image'
             },
             help: 'create a reference to re-use the image'
-        },*/
+        },
         // 'shape', 'point', 'size', 'rect', 'gradient', 'pattern', 'imagedata', 'any'
         {
             label: 'variable shape## [shape]',
@@ -415,6 +433,7 @@ var menus = {
             },
             help: 'create a reference to re-use the any'
         },
+        */
     ], true),
     /*
     array: menu('Arrays', [
@@ -556,6 +575,7 @@ var menus = {
             
         }
     ], false),
+    */
     strings: menu('Strings', [
         {
             label: 'string [string] split on [string]',
@@ -614,7 +634,7 @@ var menus = {
             help: 'send a message to the console with a format string and multiple objects'
         }
     ], false),
-    */
+    
     sensing: menu('Sensing', [
         {
             label: 'ask [string:What\'s your name?] and wait',

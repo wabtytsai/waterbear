@@ -3,8 +3,8 @@
 .control{ border-color: hsl(44, 81%, 49%); }
 .control > .block{ background-color: hsl(44, 81%, 85%); }
 
-.arrays{ border-color: hsl(195, 65%, 79%); }
-.arrays > .block{ background-color: hsl(195, 62%, 89%); }
+.variables{ border-color: hsl(195, 65%, 79%); }
+.variables > .block{ background-color: hsl(195, 62%, 89%); }
 
 .objects{ border-color: hsl(75, 90%, 66%); }
 .objects > .block { background-color: hsl(75, 90%, 76%); }
