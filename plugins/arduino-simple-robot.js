@@ -325,7 +325,7 @@ var menus = {
         },
         {
             label:'is moving [choice:motionstates]',
-            script: "(motionstate == {{1}})",
+            script: "(motionstate == \"{{1}}\")",
           	'type': 'boolean', 
           	help: 'Current motion state'
         },
