@@ -1,5 +1,10 @@
 yepnope({
-    load: 'plugins/arduino-simple-robot.css'
+    load: [ 'plugins/arduino-simple-robot.css',
+            'lib/beautify-arduino.js',
+            'lib/highlight.js'
+            
+    ]
+    //complete: setup
 });
 
 (function(){
@@ -89,14 +94,52 @@ jQuery.fn.extend({
           return script;
       }).get().join('\n\n');
   },
+  
+  
+  extract_script_filtered: function(position){
+    //console.log('extract_script this', this.data());
+    if(this.data('position') == position)
+    {
+      return this.extract_script();
+    }
+    return '';
+  },
+  wrap_script: function(){
+      // wrap the top-level script to prevent leaking into globals
+      var script = this.pretty_script();
+      //var retval = 'try{' + script + '}catch(e){alert(e);};';
+
+      var retval = 'try{' + script + '}catch(e){alert(e);};';
+
+      //console.log(retval);
+      return retval;
+  },
+  
+  pretty_script: function(){
+      var structured = $(this).structured_script();
+      return arduino_beautify(structured);
+      //oops there is bug where '->' gets split to '- >'
+      //return arduino_beautify(this.map(function(){ return $(this).extract_script();}).get().join(''));
+  },
+  
+  structured_script: function(){
+      var anyscript =  this.map(function(){ return $(this).extract_script_filtered('any');}).get().join('');
+      var mainscript = this.map(function(){ return $(this).extract_script_filtered('main');}).get().join('');
+      var loopscript = this.map(function(){ return $(this).extract_script_filtered('loop');}).get().join('');
+      
+      var structured = anyscript;//+'\n$(function(){$("#stage").playground({});\n'+mainscript+'\n'+loopscript+'\n$.playground.startGame();\n});';
+      return structured;
+  },
+  
+  /*
   wrap_script: function(){
       // wrap the top-level script to prevent leaking into globals
       var script = this.map(function(){return $(this).extract_script();}).get().join('\n\n');
       //return 'var global = new Global();\n(function($){\nvar local = new Local();\n' + script + '\n})(jQuery);';
       return script;
-  },
+  },*/
   write_script: function(view){
-      view.html('<code><pre class="script_view">' + this.wrap_script() +  '</pre></code>');
+      view.html('<code><pre class="script_view">' + this.pretty_script() +  '</pre></code>');
   }
 });
 
@@ -272,6 +315,7 @@ var menus = {
             ],
             script: 'void onChange_{{1}}(AnalogPortInformation* Sender){[[1]]}',
             help: 'When the sensor changes do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
         {
           	label:'Distance from sensor (mm)',
