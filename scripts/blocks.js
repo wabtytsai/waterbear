@@ -104,7 +104,8 @@ $.fn.extend({
             label: this.data('label').replace(/##/gm, '_' + this.id()),
             script: this.data('script').replace(/##/gm, '_' + this.id()),
             subContainerLabels: this.data('subContainerLabels'),
-            containers: this.data('containers')
+            containers: this.data('containers'),
+            position: this.data('position')
         };
         // FIXME: Move specific type handling to raphael_demo.js
         if (this.is('.trigger')){desc.trigger = true;}
@@ -341,13 +342,32 @@ function getContained(s){
 
 function choice_func(s, listname, default_opt){
     var list = choice_lists[listname];
+    var bUseKey = false;
+    if($.isPlainObject(list))
+    {
+      bUseKey = true;
+    }
     return '<span class="value string ' + listname + ' autosocket" data-type="  "><select>' + 
-        list.map(function(item){
-            if (item === default_opt){
-                return '<option selected>' + item + '</option>';
-            }else{
-                return '<option>' + item + '</option>';
+        $.map(list, function(item, idx)
+        {
+            var ret = '<option ';
+            if (bUseKey)
+            {
+                ret = ret + 'value="' + idx + '" ';
+                if (idx == default_opt)
+                {
+                    ret = ret + 'selected';
+                }
             }
+            else
+            {
+                if (item == default_opt)
+                {
+                    ret = ret + 'selected';
+                }
+            }
+            ret = ret +">"+ item + '</option>';
+            return ret;
         }).join('') +
         '</select></span>';
 }

@@ -9,6 +9,10 @@ yepnope({
 
 (function(){
     // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
+    $.get('plugins/arduino-simple-robot.pde',function(data) {
+        wrapScript = data;
+        //console.log("data =", data);
+    });
     
 // expose these globally so the Block/Label methods can find them
 window.choice_lists = {
@@ -27,8 +31,11 @@ window.choice_lists = {
     baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
     analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'],
     motionstates:['forward', 'backward', 'clockwise', 'anticlockwise','stop'],
-    analogsensors:['IR_distance_1','IR_distance_2','light_sensor_1'],
-    buttonsensors:['bumper_1']
+    //analogsensors:['IR_distance_1','IR_distance_2','light_sensor_1'],
+    //analogsensors:{'9':'IR_distance_1','10':'IR_distance_2','12':'light_sensor_1'},
+    analogsensors:{'ir_distance_1_pin':'IR distance sensor 1',
+    'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 1'},
+    buttonsensors:{'bumper_1_pin':'Bumper Button'}
 };
 
 window.set_defaultscript = function(script){
@@ -117,18 +124,32 @@ jQuery.fn.extend({
   
   pretty_script: function(){
       var structured = $(this).structured_script();
-      return arduino_beautify(structured);
+      //return arduino_beautify(structured);
+      return structured;
       //oops there is bug where '->' gets split to '- >'
       //return arduino_beautify(this.map(function(){ return $(this).extract_script();}).get().join(''));
   },
   
   structured_script: function(){
+    var positions = ['globals', 'setup','onChange', 'any', 'onDown', 'onUp', 'onHold', 'onDouble']; 
+      
+      instance = this;
+      var sections = $.map(positions, function( pos){return instance.map(function(){ return $(this).extract_script_filtered(pos);}).get().join('');});
+      //console.log("sections =", sections);
+      var structured = wrapScript;
+      
+      $.each(sections, function(index, section){
+          structured = structured.replace("##"+positions[index]+"##", section);
+      });
+      return structured;
+      
+      /*
       var anyscript =  this.map(function(){ return $(this).extract_script_filtered('any');}).get().join('');
       var mainscript = this.map(function(){ return $(this).extract_script_filtered('main');}).get().join('');
       var loopscript = this.map(function(){ return $(this).extract_script_filtered('loop');}).get().join('');
       
       var structured = anyscript;//+'\n$(function(){$("#stage").playground({});\n'+mainscript+'\n'+loopscript+'\n$.playground.startGame();\n});';
-      return structured;
+      return structured;*/
   },
   
   /*
@@ -313,10 +334,27 @@ var menus = {
                     type: 'int'
                 }
             ],
-            script: 'void onChange_{{1}}(AnalogPortInformation* Sender){[[1]]}',
+            script: 'if(Sender->pin == {{1}}){[[1]]}',
+            position:'onChange',
             help: 'When the sensor changes do this'
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
+        /*{
+            label: 'When [choice:analogsensors] changes',
+            trigger: true,
+            slot: false,
+            containers: 1,
+            locals: [
+                {
+                    label: 'value',
+                    script: 'Sender->value',
+                    type: 'int'
+                }
+            ],
+            script: 'void onChange_{{1}}(AnalogPortInformation* Sender){[[1]]}',
+            help: 'When the sensor changes do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        },*/
         {
           	label:'Distance from sensor (mm)',
           	script: "distance_calc(Sender->value)",
@@ -325,7 +363,7 @@ var menus = {
         },
         {
             label:'is moving [choice:motionstates]',
-            script: "(motionstate == \"{{1}}\")",
+            script: "(current_motion_state == \"{{1}}\")",
           	'type': 'boolean', 
           	help: 'Current motion state'
         },
