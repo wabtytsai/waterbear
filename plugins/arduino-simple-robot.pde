@@ -134,22 +134,22 @@ void onDouble(ButtonInformation* Sender) {
 }
 
 
-void cutoff_onUp(){
+void cutoff_onUp(ButtonInformation* Sender){
   current_motion_state = "cutoff";
   bot_stop();
 }
 
 
-void cutoff_onHold(){
+void cutoff_onHold(ButtonInformation* Sender){
   if(current_motion_state == "cutoff")
   {
     current_motion_state = "starting";
-//    TimedEvent.addTimer(start_button_pause, start);
+    TimedEvent.addTimer(start_button_pause, start);
   }
 }
 
 
-void start(){
+void start(TimerInformation* Sender){
   iSchedTime = 0;
 
   AnalogEvent.addAnalogPort(ir_distance_1_pin,  onChange, 3);
@@ -179,7 +179,7 @@ void start(){
 }
 
 
-void startbuttonDown()
+void startbuttonDown(ButtonInformation* Sender)
 {
   current_motion_state = "starting";
   TimedEvent.addTimer(start_button_pause, start);
