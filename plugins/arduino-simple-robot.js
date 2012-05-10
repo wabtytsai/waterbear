@@ -56,10 +56,14 @@ window.update_scripts_view = function(){
 };
 
 function run_scripts(event){
-    $('.stage')[0].scrollIntoView();
     var blocks = $('.workspace:visible .scripts_workspace > .trigger');
-    $('.stage').replaceWith('<div class="stage"><script>' + blocks.wrap_script() + '</script></div>');
+    var url = '../run.php';
+    $.post( url ,{ 'script':blocks.wrap_script()} , function(data, textStatus){
+        alert(data);
+    });
+   
 }
+
 $('.run_scripts').click(run_scripts);
 
 jQuery.fn.extend({
@@ -113,10 +117,11 @@ jQuery.fn.extend({
   },
   wrap_script: function(){
       // wrap the top-level script to prevent leaking into globals
-      var script = this.pretty_script();
+      var retval = $(this).structured_script();
+      //var script = this.pretty_script();
       //var retval = 'try{' + script + '}catch(e){alert(e);};';
 
-      var retval = 'try{' + script + '}catch(e){alert(e);};';
+      //var retval = 'try{' + script + '}catch(e){alert(e);};';
 
       //console.log(retval);
       return retval;
@@ -124,7 +129,8 @@ jQuery.fn.extend({
   
   pretty_script: function(){
       var structured = $(this).structured_script();
-      //return arduino_beautify(structured);
+      //structured = arduino_beautify(structured);
+      structured = $('<div/>').text(structured).html();
       return structured;
       //oops there is bug where '->' gets split to '- >'
       //return arduino_beautify(this.map(function(){ return $(this).extract_script();}).get().join(''));
@@ -571,15 +577,8 @@ var menus = {
     ])
 };
 
-var defaultscript=[{"klass":"control","label":"Global Settings","script":"/*Global Settings*/\u000a\u000a[[next]]\u000a\u000a","containers":0,"trigger":true,"sockets":[],"contained":[],"next":""},{"klass":"control","label":"Setup - When program starts","script":"void setup()\u000a{\u000a[[next]]\u000a}\u000a","containers":0,"trigger":true,"sockets":[],"contained":[],"next":""},{"klass":"control","label":"Main loop","script":"void loop()\u000a{\u000a[[1]]\u000a}\u000a","containers":1,"trigger":true,"sockets":[],"contained":[""],"next":""}];
-set_defaultscript(defaultscript);
-
 var demos = [
-    {
-      title:"AnalogInOutSerial",
-      description:"first example in Arduino IDE",
-      scripts:[{"klass":"control","label":"Global Settings","script":"/*Global Settings*/\u000a\u000a[[next]]\u000a\u000a","containers":0,"trigger":true,"sockets":[],"contained":[],"next":{"klass":"variables","label":"Create [string:var] set to [string]","script":"String {{1}} = '{{2}}';","containers":0,"sockets":["analogInPin","0"],"contained":[],"next":{"klass":"variables","label":"Create [string:var] set to [string]","script":"String {{1}} = '{{2}}';","containers":0,"sockets":["analogOutPin","9"],"contained":[],"next":{"klass":"variables","label":"Create [string:var] set to [int:0]","script":"int {{1}} = {{2}}'","containers":0,"sockets":["sensorValue","0"],"contained":[],"next":{"klass":"variables","label":"Create [string:var] set to [int:0]","script":"int {{1}} = {{2}}'","containers":0,"sockets":["outputValue","0"],"contained":[],"next":""}}}}},{"klass":"control","label":"Setup - When program starts","script":"void setup()\u000a{\u000a[[next]]\u000a}\u000a","containers":0,"trigger":true,"sockets":[],"contained":[],"next":{"klass":"serial","label":"Setup serial communication at [choice:baud]","script":"Serial.begin({{1}});","containers":0,"sockets":["9600"],"contained":[],"next":""}},{"klass":"control","label":"Main loop","script":"void loop()\u000a{\u000a[[1]]\u000a}\u000a","containers":1,"trigger":true,"sockets":[],"contained":[{"klass":"variables","label":"[string:var] = [int:0]","script":"{{1}} = {{2}};","containers":0,"sockets":["sensorValue",{"klass":"io","label":"Analog Input [string:0]","script":"(analogRead({{1}}))","containers":0,"type":"int","sockets":[{"klass":"variables","label":"value of [string:var]","script":"{{1}}","containers":0,"type":"string","sockets":["analogInPin"],"contained":[],"next":""}],"contained":[],"next":""}],"contained":[],"next":{"klass":"variables","label":"[string:var] = [int:0]","script":"{{1}} = {{2}};","containers":0,"sockets":["outputValue",{"klass":"operators","label":"round [number:10]","script":"(int({{1}}))","containers":0,"type":"int","sockets":[{"klass":"operators","label":"Map [number] from Analog in to Analog out","script":"map({{1}}, 0, 1023, 0, 255)","containers":0,"type":"number","sockets":[{"klass":"variables","label":"value of [string:var]","script":"{{1}}","containers":0,"type":"int","sockets":["sensorValue"],"contained":[],"next":""}],"contained":[],"next":""}],"contained":[],"next":""}],"contained":[],"next":{"klass":"serial","label":"Send [any:Message] as a line","script":"Serial.println({{1}});","containers":0,"sockets":[{"klass":"variables","label":"value of [string:var]","script":"{{1}}","containers":0,"type":"int","sockets":["outputValue"],"contained":[],"next":""}],"contained":[],"next":""}}}],"next":""}]
-    }
+    {"title":"Maze Runner","description":"Runs forwards and if it gets close to a wall it turns clockwise.","date":1336652014517,"scripts":[{"klass":"sensors","label":"When [choice:analogsensors] changes","script":"if (Sender->pin = {{1}}){[[1]]}","containers":1,"position":"onChange","trigger":true,"locals":[{"label":"value","script":"Sender->value","type":"int","klass":"sensors"}],"sockets":["ir_distance_1_pin"],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}else{\n[[2]]\n}","subContainerLabels":["else"],"containers":2,"position":"any","locals":[],"sockets":[{"klass":"operators","label":"[number:0] < [number:0]","script":"({{1}} < {{2}})","containers":0,"position":"any","type":"boolean","locals":[],"sockets":[{"klass":"sensors","label":"Distance from sensor (mm)","script":"distance_calc(Sender->value)","containers":0,"position":"any","type":"int","locals":[],"sockets":[],"contained":[],"next":""},"150"],"contained":[],"next":""}],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["forward"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Clockwise ","script":"bot_clockwise();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""},{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["clockwise"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Forward ","script":"bot_forward();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""}],"next":""}],"next":""}]}
 ];
 populate_demos_dialog(demos);
 
