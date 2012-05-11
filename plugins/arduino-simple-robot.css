@@ -25,8 +25,8 @@
 .serial > .block{ background-color: #e66a22; }
 
 
-.twitter{ border-color: hsl(90, 65%, 79%); }
-.twitter > .block {background-color: hsl(90, 62%, 89%); }
+.outputs{ border-color: hsl(90, 65%, 79%); }
+.outputs > .block {background-color: hsl(90, 62%, 89%); }
 
 /* Border colours for type values and sockets */
 

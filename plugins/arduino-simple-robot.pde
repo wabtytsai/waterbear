@@ -6,16 +6,21 @@
 #include <TimedEvent.h>
 
 
-short ir_distance_1_pin  = 9;   // IR distance sensor 1
-short ir_distance_2_pin  = 10; // IR distance sensor 2
-short light_sensor_1_pin = 11; // Light Sensor 1
+short ir_distance_1_pin  = 0;   // IR distance sensor 1
+short ir_distance_2_pin  = 1; // IR distance sensor 2
+short light_sensor_1_pin = 2; // Light Sensor 1
+
+short builtin_LED_pin = 12; // LEDs
+
 
 long iSchedTime = 0;
-long start_button_pause = 5000;
+long start_button_pause = 1000;
 
-short start_button_pin = 13;
-short cutoff_pin       = 14;
-short bumper_1_pin     = 1;  // Bumper Button
+short start_button_pin = 10;
+short cutoff_pin       = 9;
+short bumper_1_pin     = 8;  // Bumper Button
+short push_button_pin  = 7;
+
 
 String current_motion_state = "stop";
 String current_prog_state   = "init";
@@ -143,13 +148,17 @@ void cutoff_onUp(ButtonInformation* Sender){
 void cutoff_onHold(ButtonInformation* Sender){
   if(current_motion_state == "cutoff")
   {
-    current_motion_state = "starting";
-    TimedEvent.addTimer(start_button_pause, start);
+    //current_motion_state = "starting";
+    //TimedEvent.addTimer(start_button_pause, start);
   }
 }
 
+void onStartTime(TimerInformation* Sender){
+start();
+}
 
-void start(TimerInformation* Sender){
+void start()
+{
   iSchedTime = 0;
 
   AnalogEvent.addAnalogPort(ir_distance_1_pin,  onChange, 3);
@@ -164,14 +173,22 @@ void start(TimerInformation* Sender){
                         onDouble, //onDouble event function
                         200);     //double time interval
   
-  ButtonEvent.addButton(cutoff_pin,       //button pin
+   ButtonEvent.addButton(push_button_pin,       //button pin
+                        onDown,   //onDown event function
+                        onUp,     //onUp event function
+                        onHold,   //onHold event function
+                        1000,     //hold time in milliseconds
+                        onDouble, //onDouble event function
+                        200);     //double time interval
+  
+  /*ButtonEvent.addButton(cutoff_pin,       //button pin
                         onDown,   //onDown event function
                         cutoff_onUp,     //onUp event function
                         cutoff_onHold,   //onHold event function
                         1000,     //hold time in milliseconds
                         onDouble, //onDouble event function
                         200);     //double time interval
-                        
+ */                       
                         
   current_motion_state = "running";
   
@@ -182,7 +199,7 @@ void start(TimerInformation* Sender){
 void startbuttonDown(ButtonInformation* Sender)
 {
   current_motion_state = "starting";
-  TimedEvent.addTimer(start_button_pause, start);
+  TimedEvent.addTimer(start_button_pause, onStartTime);
 }
 
 
@@ -190,10 +207,14 @@ void loop() {
   iSchedTime = 0;
   AnalogEvent.loop();
   ButtonEvent.loop();
+  TimedEvent.loop();
+
 }
 
 void setup() {
     
+  pinMode(builtin_LED_pin, OUTPUT);
+  
   ##setup##
   
   ButtonEvent.addButton(start_button_pin,       //button pin
@@ -203,5 +224,7 @@ void setup() {
                         1000,     //hold time in milliseconds
                         onDouble, //onDouble event function
                         200);     //double time interval
+                        
+  //TimedEvent.addTimer(start_button_pause, onStartTime);                      
 }
 

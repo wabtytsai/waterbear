@@ -9,7 +9,7 @@ yepnope({
 
 (function(){
     // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
-    $.get('plugins/arduino-simple-robot.pde',function(data) {
+    $.post('plugins/arduino-simple-robot.pde',function(data) {
         wrapScript = data;
         //console.log("data =", data);
     });
@@ -24,6 +24,8 @@ window.choice_lists = {
     highlow: ['HIGH', 'LOW'],
     inoutput: ['INPUT', 'OUTPUT'],
     onoff: ['ON', 'OFF'],
+    onoffhighlow: {'HIGH':'ON', 'LOW':'OFF'},
+    onoffbool: {'true':'ON', 'false':'OFF'},
     logic: ['true', 'false'],
     digitalpins: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,'A0','A1','A2','A3','A4','A5'],
     analoginpins: ['A0','A1','A2','A3','A4','A5'],
@@ -35,7 +37,8 @@ window.choice_lists = {
     //analogsensors:{'9':'IR_distance_1','10':'IR_distance_2','12':'light_sensor_1'},
     analogsensors:{'ir_distance_1_pin':'IR distance sensor 1',
     'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 1'},
-    buttonsensors:{'bumper_1_pin':'Bumper Button'}
+    buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button'},
+    leds:{'builtin_LED_pin':'Built in LED'}
 };
 
 window.set_defaultscript = function(script){
@@ -230,19 +233,23 @@ $('.clear_scripts').click(clear_scripts_default);
 
 var menus = {
     control: menu('Control', [
-        /*{
-            label: 'Setup - When program starts', 
-            trigger: true, 
-            script: 'void setup()\n{\n[[next]]\n}\n',
-            help: 'Start scripts when program starts'
-        },*/
         {
             label: 'On Start', 
             trigger: true, 
             containers: 1, 
             slot: false, 
-            script: 'void loop()\n{\n[[1]]\n}\n',
+            script: '[[1]]',
+            position:'any',
             help: '5 seconds after button press do the following,' //does the cutout go in here too? 
+        },
+        {
+            label: 'On Setup', 
+            trigger: true, 
+            containers: 1, 
+            slot: false, 
+            script: '[[1]]',
+            position:'setup',
+            help: 'During Setup,' //does the cutout go in here too? 
         },
         // TODO : maybe we get the definitions of the arduino function froma seperate file
         {
@@ -259,7 +266,7 @@ var menus = {
             help: 'run first set of blocks if condition is true, second set otherwise'
         }
         
-    ], false),
+    ], true),
 
     timedmovement: menu('Timed Movement', [
         //while 
@@ -362,7 +369,7 @@ var menus = {
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },*/
         {
-          	label:'Distance from sensor (mm)',
+          	label:'Distance from sensor (cm)',
           	script: "distance_calc(Sender->value)",
           	'type': 'int', 
           	help: 'Distance from sensor'
@@ -373,14 +380,34 @@ var menus = {
           	'type': 'boolean', 
           	help: 'Current motion state'
         },
-        
         {
             label: 'When [choice:buttonsensors] pressed',
             trigger: true,
             slot: false,
             containers: 1,
-            script: 'void onDown_{{1}}(ButtonInformation* Sender){[[1]]}',
+            script: 'if(Sender->pin == {{1}}){[[1]]}',
+            position:'onDown',
             help: 'When the button pressed do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        },
+        {
+            label: 'When [choice:buttonsensors] released',
+            trigger: true,
+            slot: false,
+            containers: 1,
+            script: 'if(Sender->pin == {{1}}){[[1]]}',
+            position:'onUp',
+            help: 'When the button pressed do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        }
+        
+        /*{
+            label: 'When [choice:buttonsensors] pressed',
+            trigger: true,
+            slot: false,
+            containers: 1,
+            script: 'void onDown_{{1}}(ButtonInformation* Sender){[[1]]}',
+            help: ''
         },
         {
             label: 'When [choice:buttonsensors] released',
@@ -389,7 +416,9 @@ var menus = {
             containers: 1,
             script: 'void onDown_{{1}}(ButtonInformation* Sender){[[1]]}',
             help: 'When the button released do this'
-        }
+        }*/
+        
+        
         
         //if last signal from IR low then 1024 must mean too close 
         
@@ -401,7 +430,14 @@ var menus = {
         //distance to nearest object
         //something light sensy
         */
-    
+    outputs: menu('Outputs', [
+        {
+            label: 'Switch  [choice:leds] [choice:onoffhighlow]',
+            script: 'digitalWrite({{1}}, {{2}});',
+            help: 'Switch an LED on'
+        }
+    ]),
+        	
     variables: menu('Variables', [
         {
           	label:'Create [string:var] set to [string]',
@@ -578,7 +614,8 @@ var menus = {
 };
 
 var demos = [
-    {"title":"Maze Runner","description":"Runs forwards and if it gets close to a wall it turns clockwise.","date":1336652014517,"scripts":[{"klass":"sensors","label":"When [choice:analogsensors] changes","script":"if (Sender->pin = {{1}}){[[1]]}","containers":1,"position":"onChange","trigger":true,"locals":[{"label":"value","script":"Sender->value","type":"int","klass":"sensors"}],"sockets":["ir_distance_1_pin"],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}else{\n[[2]]\n}","subContainerLabels":["else"],"containers":2,"position":"any","locals":[],"sockets":[{"klass":"operators","label":"[number:0] < [number:0]","script":"({{1}} < {{2}})","containers":0,"position":"any","type":"boolean","locals":[],"sockets":[{"klass":"sensors","label":"Distance from sensor (mm)","script":"distance_calc(Sender->value)","containers":0,"position":"any","type":"int","locals":[],"sockets":[],"contained":[],"next":""},"150"],"contained":[],"next":""}],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["forward"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Clockwise ","script":"bot_clockwise();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""},{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["clockwise"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Forward ","script":"bot_forward();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""}],"next":""}],"next":""}]}
+    {"title":"Maze Runner","description":"","date":1336724565790,"scripts":[{"klass":"sensors","label":"When [choice:analogsensors] changes","script":"if (Sender->pin = {{1}}){[[1]]}","containers":1,"position":"onChange","trigger":true,"locals":[{"label":"value","script":"Sender->value","type":"int","klass":"sensors"}],"sockets":["ir_distance_1_pin"],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}else{\n[[2]]\n}","subContainerLabels":["else"],"containers":2,"position":"any","locals":[],"sockets":[{"klass":"operators","label":"[number:0] < [number:0]","script":"({{1}} < {{2}})","containers":0,"position":"any","type":"boolean","locals":[],"sockets":[{"klass":"sensors","label":"Distance from sensor (cm)","script":"distance_calc(Sender->value)","containers":0,"position":"any","type":"int","locals":[],"sockets":[],"contained":[],"next":""},"15"],"contained":[],"next":""}],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["forward"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Clockwise ","script":"bot_clockwise();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""},{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["clockwise"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Forward ","script":"bot_forward();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""}],"next":""}],"next":""}]},
+    {"title":"Buttons","description":"","date":1336734371704,"scripts":[{"klass":"sensors","label":"When [choice:buttonsensors] pressed","script":"if(Sender->pin == {{1}}){[[1]]}","containers":1,"position":"onDown","trigger":true,"locals":[],"sockets":["push_button_pin"],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["builtin_LED_pin","HIGH"],"contained":[],"next":""}],"next":""},{"klass":"sensors","label":"When [choice:buttonsensors] released","script":"if(Sender->pin == {{1}}){[[1]]}","containers":1,"position":"onUp","trigger":true,"locals":[],"sockets":["push_button_pin"],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["builtin_LED_pin","LOW"],"contained":[],"next":""}],"next":""}]}
 ];
 populate_demos_dialog(demos);
 
