@@ -9,7 +9,7 @@ yepnope({
 
 (function(){
     // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
-    $.post('plugins/arduino-simple-robot.pde',function(data) {
+    $.post('plugins/arduino-simple-robot-Ardumoto.pde',function(data) {
         wrapScript = data;
         //console.log("data =", data);
     });
@@ -38,7 +38,8 @@ window.choice_lists = {
     analogsensors:{'ir_distance_1_pin':'IR distance sensor 1',
     'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 1'},
     buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button'},
-    leds:{'builtin_LED_pin':'Built in LED'}
+    leds:{'builtin_LED_pin':'Built in LED'},
+    speeds: [1,2,3,4,5,6,7,8,9,10]
 };
 
 window.set_defaultscript = function(script){
@@ -296,6 +297,18 @@ var menus = {
             label: 'Wait [int:1] seconds', 
             script: 'TimedEvent.addTimer(iSchedTime), bot_stop); iSchedTime = iSchedTime+({{1}} * 1000);',
             help: 'Wait for a time'
+        },
+        
+        {
+          label: 'Set Speed to [choice:speeds]', 
+          script: 'set_speed({{1}});',
+          help: 'Set Speed'
+        },
+        {
+          label: 'Current Speed ', 
+          script: 'speed_setting_current',
+          type: 'int',
+          help: 'Get Current Speed'
         }
     ], false),
         
@@ -328,7 +341,21 @@ var menus = {
             label: 'Pause', 
             script: 'bot_stop();',
             help: 'Move Anticlockwise'
+        },
+        {
+          label: 'Set Speed to [choice:speeds]', 
+          script: 'set_speed({{1}});',
+          help: 'Set Speed'
+        },
+        {
+          label: 'Current Speed ', 
+          script: 'speed_setting_current',
+          type: 'int',
+          help: 'Get Current Speed'
         }
+        
+        
+        
         
         
     ], false),
