@@ -252,6 +252,25 @@ var menus = {
             position:'setup',
             help: 'During Setup,' //does the cutout go in here too? 
         },
+        {
+            label: 'When I receive [string:ack] message', 
+            trigger: true, 
+            script: 'void {{1}}(){\n[[next]]\n}\nvoid{{1}}_timed(TimerInformation* Sender){{{1}();};',
+            help: 'Trigger for blocks to run when message is received',
+            onAdd:'addBroadcast({{1}})',
+            onRemove:'removeBroadcast({{1}})'
+        },
+        {
+            label: 'Broadcast [string:ack] message', 
+            script: '{{1}}();',
+            help: 'Send a message to all listeners'
+        },
+        {
+          label: 'Wait [int:1] seconds then Broadcast [string:ack] message', 
+          script: 'TimedEvent.addTimer(iSchedTime, {{2}}); iSchedTime = iSchedTime+({{1}} * 1000);',
+          help: 'Wait then send a message to all listeners'
+        },
+
         // TODO : maybe we get the definitions of the arduino function froma seperate file
         {
             label: 'if [boolean]', 
