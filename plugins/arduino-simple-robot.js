@@ -417,13 +417,13 @@ var menus = {
         {
           	label:'Distance from sensor (cm)',
           	script: "distance_calc(Sender->value)",
-          	'type': 'int', 
+          	type: 'int', 
           	help: 'Distance from sensor'
         },
         {
             label:'is moving [choice:motionstates]',
             script: "(current_motion_state == \"{{1}}\")",
-          	'type': 'boolean', 
+          	type: 'boolean', 
           	help: 'Current motion state'
         },
         {
@@ -555,31 +555,31 @@ var menus = {
     operators: menu('Operators', [
         {
             label: '[number:0] + [number:0]', 
-            'type': 'number', 
+            type: 'number', 
             script: "({{1}} + {{2}})",
             help: 'Add two numbers'
         },
         {
             label: '[number:0] - [number:0]', 
-            'type': 'number', 
+            type: 'number', 
             script: "({{1}} - {{2}})",
             help: 'Subtract two numbers'
         },
         {
             label: '[number:0] * [number:0]', 
-            'type': 'number', 
+            type: 'number', 
             script: "({{1}} * {{2}})",
             help: 'Multiply two numbers'
         },
         {
             label: '[number:0] / [number:0]',
-            'type': 'number', 
+            type: 'number', 
             script: "({{1}} / {{2}})",
             help: 'Divide two numbers'
         },
         {
             label: 'pick random [number:1] to [number:10]', 
-            'type': 'number', 
+            type: 'number', 
             script: "(random({{1}}, {{2}}))",
             help: 'Generate a random number between two other numbers'
         },
@@ -590,57 +590,57 @@ var menus = {
         },*/
         {
             label: '[number:0] < [number:0]', 
-            'type': 'boolean', 
+            type: 'boolean', 
             script: "({{1}} < {{2}})",
             help: 'Check if one number is less than another'
         },
         {
             label: '[number:0] = [number:0]', 
-            'type': 'boolean', 
+            type: 'boolean', 
             script: "({{1}} == {{2}})",
             help: 'Check if one number is equal to another'
         },
         
         {
             label: '[number:0] > [number:0]', 
-            'type': 'boolean', 
+            type: 'boolean', 
             script: "({{1}} > {{2}})",
             help: 'Check if one number is greater than another'
         },
         {
             label: '[boolean] and [boolean]', 
-            'type': 'boolean', 
+            type: 'boolean', 
             script: "({{1}} && {{2}})",
             help: 'Check if both are true'
         },
         {
             label: '[boolean] or [boolean]', 
-            'type': 'boolean', 
+            type: 'boolean', 
             script: "({{1}} || {{2}})",
             help: 'Check if one is true'
         },
         {
             label: 'not [boolean]', 
-            'type': 'boolean', 
+            type: 'boolean', 
             script: "(! {{1}})",
             help: 'Not true is false and Not false is true'
         },
         {
             label: '[number:0] mod [number:0]', 
-            'type': 'number', 
+            type: 'number', 
             script: "({{1}} % {{2}})",
             help: 'Gives the remainder from the division of these two number'
         },
         
         {
             label: 'round [number:0]', 
-            'type': 'int', 
+            type: 'int', 
             script: "(int({{1}}))",
             help: 'Gives the whole number, without the decimal part'
         },
         {
             label: 'absolute of [number:10]', 
-            'type': 'number', 
+            type: 'number', 
             script: "(abs({{1}}))",
             help: 'Gives the positive of the number'
         },
