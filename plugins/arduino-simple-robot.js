@@ -9,9 +9,11 @@ yepnope({
 
 (function(){
     // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
-    $.post('plugins/arduino-simple-robot-Ardumoto.pde',function(data) {
-        wrapScript = data;
-        //console.log("data =", data);
+    $.post('../code_template.php', function(data){aTemplates = data;}, 'json')
+    .error(function(){
+    	    $.post('plugins/arduino-simple-robot-templates.json', 
+    	    	    function(data){aTemplates = data;}
+    	    	    ,'json');
     });
     
 // expose these globally so the Block/Label methods can find them
@@ -36,9 +38,9 @@ window.choice_lists = {
     //analogsensors:['IR_distance_1','IR_distance_2','light_sensor_1'],
     //analogsensors:{'9':'IR_distance_1','10':'IR_distance_2','12':'light_sensor_1'},
     analogsensors:{'ir_distance_1_pin':'IR distance sensor 1',
-    'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 1'},
+    'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 2', 'light_sensor_1_pin':'Light Sensor 2'},
     buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button'},
-    leds:{'builtin_LED_pin':'Built in LED'},
+    leds:{'LED_Green_pin':'Green LED'},
     speeds: [1,2,3,4,5,6,7,8,9,10]
 };
 
@@ -146,10 +148,12 @@ jQuery.fn.extend({
       instance = this;
       var sections = $.map(positions, function( pos){return instance.map(function(){ return $(this).extract_script_filtered(pos);}).get().join('');});
       //console.log("sections =", sections);
-      var structured = wrapScript;
+      //var structured = aTemplates.adafruitmotorshield;
+      var structured = aTemplates.ardumoto;  // TODO : Add some choice
+      console.log('structured',structured);
       
       $.each(sections, function(index, section){
-          structured = structured.replace("##"+positions[index]+"##", section);
+          structured = structured.replace("//"+positions[index]+"//", section);
       });
       return structured;
       
@@ -255,6 +259,7 @@ var menus = {
         {
             label: 'When I receive [string:ack] message', 
             trigger: true, 
+            containers: 1, 
             script: 'void {{1}}(){\n[[next]]\n}\nvoid{{1}}_timed(TimerInformation* Sender){{{1}();};',
             help: 'Trigger for blocks to run when message is received',
             onAdd:'addBroadcast({{1}})',
@@ -267,7 +272,7 @@ var menus = {
         },
         {
           label: 'Wait [int:1] seconds then Broadcast [string:ack] message', 
-          script: 'TimedEvent.addTimer(iSchedTime, {{2}}); iSchedTime = iSchedTime+({{1}} * 1000);',
+          script: 'TimedEvent.addDelayed(iSchedTime, {{2}}_timed); iSchedTime = iSchedTime+({{1}} * 1000);',
           help: 'Wait then send a message to all listeners'
         },
 
@@ -293,28 +298,28 @@ var menus = {
         //other output
         {
             label: 'Forward [int:1] seconds', 
-            script: 'TimedEvent.addTimer(iSchedTime, bot_forward); iSchedTime = iSchedTime+({{1}} * 1000); TimedEvent.addTimer(iSchedTime-1), bot_stop);',
+            script: 'TimedEvent.addDelayed(iSchedTime, bot_forward_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);',
             help: 'Move Forward for a time'
         },
         {
             label: 'Backward [int:1] seconds', 
-            script: 'TimedEvent.addTimer(iSchedTime, bot_backward); iSchedTime = iSchedTime+({{1}} * 1000); TimedEvent.addTimer(iSchedTime-1), bot_stop);',
+            script: 'TimedEvent.addDelayed(iSchedTime, bot_backward_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);',
             help: 'Move Backward for a time'
         },
         {
             label: 'Clockwise [int:1] seconds', 
-            script: 'TimedEvent.addTimer(iSchedTime, bot_clockwise); iSchedTime = iSchedTime+({{1}} * 1000); TimedEvent.addTimer(iSchedTime-1), bot_stop);',
+            script: 'TimedEvent.addDelayed(iSchedTime, bot_clockwise_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);',
             help: 'Move Clockwise for a time'
             
         },
         {
             label: 'Anticlockwise [int:1] seconds', 
-            script: 'TimedEvent.addTimer(iSchedTime), bot_anticlockwise); iSchedTime = iSchedTime+({{1}} * 1000); TimedEvent.addTimer(iSchedTime-1), bot_stop);',
+            script: 'TimedEvent.addDelayed(iSchedTime, bot_anticlockwise_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);',
             help: 'Move Anticlockwise for a time'
         },
         {
             label: 'Wait [int:1] seconds', 
-            script: 'TimedEvent.addTimer(iSchedTime), bot_stop); iSchedTime = iSchedTime+({{1}} * 1000);',
+            script: 'TimedEvent.addDelayed(iSchedTime, bot_stop_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);',
             help: 'Wait for a time'
         },
         
@@ -434,6 +439,28 @@ var menus = {
             script: 'if(Sender->pin == {{1}}){[[1]]}',
             position:'onDown',
             help: 'When the button pressed do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        },
+        
+        {
+            label: 'When [choice:buttonsensors] held',
+            trigger: true,
+            slot: false,
+            containers: 1,
+            script: 'if(Sender->pin == {{1}}){[[1]]}',
+            position:'onHold',
+            help: 'When the button is held down do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        },
+        
+        {
+            label: 'When [choice:buttonsensors] double clicked',
+            trigger: true,
+            slot: false,
+            containers: 1,
+            script: 'if(Sender->pin == {{1}}){[[1]]}',
+            position:'onDouble',
+            help: 'When the button is double clicked do this'
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
         {
@@ -661,8 +688,8 @@ var menus = {
 
 var demos = [
     {"title":"Maze Runner","description":"","date":1336724565790,"scripts":[{"klass":"sensors","label":"When [choice:analogsensors] changes","script":"if (Sender->pin = {{1}}){[[1]]}","containers":1,"position":"onChange","trigger":true,"locals":[{"label":"value","script":"Sender->value","type":"int","klass":"sensors"}],"sockets":["ir_distance_1_pin"],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}else{\n[[2]]\n}","subContainerLabels":["else"],"containers":2,"position":"any","locals":[],"sockets":[{"klass":"operators","label":"[number:0] < [number:0]","script":"({{1}} < {{2}})","containers":0,"position":"any","type":"boolean","locals":[],"sockets":[{"klass":"sensors","label":"Distance from sensor (cm)","script":"distance_calc(Sender->value)","containers":0,"position":"any","type":"int","locals":[],"sockets":[],"contained":[],"next":""},"15"],"contained":[],"next":""}],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["forward"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Clockwise ","script":"bot_clockwise();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""},{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}","containers":1,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"is moving [choice:motionstates]","script":"(current_motion_state == \"{{1}}\")","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["clockwise"],"contained":[],"next":""}],"contained":[{"klass":"movement","label":"Start Forward ","script":"bot_forward();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}],"next":""}],"next":""}],"next":""}]},
-    {"title":"Buttons","description":"","date":1336734371704,"scripts":[{"klass":"sensors","label":"When [choice:buttonsensors] pressed","script":"if(Sender->pin == {{1}}){[[1]]}","containers":1,"position":"onDown","trigger":true,"locals":[],"sockets":["push_button_pin"],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["builtin_LED_pin","HIGH"],"contained":[],"next":""}],"next":""},{"klass":"sensors","label":"When [choice:buttonsensors] released","script":"if(Sender->pin == {{1}}){[[1]]}","containers":1,"position":"onUp","trigger":true,"locals":[],"sockets":["push_button_pin"],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["builtin_LED_pin","LOW"],"contained":[],"next":""}],"next":""}]}
-];
+    {"title":"Buttons","description":"","date":1336734371704,"scripts":[{"klass":"sensors","label":"When [choice:buttonsensors] pressed","script":"if(Sender->pin == {{1}}){[[1]]}","containers":1,"position":"onDown","trigger":true,"locals":[],"sockets":["push_button_pin"],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["LED_Green_pin","HIGH"],"contained":[],"next":""}],"next":""},{"klass":"sensors","label":"When [choice:buttonsensors] released","script":"if(Sender->pin == {{1}}){[[1]]}","containers":1,"position":"onUp","trigger":true,"locals":[],"sockets":["push_button_pin"],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["LED_Green_pin","LOW"],"contained":[],"next":""}],"next":""}]},
+   {"title":"Timed Robot","description":"","date":1338535675144,"scripts":[{"klass":"control","label":"On Start","script":"[[1]]","containers":1,"position":"any","trigger":true,"locals":[],"sockets":[],"contained":[{"klass":"timed movement","label":"Forward [int:1] seconds","script":"TimedEvent.addDelayed(iSchedTime, bot_forward_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);","containers":0,"position":"any","locals":[],"sockets":["1"],"contained":[],"next":{"klass":"timed movement","label":"Backward [int:1] seconds","script":"TimedEvent.addDelayed(iSchedTime, bot_backward_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);","containers":0,"position":"any","locals":[],"sockets":["2"],"contained":[],"next":{"klass":"timed movement","label":"Set Speed to [choice:speeds]","script":"set_speed({{1}});","containers":0,"position":"any","locals":[],"sockets":["10"],"contained":[],"next":{"klass":"timed movement","label":"Forward [int:1] seconds","script":"TimedEvent.addDelayed(iSchedTime, bot_forward_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);","containers":0,"position":"any","locals":[],"sockets":["1"],"contained":[],"next":{"klass":"timed movement","label":"Clockwise [int:1] seconds","script":"TimedEvent.addDelayed(iSchedTime, bot_clockwise_timed);\n iSchedTime = iSchedTime+({{1}} * 1000);\n TimedEvent.addDelayed(iSchedTime-1, bot_stop_timed);","containers":0,"position":"any","locals":[],"sockets":["1"],"contained":[],"next":""}}}}}],"next":""}]}];
 populate_demos_dialog(demos);
 
 })();
