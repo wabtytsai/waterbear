@@ -35,10 +35,11 @@ window.choice_lists = {
     baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
     analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'],
     motionstates:['forward', 'backward', 'clockwise', 'anticlockwise','stop'],
+    modes:['moving', 'searching'],
     //analogsensors:['IR_distance_1','IR_distance_2','light_sensor_1'],
     //analogsensors:{'9':'IR_distance_1','10':'IR_distance_2','12':'light_sensor_1'},
     analogsensors:{'ir_distance_1_pin':'IR distance sensor 1',
-    'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 2', 'light_sensor_1_pin':'Light Sensor 2'},
+    'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 1', 'light_sensor_2_pin':'Light Sensor 2'},
     buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button'},
     leds:{'LED_Green_pin':'Green LED'},
     speeds: [1,2,3,4,5,6,7,8,9,10]
@@ -270,6 +271,39 @@ var menus = {
             script: '{{1}}();',
             help: 'Send a message to all listeners'
         },
+        {
+            label: 'When mode changes to [choice:modes]', 
+            trigger: true, 
+            containers: 1, 
+            script: 'if(newmode == {{1}}){[[1]]}',
+            position:'onModeChange',
+            help: 'Trigger for blocks to run when mode changes'
+        },
+        /*{
+            label: 'Change to [choice:modes] mode', 
+            script: 'onModeChange({{1}});', 
+            help: 'Send a mode change'
+        },*/
+        {
+            label: 'Change to "Moving" mode', 
+            script: 'TimedEvent.addDelayed(iSchedTime, changeToMovingMode);', 
+            help: 'Send a mode change'
+        },
+        {
+            label: 'Change to "Searching" mode', 
+            script: 'TimedEvent.addDelayed(iSchedTime, changeToSearchingMode);', 
+            help: 'Send a mode change'
+        },
+        {
+            label: 'When direction changes to [choice:motionstates]', 
+            trigger: true, 
+            containers: 1, 
+            script: 'if(newmode == {{1}}){[[1]]}',
+            position:'onDirectionChange',
+            help: 'Trigger for blocks to run when direction changes'
+        },
+        
+        
         {
           label: 'Wait [int:1] seconds then Broadcast [string:ack] message', 
           script: 'TimedEvent.addDelayed(iSchedTime, {{2}}_timed); iSchedTime = iSchedTime+({{1}} * 1000);',
