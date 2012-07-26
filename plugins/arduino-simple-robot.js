@@ -248,7 +248,7 @@ var menus = {
             position:'any',
             help: '5 seconds after button press do the following,' //does the cutout go in here too? 
         },
-        {
+        /*{
             label: 'On Setup', 
             trigger: true, 
             containers: 1, 
@@ -270,7 +270,7 @@ var menus = {
             label: 'Broadcast [string:ack] message', 
             script: '{{1}}();',
             help: 'Send a message to all listeners'
-        },
+        },*/
         {
             label: 'When mode changes to [choice:modes]', 
             trigger: true, 
@@ -279,21 +279,43 @@ var menus = {
             position:'onModeChange',
             help: 'Trigger for blocks to run when mode changes'
         },
-        /*{
-            label: 'Change to [choice:modes] mode', 
-            script: 'onModeChange({{1}});', 
-            help: 'Send a mode change'
-        },*/
         {
-            label: 'Change to "Moving" mode', 
+            label: 'Change to [choice:modes] mode', 
+            script: 'if({{1}}=="moving"){TimedEvent.addDelayed(iSchedTime, changeToMovingMode);}if({{1}}=="searching"){TimedEvent.addDelayed(iSchedTime, changeToSearchingMode);}', 
+            help: 'Send a mode change'
+        },
+        /*
+        {
+            label: 'Change to "moving" mode', 
             script: 'TimedEvent.addDelayed(iSchedTime, changeToMovingMode);', 
             help: 'Send a mode change'
         },
         {
-            label: 'Change to "Searching" mode', 
+            label: 'Change to "searching" mode', 
             script: 'TimedEvent.addDelayed(iSchedTime, changeToSearchingMode);', 
             help: 'Send a mode change'
+        },*/
+        {
+            label: 'Is Current Mode = [choice:modes]', 
+            script: 'current_mode == {{1}}',
+            type:'boolean',
+            help: 'Is Robot\'s current Mode the same as the selected mode'
         },
+        
+        {
+            label: 'Current Mode', 
+            script: 'current_mode',
+            type:'string',
+            help: 'Current Robot Mode'
+        },
+        {
+            label: '[choice:modes]', 
+            script: '{{1}}',
+            type:'string',
+            help: 'Possible Robot Modes'
+        },
+        
+        /*
         {
             label: 'When direction changes to [choice:motionstates]', 
             trigger: true, 
@@ -309,7 +331,7 @@ var menus = {
           script: 'TimedEvent.addDelayed(iSchedTime, {{2}}_timed); iSchedTime = iSchedTime+({{1}} * 1000);',
           help: 'Wait then send a message to all listeners'
         },
-
+        */
         // TODO : maybe we get the definitions of the arduino function froma seperate file
         {
             label: 'if [boolean]', 
