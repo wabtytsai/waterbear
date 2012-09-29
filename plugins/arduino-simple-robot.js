@@ -38,9 +38,10 @@ window.choice_lists = {
     modes:['moving', 'searching'],
     //analogsensors:['IR_distance_1','IR_distance_2','light_sensor_1'],
     //analogsensors:{'9':'IR_distance_1','10':'IR_distance_2','12':'light_sensor_1'},
-    analogsensors:{'ir_distance_1_pin':'IR distance sensor 1',
-    'ir_distance_2_pin':'IR distance sensor 2','light_sensor_1_pin':'Light Sensor 1', 'light_sensor_2_pin':'Light Sensor 2'},
-    buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button'},
+    analogsensors:{'light_sensor_1_pin':'Light Sensor 1', 'light_sensor_2_pin':'Light Sensor 2','ir_distance_1_pin':'IR distance sensor 1', 'ir_distance_2_pin':'IR distance sensor 2'},
+    distsensors:{'ir_distance_1_pin':'IR distance sensor 1', 'ir_distance_2_pin':'IR distance sensor 2'},
+    distances:[15, 20, 25 , 30 , 35, 40],
+    buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button 1', 'bumper_2_pin':'Bumper Button 2'},
     leds:{'LED_Green_pin':'Green LED'},
     speeds: [1,2,3,4,5,6,7,8,9,10]
 };
@@ -398,22 +399,22 @@ var menus = {
     movement: menu('Movement', [
         
         {
-            label: 'Start Forward ', 
+            label: 'Go Forward ', 
             script: 'bot_forward();',
             help: 'Move Forward'
         },
         {
-            label: 'Start Backward ', 
+            label: 'Go Backward ', 
             script: 'bot_backward();',
             help: 'Move Backward'
         },
         {
-            label: 'Start Clockwise ', 
+            label: 'Go Clockwise ', 
             script: 'bot_clockwise();',
             help: 'Move Clockwise'
         },
         {
-            label: 'Start Anticlockwise ', 
+            label: 'Go Anticlockwise ', 
             script: 'bot_anticlockwise();',
             help: 'Move Anticlockwise'
         },
@@ -459,6 +460,24 @@ var menus = {
             help: 'When the sensor changes do this'
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
+        {
+          label: 'When [choice:distsensors] closer than [choice:distances] cm',
+            trigger: true,
+            slot: false,
+            containers: 2,
+            subContainerLabels: ['else'],
+            locals: [
+                {
+                    label: 'distance',
+                    script: 'distance',
+                    type: 'int'
+                }
+            ],
+            script: 'if(Sender->pin == {{1}}){int distance = 0; distance = distance_calc(Sender->value); if(distance < {{2}}){[[1]]}else{[[2]]}}',
+            position:'onChange',
+            help: 'When the sensor changes check whether the distance is closer then do first block'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        },
         /*{
             label: 'When [choice:analogsensors] changes',
             trigger: true,
@@ -475,9 +494,15 @@ var menus = {
             help: 'When the sensor changes do this'
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },*/
-        {
+        /*{
           	label:'Distance from sensor (cm)',
           	script: "distance_calc(Sender->value)",
+          	type: 'int', 
+          	help: 'Distance from sensor'
+        },*/
+        {
+          label:'[choice:distsensors] (cm)',
+          script: "distance_calc(analogRead({{1}}) )",
           	type: 'int', 
           	help: 'Distance from sensor'
         },

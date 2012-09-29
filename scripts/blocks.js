@@ -342,13 +342,29 @@ function getContained(s){
 
 function choice_func(s, listname, default_opt){
     var list = choice_lists[listname];
-
-    return '<span class="value string ' + listname + ' autosocket" data-type="  "><select>' +
-        list.map(function(item){
-            if (item === default_opt){
-                return '<option selected>' + item + '</option>';
-            }else{
-                return '<option>' + item + '</option>';
+    var bUseKey = false;
+    if($.isPlainObject(list))
+    {
+      bUseKey = true;
+    }
+    return '<span class="value string ' + listname + ' autosocket" data-type="  "><select>' + 
+        $.map(list, function(item, idx)
+        {
+            var ret = '<option ';
+            if (bUseKey)
+            {
+                ret = ret + 'value="' + idx + '" ';
+                if (idx === default_opt)
+                {
+                    ret = ret + 'selected';
+                }
+            }
+            else
+            {
+                if (item === default_opt)
+                {
+                    ret = ret + 'selected';
+                }
             }
             ret = ret +">"+ item + '</option>';
             return ret;
