@@ -1,4 +1,5 @@
 /* block and border colours for different groups of blocks */
+.goto_stage{display: none;}
 
 .motion{ border-color: hsl(225,65%,83%); }
 .motion > .block{ background-color: hsl(225, 65%, 93%); }
