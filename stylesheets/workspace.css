@@ -58,6 +58,7 @@ body {
     border: 1px solid #CCC;
     overflow-x: hidden;
     overflow-y: auto; 
+    padding-top: 30px;
 }
 
 .scripts_workspace, .scripts_text_view {
@@ -66,6 +67,7 @@ body {
     position: relative;
     display: none;
     padding: 15px;
+    padding-top: 30px;
 }
 
 .scripts_workspace {

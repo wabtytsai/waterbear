@@ -6,7 +6,10 @@ yepnope({
             
     ],
     complete: function(){
-      $('.tab_bar').append('<select id="ports" class="myoptions"></select><button id="connect">Serial Monitor</button>');
+      $('.tab_bar').append('<select id="ports" class="myoptions"></select>');
+      
+      $('.tab_bar2').append('<button class="hidden" id="connect">Serial Monitor</button>');
+      
       enableUSB();
       $('#connect').on('click', function(event){window.connect();});
     }
@@ -70,6 +73,7 @@ window.update_scripts_view = function(){
 };
 
 function run_scripts(event){
+    
     var blocks = $('.workspace:visible .scripts_workspace > .trigger');
    
     var url = '../compiler/';
@@ -81,13 +85,13 @@ function run_scripts(event){
       console.log("obj =", obj);
       if(obj.success === 0)
       {
-        alert("Compilation failed.");
+        clearProgress("Compilation failed.");
       }
       else
       {
         
-        var progressText = "<p>" + obj.text + "<br /> Code Size: " + obj.size + " bytes<br /><small>(out of <strong>"+ getMaxSize()+"</strong> available.)</small></p>";
-        alert(progressText);
+        var progressText = "Compiled OK";//"<p>" + obj.text + "<br /> Code Size: " + obj.size + " bytes<br /><small>(out of <strong>"+ getMaxSize()+"</strong> available.)</small></p>";
+        clearProgress(progressText);
         uploadusb(obj);
         
       }
