@@ -98,7 +98,7 @@ jQuery.fn.extend({
   extract_script: function(){
       if (this.length === 0) {return '';}
       if (this.is(':input')) {return this.val();}
-      if (this.is('.empty')) {return '// do nothing';}
+      if (this.is('.empty')) {return "\n// do nothing\n";}
       return this.map(function(){
           var self = $(this);
           var script = self.data('script');
@@ -286,7 +286,33 @@ var menus = {
             subContainerLabels: ['else'],
             script: 'if({{1}}){\n[[1]]\n}else{\n[[2]]\n}',
             help: 'run first set of blocks if condition is true, second set otherwise'
+        },
+        {
+            label: 'forever while [boolean:true]', 
+            containers: 1,  
+            script: 'while({{1}}){[[1]]}',
+            help: 'repeat until the condition is false'
+        },
+        {
+            label: 'once and forever while [boolean:true]', 
+            containers: 1,  
+            script: 'do{{{(1}}} while([[1]]);',
+            help: 'do once then repeat until the condition is false'
+        },
+        {
+            label: 'repeat [number:10] times', 
+            containers: 1, 
+            script: 'for (int index##=0; index## <= {{1}}; index##++){[[1]]};',
+            help: 'repeat the contained blocks so many times',
+            locals: [
+                {
+                    label: 'loop index##',
+                    script: 'index##',
+                    type: 'number'
+                }
+            ]
         }
+        
         
     ], true),
    
@@ -303,11 +329,11 @@ var menus = {
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
         {
-            label: '[choice:digitalinputpins] is ON', 
+          label: '[choice:digitalinputpins] is [choice:onoffhighlow]', 
             //label: 'Is Pin [string] HIGH', 
             'type': 'boolean', 
-            script: '(digitalRead({{1}}) == HIGH)',
-            help: 'Is the button Pressed'
+            script: '(digitalRead({{1}}) == {{2}})',
+            help: 'Is the button Pressed or not'
         },
         {
             label: 'value of [choice:analoginputpins]', 
@@ -486,6 +512,17 @@ var menus = {
             script: "(randomSeed({{1}}))",
             help: ''
         },*/
+        {
+            label: 'is [number:0] between [number:1] and [number:100]', 
+            type: 'boolean', 
+            script: "(({{1}} > {{2}}) && ({{1}} < {{3}}))",
+            help: 'Check if one number is between the others exclusive'
+        },{
+            label: 'is [number:0] between [number:1] and [number:100] (inclusive)', 
+            type: 'boolean', 
+            script: "(({{1}} >= {{2}}) && ({{1}} =< {{3}}))",
+            help: 'Check if one number is between the others inclusive'
+        },
         {
             label: '[number:0] < [number:0]', 
             type: 'boolean', 
