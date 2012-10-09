@@ -3,10 +3,6 @@
 yepnope(
     {
         load: [
-            'lib/raphael-1.3.1-min.js',
-            'lib/raphael-path.js',
-            'lib/sketchy.js',
-            'lib/colorwheel.js',
             'lib/beautify.js',
             'lib/highlight.js',
             'lib/highlight-javascript.js',
@@ -81,36 +77,7 @@ jQuery.fn.extend({
 });
 
 function setup(){
-    // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
-    
-function showColorPicker(){
-    var self = $(this);
-    cw.input(this);
-    cw.onchange(function(){
-        var color = self.val();
-        self.css({color: color, 'background-color': color});
-    });
-    $('#color_popup').bPopup({modalColor: 'transparent'});
-}
-$('.workspace:visible .scripts_workspace').delegate('input[type=color]', 'click', showColorPicker);
-$(document).ready(function(){
-    window.cw = Raphael.colorwheel($('#color_contents')[0], 300, 180);
-});
-
-window.update_scripts_view = function(){
-    var blocks = $('.workspace:visible .scripts_workspace > .wrapper');
-    //console.log('found %s scripts to view', blocks.length);
-    var view = $('.workspace:visible .scripts_text_view');
-    blocks.write_script(view);
-}
-
-function run_scripts(event){
-    $('.stage')[0].scrollIntoView();
-    var blocks = $('.workspace:visible .scripts_workspace > .trigger');
-    $('.stage').replaceWith('<div class="stage"><script>' + blocks.wrap_script() + '</script></div>');
-}
-$('.run_scripts').click(run_scripts);
-
+  
 }
 
 // End UI section

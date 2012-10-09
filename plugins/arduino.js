@@ -6,10 +6,8 @@ yepnope({
             
     ],
     complete: function(){
-      $('.tab_bar').append('<select id="ports" class="myoptions"></select>');
-      
-      $('.tab_bar2').append('<button class="hidden" id="connect">Serial Monitor</button>');
-      
+      $('.tab_bar').append('<select id="ports" class="myoptions">');
+      $('.tab_bar2').append('</select><button id="connect">Serial Monitor</button>');
       enableUSB();
       $('#connect').on('click', function(event){window.connect();});
     }
@@ -27,33 +25,20 @@ yepnope({
     
 // expose these globally so the Block/Label methods can find them
 window.choice_lists = {
-    /*keys: 'abcdefghijklmnopqrstuvwxyz0123456789*+-./'
-        .split('').concat(['up', 'down', 'left', 'right',
-        'backspace', 'tab', 'return', 'shift', 'ctrl', 'alt', 
-        'pause', 'capslock', 'esc', 'space', 'pageup', 'pagedown', 
-        'end', 'home', 'insert', 'del', 'numlock', 'scroll', 'meta']),*/
     highlow: ['HIGH', 'LOW'],
     inoutput: ['INPUT', 'OUTPUT'],
     onoff: ['ON', 'OFF'],
     onoffhighlow: {'HIGH':'ON', 'LOW':'OFF'},
     onoffbool: {'true':'ON', 'false':'OFF'},
     logic: ['true', 'false'],
-    digitalpins: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,'A0','A1','A2','A3','A4','A5'],
-    analoginpins: ['A0','A1','A2','A3','A4','A5'],
-    pwmpins: [3, 5, 6, 9, 10, 11],
+    digitalinputpins:{'push_button_pin':'Push Button',0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
+    analoginputpins: {'pot_pin':'Potentiometer','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
+    digitaloutputpins:{'LED_Green_pin':'Front LED',0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
+    analogoutputpins: {'servo_pin':'Servo', 3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'},
+    alloutputpins:{'servo_pin':'Servo','LED_Green_pin':'Front LED',0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
     baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
-    analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'],
-    motionstates:['forward', 'backward', 'clockwise', 'anticlockwise','stop'],
-    modes:['moving', 'searching'],
-    //analogsensors:['IR_distance_1','IR_distance_2','light_sensor_1'],
-    //analogsensors:{'9':'IR_distance_1','10':'IR_distance_2','12':'light_sensor_1'},
-    analogsensors:{'light_sensor_1_pin':'Light Sensor 1', 'light_sensor_2_pin':'Light Sensor 2','ir_distance_1_pin':'IR distance sensor 1', 'ir_distance_2_pin':'IR distance sensor 2'},
-    distsensors:{'ir_distance_1_pin':'IR distance sensor 1', 'ir_distance_2_pin':'IR distance sensor 2'},
-    distances:[15, 20, 25 , 30 , 35, 40],
-    buttonsensors:{'push_button_pin':'Push Button', 'bumper_1_pin':'Bumper Button 1', 'bumper_2_pin':'Bumper Button 2'},
-    leds:{'LED_Green_pin':'Green LED'},
-    speeds: [1,2,3,4,5,6,7,8,9,10]
-};
+    analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL']
+   };
 
 window.set_defaultscript = function(script){
     window.defaultscript = script; 
@@ -73,9 +58,11 @@ window.update_scripts_view = function(){
 };
 
 function run_scripts(event){
-    
     var blocks = $('.workspace:visible .scripts_workspace > .trigger');
-   
+    
+    $('.stage')[0].scrollIntoView();
+    clearProgress('Sending to server for compilation');
+    
     var url = '../compiler/';
     $.post( url ,{ 'data':blocks.wrap_script()} , function(data, textStatus){
         console.log("data =", data);
@@ -90,7 +77,7 @@ function run_scripts(event){
       else
       {
         
-        var progressText = "Compiled OK";//"<p>" + obj.text + "<br /> Code Size: " + obj.size + " bytes<br /><small>(out of <strong>"+ getMaxSize()+"</strong> available.)</small></p>";
+        var progressText = "<p>" + obj.text + "<br /> Code Size: " + obj.size + " bytes<br /><small>(out of <strong>"+ getMaxSize()+"</strong> available.)</small></p>";
         clearProgress(progressText);
         uploadusb(obj);
         
@@ -99,10 +86,10 @@ function run_scripts(event){
     });
 /*    var url = '../run.php';
     $.post( url ,{ 'script':blocks.wrap_script()} , function(data, textStatus){
-        alert(data);
+        clearProgress(data);
     });
 */  
-    $('.workspace')[0].scrollIntoView();
+    //$('.workspace')[0].scrollIntoView();
 }
 
 $('.run_scripts').click(run_scripts);
@@ -159,12 +146,6 @@ jQuery.fn.extend({
   wrap_script: function(){
       // wrap the top-level script to prevent leaking into globals
       var retval = $(this).structured_script();
-      //var script = this.pretty_script();
-      //var retval = 'try{' + script + '}catch(e){alert(e);};';
-
-      //var retval = 'try{' + script + '}catch(e){alert(e);};';
-
-      //console.log(retval);
       return retval;
   },
   
@@ -178,12 +159,10 @@ jQuery.fn.extend({
   },
   
   structured_script: function(){
-    var positions = ['globals', 'setup','onChange', 'any', 'onDown', 'onUp', 'onHold', 'onDouble']; 
+    var positions = ['globals','def', 'setup', 'any']; 
       
       instance = this;
       var sections = $.map(positions, function( pos){return instance.map(function(){ return $(this).extract_script_filtered(pos);}).get().join('');});
-      //console.log("sections =", sections);
-      //var structured = aTemplates.adafruitmotorshield;
       var structured = aTemplates.arduino;  // TODO : Add some choice
       console.log('structured',structured);
       
@@ -191,23 +170,8 @@ jQuery.fn.extend({
           structured = structured.replace("//"+positions[index]+"//", section);
       });
       return structured;
-      
-      /*
-      var anyscript =  this.map(function(){ return $(this).extract_script_filtered('any');}).get().join('');
-      var mainscript = this.map(function(){ return $(this).extract_script_filtered('main');}).get().join('');
-      var loopscript = this.map(function(){ return $(this).extract_script_filtered('loop');}).get().join('');
-      
-      var structured = anyscript;//+'\n$(function(){$("#stage").playground({});\n'+mainscript+'\n'+loopscript+'\n$.playground.startGame();\n});';
-      return structured;*/
   },
   
-  /*
-  wrap_script: function(){
-      // wrap the top-level script to prevent leaking into globals
-      var script = this.map(function(){return $(this).extract_script();}).get().join('\n\n');
-      //return 'var global = new Global();\n(function($){\nvar local = new Local();\n' + script + '\n})(jQuery);';
-      return script;
-  },*/
   write_script: function(view){
       view.html('<code><pre class="script_view">' + this.pretty_script() +  '</pre></code>');
   }
@@ -274,13 +238,13 @@ $('.clear_scripts').click(clear_scripts_default);
 var menus = {
     control: menu('Control', [
         {
-            label: 'On Start', 
+            label: 'Setup', 
             trigger: true, 
             containers: 1, 
             slot: false, 
             script: '[[1]]',
             position:'setup',
-            help: 'During Setup,' //does the cutout go in here too? 
+            help: 'Do Once when the program starts' //does the cutout go in here too? 
         },
 
         {
@@ -299,12 +263,14 @@ var menus = {
             containers: 1, 
             script: 'void {{1}}(){\n[[next]]\n}\nvoid{{1}}_timed(TimerInformation* Sender){{{1}();};',
             help: 'Trigger for blocks to run when message is received',
+            position:'def',
             onAdd:'addBroadcast({{1}})',
             onRemove:'removeBroadcast({{1}})'
         },
         {
             label: 'Broadcast [string:ack] message', 
             script: '{{1}}();',
+            position:'def',
             help: 'Send a message to all listeners'
         },*/
         // TODO : maybe we get the definitions of the arduino function froma seperate file
@@ -327,7 +293,7 @@ var menus = {
     sensing: menu('Sensors', [
         
         {
-            label: 'When [choice:buttonsensors] pressed',
+            label: 'When [choice:digitalinputpins] is ON',
             trigger: true,
             slot: false,
             containers: 1,
@@ -337,169 +303,23 @@ var menus = {
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
         {
-            label: '[choice:buttonsensors] Is Pressed', 
+            label: '[choice:digitalinputpins] is ON', 
             //label: 'Is Pin [string] HIGH', 
             'type': 'boolean', 
             script: '(digitalRead({{1}}) == HIGH)',
             help: 'Is the button Pressed'
         },
-        
-        
         {
-            label: 'Digital Pin [string]', 
-            //label: 'Is Pin [string] HIGH', 
-            'type': 'boolean', 
-            script: '(digitalRead({{1}}) == HIGH)',
-            help: 'Is the digital input pin ON'
+            label: 'value of [choice:analoginputpins]', 
+            'type': 'int', 
+            script: 'analogRead({{1}})',
+            help: 'Value of Input (0-1023)'
+        },
+        {
+            label: 'Set [choice:analoginputpins] to input mode', 
+            script: 'pinMode({{1}}, INPUT);',
+            help: 'Set pin to input mode - not normally needed'
         }
-        
-        /*
-        {
-            label: 'Create analog_input## on Pin [choice:analoginpins]', 
-            script: 'analog_input## = "{{1}}"; pinMode(analog_input##, INPUT);',
-            help: 'Create a named pin set to input',
-            returns: {
-                label: 'analog_input##',
-                script: 'analog_input##',
-                type: 'string'
-            }
-        }
-        */
-        
-        /*{
-            label: 'When [choice:analogsensors] changes',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            locals: [
-                {
-                    label: 'value',
-                    script: 'Sender->value',
-                    type: 'int'
-                }
-            ],
-            script: 'if(Sender->pin == {{1}}){[[1]]}',
-            position:'onChange',
-            help: 'When the sensor changes do this'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },
-        {
-          label: 'When [choice:distsensors] closer than [choice:distances] cm',
-            trigger: true,
-            slot: false,
-            containers: 2,
-            subContainerLabels: ['else'],
-            locals: [
-                {
-                    label: 'distance',
-                    script: 'distance',
-                    type: 'int'
-                }
-            ],
-            script: 'if(Sender->pin == {{1}}){int distance = 0; distance = distance_calc(Sender->value); if(distance < {{2}}){[[1]]}else{[[2]]}}',
-            position:'onChange',
-            help: 'When the sensor changes check whether the distance is closer then do first block'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },
-        {
-            label: 'When [choice:analogsensors] changes',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            locals: [
-                {
-                    label: 'value',
-                    script: 'Sender->value',
-                    type: 'int'
-                }
-            ],
-            script: 'void onChange_{{1}}(AnalogPortInformation* Sender){[[1]]}',
-            help: 'When the sensor changes do this'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },*/
-        /*{
-          	label:'Distance from sensor (cm)',
-          	script: "distance_calc(Sender->value)",
-          	type: 'int', 
-          	help: 'Distance from sensor'
-        },*/
-        /*{
-          label:'[choice:distsensors] (cm)',
-          script: "distance_calc(analogRead({{1}}) )",
-          	type: 'int', 
-          	help: 'Distance from sensor'
-        },
-        {
-            label:'is moving [choice:motionstates]',
-            script: "(current_motion_state == \"{{1}}\")",
-          	type: 'boolean', 
-          	help: 'Current motion state'
-        },
-        {
-            label: 'When [choice:buttonsensors] pressed',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            script: 'if(Sender->pin == {{1}}){[[1]]}',
-            position:'onDown',
-            help: 'When the button pressed do this'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },
-        
-        {
-            label: 'When [choice:buttonsensors] held',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            script: 'if(Sender->pin == {{1}}){[[1]]}',
-            position:'onHold',
-            help: 'When the button is held down do this'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },
-        
-        {
-            label: 'When [choice:buttonsensors] double clicked',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            script: 'if(Sender->pin == {{1}}){[[1]]}',
-            position:'onDouble',
-            help: 'When the button is double clicked do this'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },
-        {
-            label: 'When [choice:buttonsensors] released',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            script: 'if(Sender->pin == {{1}}){[[1]]}',
-            position:'onUp',
-            help: 'When the button pressed do this'
-            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-        },
-        
-        {
-            label: 'When [choice:buttonsensors] pressed',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            script: 'void onDown_{{1}}(ButtonInformation* Sender){[[1]]}',
-            help: ''
-        },
-        {
-            label: 'When [choice:buttonsensors] released',
-            trigger: true,
-            slot: false,
-            containers: 1,
-            script: 'void onDown_{{1}}(ButtonInformation* Sender){[[1]]}',
-            help: 'When the button released do this'
-        }*/
-        
-        
-        
-        //if last signal from IR low then 1024 must mean too close 
-        
-        
     ]),
     
     /*
@@ -509,40 +329,42 @@ var menus = {
         */
     outputs: menu('Outputs', [
         {
-            label: 'Switch  [choice:leds] [choice:onoffhighlow]',
-            script: 'digitalWrite({{1}}, {{2}});',
-            help: 'Switch an LED on'
+            label: 'Set [choice:alloutputpins] to output mode', 
+            script: 'pinMode({{1}}, INPUT);',
+            help: 'Set the pin to output mode - normally in Setup'
         },
-        
+        {
+            label: 'Set [choice:digitaloutputpins] to [choice:onoffhighlow]',
+            script: 'digitalWrite({{1}}, {{2}});',
+            help: 'Switch a Digital Output Pin on or off'
+        },
+        {
+          label: 'Set [choice:analogoutputpins] to [int:255]', 
+          	script: 'analogWrite({{1}}, {{2}});',
+          	help: 'Set value of PWM pin (0-255)'
+        },
         {
             label: 'Dispense  a Sweet',
             script: 'dispense();',
             help: 'Dispense a Sweet'
-        }
-        /*
-        {
-            label: 'Create analog_output## on Pin [choice:pwmpins]', 
-            script: 'analog_output## = "{{1}}"; pinMode(analog_output##, OUTPUT);',
-            help: 'Create a named pin set to output',
-            returns: {
-                label: 'analog_output##',
-                script: 'analog_output##',
-                type: 'string'
-            }
         },
-        
         {
-          	label: 'Analog [string] outputs [int:255]', 
-          	script: 'analogWrite({{1}}, {{2}});',
-          	help: 'Set value of a pwm pin'
+            label: 'Map [number:0] from Analog in to Analog out',
+          	type: 'number',
+          	script: 'map({{1}}, 0, 1023, 0, 255)',
+          	help: 'Convert numbers 0-1023 to 0-255'
         }
-        */
     ]),
     
     timing: menu('Timing', [
         {
             label: 'wait [int:1] secs', 
             script: 'delay(1000*{{1}});',
+            help: 'pause before running subsequent blocks'
+        },
+        {
+            label: 'wait [int:100] milli seconds', 
+            script: 'delay({{1}});',
             help: 'pause before running subsequent blocks'
         },
         {
@@ -684,19 +506,19 @@ var menus = {
             help: 'Check if one number is greater than another'
         },
         {
-            label: '[boolean] and [boolean]', 
+          label: '[boolean:false] and [boolean::false]', 
             type: 'boolean', 
             script: "({{1}} && {{2}})",
             help: 'Check if both are true'
         },
         {
-            label: '[boolean] or [boolean]', 
+          label: '[boolean:false] or [boolean:false]', 
             type: 'boolean', 
             script: "({{1}} || {{2}})",
             help: 'Check if one is true'
         },
         {
-            label: 'not [boolean]', 
+          label: 'not [boolean:false]', 
             type: 'boolean', 
             script: "(! {{1}})",
             help: 'Not true is false and Not false is true'
@@ -721,13 +543,13 @@ var menus = {
             help: 'Gives the positive of the number'
         },
         {
-          	label: 'Map [number] from Analog in to Analog out',
+          label: 'Map [number:0] from Analog in to Analog out',
           	type: 'number',
           	script: 'map({{1}}, 0, 1023, 0, 255)',
           	help: ''
         },
         {
-          	label: 'Map [number] from [number:0]-[number:1023] to [number:0]-[number:255] ',
+          label: 'Map [number:0] from [number:0]-[number:1023] to [number:0]-[number:255] ',
           	type: 'number',
           	script: 'map({{1}}, 0, 1023, 0, 255)',
             help: ''
@@ -765,7 +587,8 @@ var menus = {
 };
 
 var demos = [
-    {"title":"Sweets","description":"","date":1349102341055,"scripts":[{"klass":"control","label":"Main Loop","script":"[[1]]","containers":1,"position":"any","trigger":true,"locals":[],"sockets":[],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}else{\n[[2]]\n}","subContainerLabels":["else"],"containers":2,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"[choice:buttonsensors] Is Pressed","script":"(digitalRead({{1}}) == HIGH)","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["push_button_pin"],"contained":[],"next":""}],"contained":[{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["LED_Green_pin","LOW"],"contained":[],"next":{"klass":"outputs","label":"Dispense  a Sweet","script":"dispense();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}},{"klass":"outputs","label":"Switch  [choice:leds] [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["LED_Green_pin","HIGH"],"contained":[],"next":""}],"next":{"klass":"timing","label":"wait [int:1] secs","script":"delay(1000*{{1}});","containers":0,"position":"any","locals":[],"sockets":["1"],"contained":[],"next":""}}],"next":""}]}];
+{"title":"Sweet","description":"","date":1349636993364,"scripts":[{"klass":"control","label":"Main Loop","script":"[[1]]","containers":1,"position":"any","trigger":true,"locals":[],"sockets":[],"contained":[{"klass":"control","label":"if [boolean]","script":"if({{1}}){\n[[1]]\n}else{\n[[2]]\n}","subContainerLabels":["else"],"containers":2,"position":"any","locals":[],"sockets":[{"klass":"sensors","label":"[choice:digitalinputpins] is ON","script":"(digitalRead({{1}}) == HIGH)","containers":0,"position":"any","type":"boolean","locals":[],"sockets":["push_button_pin"],"contained":[],"next":""}],"contained":[{"klass":"outputs","label":"Set [choice:digitaloutputpins] to [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["LED_Green_pin","HIGH"],"contained":[],"next":{"klass":"outputs","label":"Dispense  a Sweet","script":"dispense();","containers":0,"position":"any","locals":[],"sockets":[],"contained":[],"next":""}},{"klass":"outputs","label":"Set [choice:digitaloutputpins] to [choice:onoffhighlow]","script":"digitalWrite({{1}}, {{2}});","containers":0,"position":"any","locals":[],"sockets":["LED_Green_pin","LOW"],"contained":[],"next":""}],"next":""}],"next":""}]}
+];
 populate_demos_dialog(demos);
 
 })();

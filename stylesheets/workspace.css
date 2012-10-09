@@ -90,7 +90,7 @@ body {
 .tab_bar2{
     position: absolute;
     right: -0.1%;
-    top: 30px;
+    top: 6px;
     width: 50%;
     z-index: 15;
 }
@@ -125,9 +125,11 @@ body {
     height: 95%;
     right: 0px;
     width: 49.8%;
-    bottom: -20px;
+    oldbottom: -20px;
     background-color: #FFF;
     border: 1px solid #CCC;
+    
+    padding-top: 30px;
 }
 
 #block_menu{
