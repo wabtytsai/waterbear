@@ -1,9 +1,16 @@
 yepnope({
     load: [ 'plugins/arduino-simple-robot.css',
             'lib/beautify-arduino.js',
-            'lib/highlight.js'
+            'lib/highlight.js',
+            'lib/codebender.js'
             
-    ]
+    ],
+    complete: function(){
+      $('.tab_bar').append('<select id="ports" class="myoptions">');
+      $('.tab_bar2').append('</select><button id="connect">Serial Monitor</button>');
+      enableUSB();
+      $('#connect').on('click', function(event){window.connect();});
+    }
     //complete: setup
 });
 
@@ -63,6 +70,7 @@ window.update_scripts_view = function(){
     blocks.write_script(view);
 };
 
+/*
 function run_scripts(event){
     var blocks = $('.workspace:visible .scripts_workspace > .trigger');
     var url = '../run.php';
@@ -70,6 +78,41 @@ function run_scripts(event){
         alert(data);
     });
    
+}
+*/
+function run_scripts(event){
+    var blocks = $('.workspace:visible .scripts_workspace > .trigger');
+    
+    $('.stage')[0].scrollIntoView();
+    clearProgress('Sending to server for compilation');
+    
+    var url = '../compiler/';
+    $.post( url ,{ 'data':blocks.wrap_script()} , function(data, textStatus){
+        console.log("data =", data);
+        
+        
+      var obj = jQuery.parseJSON(data);
+      console.log("obj =", obj);
+      if(obj.success === 0)
+      {
+        clearProgress("Compilation failed.");
+      }
+      else
+      {
+        
+        var progressText = "<p>" + obj.text + "<br /> Code Size: " + obj.size + " bytes<br /><small>(out of <strong>"+ getMaxSize()+"</strong> available.)</small></p>";
+        clearProgress(progressText);
+        uploadusb(obj);
+        
+      }
+		    
+    });
+/*    var url = '../run.php';
+    $.post( url ,{ 'script':blocks.wrap_script()} , function(data, textStatus){
+        clearProgress(data);
+    });
+*/  
+    //$('.workspace')[0].scrollIntoView();
 }
 
 $('.run_scripts').click(run_scripts);
