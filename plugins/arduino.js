@@ -253,7 +253,7 @@ var menus = {
             containers: 1, 
             slot: false, 
             script: '[[1]]',
-            position:'any',
+            position:'loop',
             help: 'Will do these blocks repeatedly' //does the cutout go in here too? 
         },
         /*
@@ -302,7 +302,7 @@ var menus = {
         {
             label: 'once and forever while [boolean:true]', 
             containers: 1,  
-            script: 'do{{{(1}}} while([[1]]);',
+            script: 'do{[[1]]} while({{1}});',
             help: 'do once then repeat until the condition is false'
         },
         {
@@ -330,7 +330,7 @@ var menus = {
             slot: false,
             containers: 1,
             script: 'if(digitalRead({{1}}) == HIGH){[[1]]}',
-            position:'any',
+            position:'loop',
             help: 'When the button pressed do this'
             //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         },
