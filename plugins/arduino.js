@@ -15,10 +15,10 @@ yepnope({
 
 (function(){
     
-    // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
-    $.post('../code_template.php', function(data){aTemplates = data;}, 'json')
+    var pluginname = "arduino";
+    $.post('../code_template.php?type='+pluginname, function(data){aTemplates = data;}, 'json')
     .error(function(){
-    	    $.post('plugins/arduino-templates.json', 
+    	    $.post('plugins/'+pluginname+'-templates.json', 
     	    	    function(data){aTemplates = data;}
     	    	    ,'json');
     });
