@@ -102,7 +102,7 @@ function uploadusb(compileResult)
     //var progress = applet.flash(portslist.selectedIndex, hex, baudrate);//+'\0');
     var portname = window.portslist.options[portslist.selectedIndex].text;
     var iBoard = 0; //UNO only at the mo
-    var progress = plugin.flash(portname, binary, window.boardz[iBoard]["upload"]["maximum_size"], window.boardz[iBoard]["upload"]["protocol"], window.boardz[iBoard]["upload"]["speed"], window.boardz[iBoard]["build"]["mcu"]);
+    var progress = plugin.flash(portname, binary, window.boardz[iBoard].upload.maximum_size, window.boardz[iBoard].upload.protocol, window.boardz[iBoard].upload.speed, window.boardz[iBoard].build.mcu);
 
 
     //console.log("applet =", applet);
@@ -128,6 +128,32 @@ function uploadusb(compileResult)
     $('#connect').addClass('hidden');
   }
 }
+
+
+function getFire()
+{
+
+  //console.log("getFire plugin =", plugin);
+  var ports="";
+  try{
+    ports = plugin.probeUSB();
+    if(ports != oldPorts){
+      $('#ports').find('option').remove();
+      portsAvail=ports.split(",");
+      for (var i =0 ;i< portsAvail.length ; i++){
+        if (portsAvail[i]!==""){
+          portslist.options[i]=new Option(portsAvail[i],portsAvail[i],true,false);
+        }
+      }
+      oldPorts = ports;
+    }
+  }
+  catch(err){
+  $('#ports').find('option').remove();
+  oldPorts = ports;
+  }
+}
+
 
 function scan()
 {
@@ -169,30 +195,6 @@ function connect()
   else
   {
     clearProgress("Please select a valid port or enable the Java Applet!!");
-  }
-}
-
-function getFire()
-{
-
-  //console.log("getFire plugin =", plugin);
-  var ports="";
-  try{
-    ports = plugin.probeUSB();
-    if(ports != oldPorts){
-      $('#ports').find('option').remove();
-      portsAvail=ports.split(",");
-      for (var i =0 ;i< portsAvail.length ; i++){
-        if (portsAvail[i]!==""){
-          portslist.options[i]=new Option(portsAvail[i],portsAvail[i],true,false);
-        }
-      }
-      oldPorts = ports;
-    }
-  }
-  catch(err){
-  $('#ports').find('option').remove();
-  oldPorts = ports;
   }
 }
 
