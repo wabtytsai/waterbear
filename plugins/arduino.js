@@ -1,3 +1,5 @@
+
+
 yepnope({
     load: [ 'plugins/arduino.css',
             'lib/beautify-arduino.js',
@@ -6,16 +8,47 @@ yepnope({
             
     ],
     complete: function(){
+      console.log("complete =");
+      
+      window.boardz = [{"name":"Arduino Uno","upload":{"protocol":"arduino","maximum_size":"32256","speed":"115200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xde","extended_fuses":"0x05","path":"optiboot","file":"optiboot_atmega328.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega328p","f_cpu":"16000000L","core":"arduino","variant":"standard"},"description":"The Uno is the reference model for the Arduino platform. It has 14 digital input\/output pins (of which 6 can be used as PWM outputs), 6 analog inputs, a 16 MHz ceramic resonator, a USB connection, a power jack, an ICSP header, and a reset button. It does not use the FTDI USB-to-serial driver chip. Instead, it features the Atmega16U2 (Atmega8U2 up to version R2) programmed as a USB-to-serial converter."},{"name":"Arduino Duemilanove w\/ ATmega328","upload":{"protocol":"arduino","maximum_size":"30720","speed":"57600"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xda","extended_fuses":"0x05","path":"atmega","file":"ATmegaBOOT_168_atmega328.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega328p","f_cpu":"16000000L","core":"arduino","variant":"standard"},"description":"Around March 1st, 2009, the Duemilanove started to ship with the ATmega328p instead of the ATmega168. The ATmega328 has 32 KB, (also with 2 KB used for the bootloader)."},{"name":"Arduino Diecimila or Duemilanove w\/ ATmega168","upload":{"protocol":"arduino","maximum_size":"14336","speed":"19200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xdd","extended_fuses":"0x00","path":"atmega","file":"ATmegaBOOT_168_diecimila.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega168","f_cpu":"16000000L","core":"arduino","variant":"standard"},"description":"The Duemilanove automatically selects the appropriate power supply (USB or external power), eliminating the need for the power selection jumper found on previous boards. It also adds an easiest to cut trace for disabling the auto-reset, along with a solder jumper for re-enabling it."},{"name":"Arduino Nano w\/ ATmega328","upload":{"protocol":"arduino","maximum_size":"30720","speed":"57600"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xda","extended_fuses":"0x05","path":"atmega","file":"ATmegaBOOT_168_atmega328.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega328p","f_cpu":"16000000L","core":"arduino","variant":"eightanaloginputs"},"description":"The Arduino Nano is an all-in-one, compact design for use in breadboards. Version 3.0 has an ATmega328."},{"name":"Arduino Nano w\/ ATmega168","upload":{"protocol":"arduino","maximum_size":"14336","speed":"19200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xdd","extended_fuses":"0x00","path":"atmega","file":"ATmegaBOOT_168_diecimila.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega168","f_cpu":"16000000L","core":"arduino","variant":"eightanaloginputs"},"description":"Older Arduino Nano with ATmega168 instead of the newer ATmega328."},{"name":"Arduino Mega 2560 or Mega ADK","upload":{"protocol":"stk500v2","maximum_size":"258048","speed":"115200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xd8","extended_fuses":"0xfd","path":"stk500v2","file":"stk500boot_v2_mega2560.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega2560","f_cpu":"16000000L","core":"arduino","variant":"mega"},"description":"The Mega 2560 is an update to the Arduino Mega, which it replaces. It features the Atmega2560, which has twice the memory, and uses the ATMega 8U2 for USB-to-serial communication."},{"name":"Arduino Mega (ATmega1280)","upload":{"protocol":"arduino","maximum_size":"126976","speed":"57600"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xda","extended_fuses":"0xf5","path":"atmega","file":"ATmegaBOOT_168_atmega1280.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega1280","f_cpu":"16000000L","core":"arduino","variant":"mega"},"description":"A larger, more powerful Arduino board. Has extra digital pins, PWM pins, analog inputs, serial ports, etc. The original Arduino Mega has an ATmega1280 and an FTDI USB-to-serial chip."},{"name":"Arduino Leonardo","upload":{"protocol":"avr109","maximum_size":"28672","speed":"57600","disable_flushing":"true"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xd8","extended_fuses":"0xcb","path":"caterina","file":"Caterina-Leonardo.hex","unlock_bits":"0x3F","lock_bits":"0x2F"},"build":{"vid":"0x2341","pid":"0x8036","mcu":"atmega32u4","f_cpu":"16000000L","core":"arduino","variant":"leonardo"},"description":"The Leonardo differs from all preceding boards in that the ATmega32u4 has built-in USB communication, eliminating the need for a secondary processor. This allows the Leonardo to appear to a connected computer as a mouse and keyboard, in addition to a virtual (CDC) serial \/ COM port."},{"name":"Arduino Mini w\/ ATmega328","upload":{"protocol":"stk500","maximum_size":"28672","speed":"115200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xd8","extended_fuses":"0x05","path":"optiboot","file":"optiboot_atmega328-Mini.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega328p","f_cpu":"16000000L","core":"arduino","variant":"eightanaloginputs"},"description":"The Mini is a compact Arduino board, intended for use on breadboards and when space is at a premium. This version has an ATmega328."},{"name":"Arduino Mini w\/ ATmega168","upload":{"protocol":"arduino","maximum_size":"14336","speed":"19200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xdd","extended_fuses":"0x00","path":"atmega","file":"ATmegaBOOT_168_ng.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega168","f_cpu":"16000000L","core":"arduino","variant":"eightanaloginputs"},"description":"Older Arduino Mini version with the ATmega168 microcontroller."},{"name":"Arduino Ethernet","upload":{"protocol":"arduino","maximum_size":"32256","speed":"115200"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xde","extended_fuses":"0x05","path":"optiboot","file":"optiboot_atmega328.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega328p","f_cpu":"16000000L","core":"arduino","variant":"standard"},"description":"The Ethernet differs from other boards in that it does not have an onboard USB-to-serial driver chip, but has a Wiznet Ethernet interface. This is the same interface found on the Ethernet shield."},{"name":"Arduino Fio","upload":{"protocol":"arduino","maximum_size":"30720","speed":"57600"},"bootloader":{"low_fuses":"0xff","high_fuses":"0xda","extended_fuses":"0x05","path":"atmega","file":"ATmegaBOOT_168_atmega328_pro_8MHz.hex","unlock_bits":"0x3F","lock_bits":"0x0F"},"build":{"mcu":"atmega328p","f_cpu":"8000000L","core":"arduino","variant":"eightanaloginputs"},"description":"An Arduino intended for use as a wireless node. Has a header for an XBee radio, a connector for a LiPo battery, and a battery charging circuit."}];
+
+      window.enabledapplet=false;
+      
       $('.tab_bar').append('<select id="ports" class="myoptions">');
-      $('.tab_bar2').append('</select><button id="connect">Serial Monitor</button>');
+      
+      $("#progress").hide();
+      $("#scanning").hide();
+      $("#net-tools").hide();
+      
+      
+      
+      //$('.tab_bar2').append('</select><button id="connect">Serial Monitor</button>');
       enableUSB();
-      $('#connect').on('click', function(event){window.connect();});
+      //$('#connect').on('click', function(event){window.connect();});
     }
 });
 
 (function(){
     
+    
+      $('body').append('<object id="plugin0" type="application/x-codebendercc" width="0" height="0"><param name="onload" value="enableUSB" /></object>');
+      
+      $('body').append('<div id="prescanning"><p><small>If you would like to upload your code to your USB-connected Arduino, please run our Java applet.</small></p><div id="missingplugin"><p>It seems like you need to enable or install the Codebender.cc Browser Plugin. You can download the plugin from <a href="http://exp.dev.codebender.cc/amaxilatis/Symfony/web/codebender.xpi" >here</a>.</p></div>');
+      
+			/*			<div id="enableUSBdiv">
+							<button id = "enableUSB" class="btn span12" style="margin-bottom:10px; margin-left:0px;" onclick="enableUSB();"><i id="upload_icon" class="icon-play"></i><span id="upload_text"> Enable USB flash </span></button>
+						</div>
+					</div>
+				    <div id="scanning">
+				        
+
+						<button id = "uploadusb" class="btn disabled span12" style="margin-bottom:10px; margin-left:0px;"><i id="upload_icon" class="icon-upload"></i><span id="upload_text"> USB Flash </span></button>
+				  </div>
+				</div>'
+    */
+    
     var pluginname = "arduino";
+    
     $.post('../code_template.php?type='+pluginname, function(data){aTemplates = data;}, 'json')
     .error(function(){
     	    $.post('plugins/'+pluginname+'-templates.json', 
@@ -63,20 +96,37 @@ function run_scripts(event){
     $('.stage')[0].scrollIntoView();
     clearProgress('Sending to server for compilation');
     
-    var url = '../compiler/';
-    $.post( url ,{ 'data':blocks.wrap_script()} , function(data, textStatus){
-        console.log("data =", data);
+    //var url = '../compiler/';
+    //$.post( url ,{ 'data':blocks.wrap_script()} , function(data, textStatus){
+    var url = 'http://compiler.dev.codebender.cc/compiler.php';
+    
+    
+    var aCompile = {"files":
+        [{"filename":"main.ino","content":blocks.wrap_script()}],
+        "format":"binary",//"syntax",
+        "build":
+        {"mcu":"atmega328p",
+        "f_cpu":"16000000L",
+        "core":"arduino",
+        "variant":"standard"}
+        };
+        
+    console.log("aCompile =", aCompile);
+        
+    $.post( url , JSON.stringify(aCompile) , function(data, textStatus){
+        
+    
+      console.log("data =", data);
         
         
       var obj = jQuery.parseJSON(data);
       console.log("obj =", obj);
-      if(obj.success === 0)
+      if(obj.success === false)
       {
-        clearProgress("Compilation failed.");
+        clearProgress("Compilation failed.<br>".obj.message);
       }
       else
-      {
-        
+      {        
         var progressText = "<p>" + obj.text + "<br /> Code Size: " + obj.size + " bytes<br /><small>(out of <strong>"+ getMaxSize()+"</strong> available.)</small></p>";
         clearProgress(progressText);
         uploadusb(obj);
