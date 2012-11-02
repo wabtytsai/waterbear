@@ -30,7 +30,9 @@ yepnope({
 
 (function(){
     
-    
+      $("#block_menu").append('<section id="statusbox" class="submenu"><h3 class="select">Status</h3><div class="option" style="display:none;"><p id="statusmessage">Messages Here</p></div></section>');
+                
+                
       $('body').append('<object id="plugin0" type="application/x-codebendercc" width="0" height="0"><param name="onload" value="enableUSB" /></object>');
       
       $('body').append('<div id="prescanning"><p><small>If you would like to upload your code to your USB-connected Arduino, please run our Java applet.</small></p><div id="missingplugin"><p>It seems like you need to enable or install the Codebender.cc Browser Plugin. You can download the plugin from <a href="http://exp.dev.codebender.cc/amaxilatis/Symfony/web/codebender.xpi" >here</a>.</p></div>');
@@ -93,7 +95,7 @@ window.update_scripts_view = function(){
 function run_scripts(event){
     var blocks = $('.workspace:visible .scripts_workspace > .trigger');
     
-    $('.stage')[0].scrollIntoView();
+    //$('.stage')[0].scrollIntoView();
     clearProgress('Sending to server for compilation');
     
     //var url = '../compiler/';
