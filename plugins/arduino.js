@@ -239,7 +239,7 @@ yepnope({
 
 (function(){
   
-  $("#block_menu").append('<section id="statusbox" class="submenu"><h3 class="select">Arduino Status</h3><div class="option" style="display:none;"><select id="ports" class="myoptions"></select><p id="statusmessage">&nbsp;</p><div id="missingplugin"><p>It seems like you need to enable or install the Codebender.cc Browser Plugin. You can download the plugin from <a href="http://exp.dev.codebender.cc/amaxilatis/Symfony/web/codebender.xpi" >here</a>.</p></div><p><small>Arduino Compiling and Loading by <a href="http://codebender.cc/">http://codebender.cc/</a></small></p></div></section>');
+  $("#block_menu").append('<section id="statusbox" class="submenu"><h3 class="select">Arduino Status</h3><div class="option"><select id="ports" class="myoptions"></select><p id="statusmessage">&nbsp;</p><div id="missingplugin"><p>It seems like you need to enable or install the Codebender.cc Browser Plugin. You can download the plugin from <a href="http://exp.dev.codebender.cc/amaxilatis/Symfony/web/codebender.xpi" >here</a>.</p></div><p><small>Arduino Compiling and Loading by <a href="http://codebender.cc/">http://codebender.cc/</a></small></p></div></section>');
             
             
   $('body').append('<object id="plugin0" type="application/x-codebendercc" width="0" height="0"><param name="onload" value="enableUSB" /></object>');
@@ -579,7 +579,7 @@ var menus = {
         }
         
         
-    ], true),
+    ], false),
    
     sensing: menu('Sensors', [
         
