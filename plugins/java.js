@@ -58,6 +58,12 @@ window.choiceLists = {
 //
 //
 
+var java = {
+	template: {depend:'', main:'', end:''}
+};
+
+window.java = java;
+
 // MENUS
 
 // Special menus used at runtime
@@ -70,11 +76,20 @@ menu('Globals', []);
 // Javascript core blocks
 
 menu('Control', [
+	{
+        blocktype: 'eventhandler',
+        labels: ['class [string:example]'],
+        script: 'class {{1}}{[[1]]}',
+        help: 'this trigger will run its scripts once when the program starts'
+    },
     {
 		//This must be enclosed inside of a class
         blocktype: 'context',
         labels: ['when program runs'],
-        script: 'public static void main(string[] args){[[1]]}',
+        script: {
+			main:'public static void main(string[] args){[[1]]}',
+			depend: 'package edu.team2648.frcEasyJ;'
+		},
         help: 'this trigger will run its scripts once when the program starts'
     },
 	{
