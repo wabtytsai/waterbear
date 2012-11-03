@@ -565,7 +565,7 @@ var menus = {
             help: 'do once then repeat until the condition is false'
         },
         {
-            label: 'repeat [number:10] times', 
+            label: 'repeat [int:10] times', 
             containers: 1, 
             script: 'for (int index##=0; index## <= {{1}}; index##++){[[1]]};',
             help: 'repeat the contained blocks so many times',
@@ -573,7 +573,7 @@ var menus = {
                 {
                     label: 'loop index##',
                     script: 'index##',
-                    type: 'number'
+                    type: 'int'
                 }
             ]
         }
@@ -595,11 +595,37 @@ var menus = {
         },
         {
           label: '[choice:digitalinputpins] is [choice:onoffhighlow]', 
-            //label: 'Is Pin [string] HIGH', 
             'type': 'boolean', 
             script: '(digitalRead({{1}}) == {{2}})',
             help: 'Is the button Pressed or not'
+        },/*
+        {
+          label: 'Wait for a pulse of [choice:digitalinputpins] being [choice:onoffhighlow] or [int:1000] millisseconds (pulse_length_##_millis)', 
+          script: 'long pulse_length_##_millis = pulseIn({{1}}, {{2}}, {{3}});',
+            locals: [
+                {
+                    label: 'pulse_length_##_millis',
+                    script: 'pulse_length_##_millis',
+                    type: 'int'
+                }
+            ],
+            help: 'Wait for a pulse on a pin and record how long the pulse was'
         },
+        */
+        {
+          label: 'if [choice:digitalinputpins] pulses [choice:onoffhighlow] in next [int:1000] ms longer than [int:0] ms', 
+          script: 'long pulse_ms## = pulseIn({{1}}, {{2}}, {{3}}); if(pulse_ms## > {{4}}){\n[[1]]\n}\n',
+          containers: 1,
+          locals: [
+              {
+                  label: 'pulse_ms##',
+                  script: 'pulse_ms##',
+                  type: 'int'
+              }
+          ],
+          help: 'Wait for a pulse on a pin and record how long the pulse was'
+        },
+        
         {
             label: 'value of [choice:analoginputpins]', 
             'type': 'int', 
@@ -640,8 +666,8 @@ var menus = {
             help: 'Dispense a Sweet'
         },
         {
-            label: 'Map [number:0] from Analog in to Analog out',
-          	type: 'number',
+            label: 'Map [int:0] from Analog in to Analog out',
+          	type: 'int',
           	script: 'map({{1}}, 0, 1023, 0, 255)',
           	help: 'Convert numbers 0-1023 to 0-255'
         }
@@ -767,8 +793,8 @@ var menus = {
             help: 'Divide two numbers'
         },
         {
-            label: 'pick random [number:1] to [number:10]', 
-            type: 'number', 
+            label: 'pick random [int:1] to [int:10]', 
+            type: 'int', 
             script: "(random({{1}}, {{2}}))",
             help: 'Generate a random number between two other numbers'
         },
@@ -845,14 +871,14 @@ var menus = {
             help: 'Gives the positive of the number'
         },
         {
-          label: 'Map [number:0] from Analog in to Analog out',
-          	type: 'number',
+          label: 'Map [int:0] from Analog in to Analog out',
+          	type: 'int',
           	script: 'map({{1}}, 0, 1023, 0, 255)',
           	help: ''
         },
         {
-          label: 'Map [number:0] from [number:0]-[number:1023] to [number:0]-[number:255] ',
-          	type: 'number',
+          label: 'Map [int:0] from [int:0]-[int:1023] to [int:0]-[int:255] ',
+          	type: 'int',
           	script: 'map({{1}}, 0, 1023, 0, 255)',
             help: ''
         }
