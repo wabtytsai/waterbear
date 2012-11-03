@@ -257,14 +257,21 @@ yepnope({
   */
 
   var pluginname = "arduino";
+  window.aTemplates = [];
   
-  $.post('../code_template.php?type='+pluginname, function(data){aTemplates = data;}, 'json')
-  .error(function(){
-        $.post('plugins/'+pluginname+'-templates.json', 
-              function(data){aTemplates = data;}
-              ,'json');
-  });
+  
+  window.loadTemplates = function(pluginname){
+    $.post('../code_template.php?type='+pluginname, function(data){window.aTemplates = data;}, 'json')
+    .error(function(){
+          $.post('plugins/'+pluginname+'-templates.json', 
+                function(data){window.aTemplates = data;}
+                ,'json');
+    });
+  };
+  
+setInterval(function(){	window.loadTemplates(pluginname); }, 60000);
     
+  
 // expose these globally so the Block/Label methods can find them
 window.choice_lists = {
     highlow: ['HIGH', 'LOW'],
@@ -307,7 +314,9 @@ function run_scripts(event){
     
     //var url = '../compiler/';
     //$.post( url ,{ 'data':blocks.wrap_script()} , function(data, textStatus){
-    var url = 'http://compiler.dev.codebender.cc/compiler.php';
+    
+    var url = 'http://compiler.codebender.cc/';
+    //var url = 'http://compiler.dev.codebender.cc/compiler.php';
     
     
     var aCompile = {"files":
@@ -422,7 +431,9 @@ jQuery.fn.extend({
       
       instance = this;
       var sections = $.map(positions, function( pos){return instance.map(function(){ return $(this).extract_script_filtered(pos);}).get().join('');});
-      var structured = aTemplates.arduino;  // TODO : Add some choice
+      var structured = window.aTemplates.arduino;  // TODO : Add some choice
+      console.log("structured =", structured);
+      console.log("aTemplates =", aTemplates);
       console.log('structured',structured);
       
       $.each(sections, function(index, section){
