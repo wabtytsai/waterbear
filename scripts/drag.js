@@ -159,9 +159,9 @@
         // get position and append target to .content, adjust offsets
         // set last offset
         // TODO: handle detach better (generalize restoring sockets, put in language file)
-        console.log('[1] model: %s', dragTarget.data('model'));
+        print('[1] model: %s', dragTarget.data('model'));
         removeFromScriptEvent(dragTarget);
-        console.log('[2] model: %s', dragTarget.data('model'));
+        print('[2] model: %s', dragTarget.data('model'));
         dragTarget.css('position', 'absolute');
         if (dragTarget.is('.scripts_workspace .wrapper')){
             dragPlaceholder = $('<div class="dragPlaceholder"></div>');
@@ -169,7 +169,7 @@
             dragTarget.before(dragPlaceholder);
         }
         $('.content').append(dragTarget);
-        console.log('[3] model: %s', dragTarget.data('model'));
+        print('[3] model: %s', dragTarget.data('model'));
         dragTarget.offset(startPosition);
         potentialDropTargets = getPotentialDropTargets();
         dropRects = $.map(potentialDropTargets, function(elem, idx){
@@ -231,7 +231,7 @@
             }
         }else if ($('.block_menu').cursorOver()){
             // delete block if dragged back to menu
-            console.log('triggering delete_block');
+            print('triggering delete_block');
             dragTarget.trigger('delete_block');
             dragTarget.remove();
         }else if (dragTarget.overlap(targetCanvas)){

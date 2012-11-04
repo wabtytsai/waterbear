@@ -137,6 +137,7 @@ Value.prototype.choiceView = function(){
         '</select></span>');
 };
 
+//@todo Move type spesifice to plugins
 Value.prototype.update = function(newValue){
     switch(this.type){
         case 'number': this.value = parseFloat(newValue); break;
@@ -294,7 +295,10 @@ Block.prototype.init = function(spec){
         return labelspec.replace(/##/g, self.id ? '_' + self.id : '');
     });
     this.signature = signature(this);
-    this.script = this.script.replace(/##/g, '_' + self.id);
+		
+		if(typeof this.script != "object")	//This will work ok as long as the other code doesn't rely on local blocks
+			this.script = this.script.replace(/##/g, '_' + self.id);
+		
     Block.registerBlock(this);
 	print('parsing labels');
     this.labels = this.labels.map(function(labelspec){
@@ -452,16 +456,27 @@ Block.prototype.code = function(){
 	// extract code from script, values, contained, and next
 	var self = this;
 	var _code = this.script;
-	function replace_values(match, offset, s){
-        var idx = parseInt(match.slice(2, -2), 10) - 1;
-		if (match[0] === '{'){
-			return self.values[idx] ? self.values[idx].code() : match;
-		}else{
-			return self.contained[idx] ? self.contained[idx].code() : match;
-		}
+	
+	//if the script is a json object, lets ask the plugin how to handle it.
+	if(typeof this.script == "object"){		
+		//Note: getMain is defined in the lugin file.
+		_code = window.getMain(this.script);
 	}
-	_code = _code.replace(/\{\{\d\}\}/g, replace_values);
-	_code = _code.replace(/\[\[\d\]\]/g, replace_values);
+	
+	
+		function replace_values(match, offset, s){
+			var idx = parseInt(match.slice(2, -2), 10) - 1;
+			if (match[0] === '{'){
+				//Note the change, match has benen replaced with "" 
+				// This is so that when a block has a container but no isnide, 
+				// the {{#}} or [#] isnt output.
+				return self.values[idx] ? self.values[idx].code() : "";
+			}else{
+				return self.contained[idx] ? self.contained[idx].code() : "";
+			}
+		}
+		_code = _code.replace(/\{\{\d\}\}/g, replace_values);
+		_code = _code.replace(/\[\[\d\]\]/g, replace_values);
 	if (this.next){
 		_code = _code + this.next.code();
 	}
@@ -735,4 +750,6 @@ function addToScriptEvent(container, view){
             }
         }
     }
+		//When a new block is added to the workdpace, update the input width.
+		container.find('.socket input').autoGrowInput();
 }
