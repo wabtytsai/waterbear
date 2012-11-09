@@ -1,3 +1,7 @@
+#statusbox .option {font-size: 80%;}
+#controlbox .option {font-size: 80%;}
+#controlbox .option select {font-size: 80%;}
+
 /* block and border colours for different groups of blocks */
 .goto_stage{display: none;}
 
