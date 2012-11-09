@@ -190,13 +190,16 @@ function enableUSB(){
 }
 window._loadTemplates = function(data)
 {
-  window.aTemplates = data;
-  console.log("window.aTemplates =", window.aTemplates);
-  var myTemplates = $("#templates");
-  for (var i=0;i<window.aTemplates.content.length;i++)
+  if (window.aTemplates != data)
   {
-    //mySelect.append($('<option></option>').val(window.boardz[i].name).html(window.boardz[i].name));
-    myTemplates.append($('<option></option>').val(i).html(window.aTemplates.name[i]));
+    window.aTemplates = data;
+    var myTemplates = $("#templates");
+    myTemplates.find('option').remove();
+    for (var i=0;i<window.aTemplates.content.length;i++)
+    {
+      //mySelect.append($('<option></option>').val(window.boardz[i].name).html(window.boardz[i].name));
+      myTemplates.append($('<option></option>').val(i).html(window.aTemplates.name[i]));
+    }
   }
 };
       
