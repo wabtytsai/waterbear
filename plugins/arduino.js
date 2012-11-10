@@ -605,6 +605,7 @@ var menus = {
             help: 'Wait for a pulse on a pin and record how long the pulse was'
         },
         */
+        /*
         {
           label: 'if [choice:digitalinputpins] pulses [choice:onoffhighlow] in next [int:1000] ms longer than [int:0] ms', 
           script: 'long pulse_ms## = pulseIn({{1}}, {{2}}, {{3}}); if(pulse_ms## > {{4}}){\n[[1]]\n}\n',
@@ -618,7 +619,7 @@ var menus = {
           ],
           help: 'Wait for a pulse on a pin and record how long the pulse was'
         },
-        
+        */
         {
             label: 'value of [choice:analoginputpins]', 
             'type': 'int', 
