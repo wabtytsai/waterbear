@@ -327,7 +327,7 @@ function run_scripts(event){
       console.log("obj =", obj);
       if(obj.success === false)
       {
-        clearProgress("Compilation failed.<br>".obj.message);
+        clearProgress("Compilation failed.<br>"+obj.message);
       }
       else
       {        
@@ -407,13 +407,14 @@ jQuery.fn.extend({
   },
   
   structured_script: function(){
-    var positions = ['globals', 'def', 'setup', 'mainloop', 'any']; 
+    var positions = ['globals', 'def', 'setup', 'mainloop', 'any','ontweet']; 
       
       instance = this;
       var sections = $.map(positions, function( pos){return instance.map(function(){ return $(this).extract_script_filtered(pos);}).get().join('');});
       var iTemplate = $("#templates").val(); 
+      console.log("iTemplate =", iTemplate);
       
-      var structured = window.aTemplates.content[0];  // TODO : Add some choice
+      var structured = window.aTemplates.content[iTemplate];  // TODO : Add some choice
       console.log("structured =", structured);
       console.log("aTemplates =", aTemplates);
       console.log('structured',structured);
@@ -692,6 +693,130 @@ var menus = {
         }
         
     ]),
+    twitter:menu('Twitter',[
+       {
+          	label:'Set search Screen Name to [string]',
+          	script: "screenName = String('{{1}}');",
+          	help: 'Set screenName to [string]'
+        },
+        
+        {
+            label: 'Tweet received',
+            trigger: true,
+            slot: false,
+            containers: 1,
+            script: '[[1]]',
+            position:'ontweet',  
+            locals: [
+              {
+                  label: 'tweet',
+                  script: 'tweet',
+                  type: 'string'
+              }
+          ],
+        
+            help: 'When tweet recieved do this'
+            //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        }
+        
+    ]),
+    
+    strings: menu('Strings', [
+       
+        {
+          label: 'string [string:] Contains [string:]',
+            script: '({{1}}.indexOf("{{2}}") > -1 )',
+            type: 'boolean',
+            help: 'Does the named string contain the second string'
+        },
+        
+        {
+          label: '[string:] equals [string:]',
+            script: '({{1}}.equal({{2}}) )',
+            type: 'boolean',
+            help: 'is the named string same as the second string'
+        },
+        
+        {
+         label: 'string [string:] character at [number:0]',
+            script: '{{1}}.charAt({{2}})',
+            type: 'string',
+            help: 'get the single character string at the given index of named string'
+        },
+        {
+          label: 'string [string:] length',
+            script: '{{1}}.length()',
+            type: 'int',
+            help: 'get the length of named string'
+        },
+        {
+          label: 'string [string:] indexOf [string:]',
+            script: '{{1}}.indexOf({{2}})',
+            type: 'number',
+            help: 'get the index of the substring within the named string'
+        },
+       
+        {
+          label: 'string [string:] Contains [string:]',
+            script: '({{1}}.indexOf("{{2}}") > -1 )',
+            type: 'boolean',
+            help: 'Does the named string contain the second string'
+        },
+        {
+          label: 'string [string:] replace [string:] with [string:]',
+            script: '{{1}}.replace("{{2}}", "{{3}}")',
+            type: 'string',
+            help: 'get a new string by replacing a substring with a new string'
+        },
+        
+        {
+          label: 'change string [string:] to upper case',
+            script: '{{1}}.toUpperCase()',
+            type: 'string',
+            help: 'change named string to upper case'
+        },
+        
+        {
+          label: 'change string [string:] to lower case',
+            script: '{{1}}.toLowerCase()',
+            type: 'string',
+            help: 'change named string to lower case'
+        },
+        
+        {
+          label: 'trim [string:]',
+            script: '{{1}}.trim()',
+            type: 'string',
+            help: 'remove leading and trailing spaces string'
+        }
+        
+        /*{
+            label: 'to string [any]',
+            script: '{{1}}.toString()',
+            type: 'string',
+            help: 'convert any object to a string'
+        },
+        {
+            label: 'comment [string]',
+            script: '// {{1}};\n',
+            help: 'this is a comment and will not be run by the program'
+        },
+        {
+            label: 'alert [string]',
+            script: 'window.alert({{1}});',
+            help: 'pop up an alert window with string'
+        },
+        {
+            label: 'console log [any]',
+            script: 'console.log({{1}});',
+            help: 'Send any object as a message to the console'
+        },
+        {
+            label: 'console log format [string] arguments [array]',
+            script: 'var __a={{2}};__a.unshift({{1}});console.log.apply(console, __a);',
+            help: 'send a message to the console with a format string and multiple objects'
+        }*/
+    ], false),
     
     variables: menu('Variables', [
         {
