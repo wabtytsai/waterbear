@@ -150,16 +150,36 @@ Value.prototype.view = function(){
 
 Value.prototype.choiceView = function(){
     var self = this;
+    var bUseKey = false;
+    
+    if($.isPlainObject(this.choiceList))
+    {
+      bUseKey = true;
+    }
     return $('<span class="value string ' + this.choiceName + ' autosocket" data-type="  " + data-index="' + this.index + '"><select>' + 
-        this.choiceList.map(function(item){
-            if (item === self.value){
-                return '<option selected>' + item + '</option>';
-            }else{
-                return '<option>' + item + '</option>';
+    $.map(this.choiceList, function(item, idx)
+    {
+        var ret = '<option ';
+        if (bUseKey)
+        {
+            ret = ret + 'value="' + idx + '" ';
+            if (idx === self.value)
+            {
+                ret = ret + 'selected';
             }
-        }).join('') +
-        '</select></span>');
-};
+        }
+        else
+        {
+            if (item === self.value)
+            {
+                ret = ret + 'selected';
+            }
+        }
+        ret = ret +">"+ item + '</option>';
+        return ret;
+    }).join('') +
+    '</select></span>');
+}
 
 Value.prototype.update = function(newValue){
     switch(this.type){
@@ -278,7 +298,7 @@ function Block(spec, scope){
         case 'eventhandler':
             return new EventHandler(spec, scope);
         default:
-            console.warn('Unsupported blocktype: %o', model);
+            console.warn('Unsupported blocktype: %o', spec.blocktype);
             return null;
     }
 }

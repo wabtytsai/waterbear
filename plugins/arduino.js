@@ -38,11 +38,13 @@ window.loadDefaultScript = function(script){
     }
 };
 
+/*
 window.updateScriptsView = function(){
     var blocks = $('.workspace:visible .scripts_workspace > .wrapper');
     var view = $('.workspace:visible .scripts_text_view');
     blocks.writeScript(view);
 };
+*/
 
 jQuery.fn.extend({
   wrapScript: function(){

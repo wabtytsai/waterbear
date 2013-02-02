@@ -134,6 +134,8 @@
     <script src="scripts/debug.js"></script>
     <script src="scripts/workspace.js"></script>
     <script src="scripts/serialization-1.0.js"></script>
+    <script src="plugins/plugins.js"></script>
+
     <script>
 	
         var q = wb.urlToQueryParams(location.href);
@@ -144,11 +146,16 @@
             // return;
 	   }
 
+	      var plugins = q['plugin'].split('|').map(function(name){
+            Block.registerPlugin(name);
+            return plugin_locations[name];
+        });
+	   
         // load all modules separated by |
-        var plugins = q['plugin'].split('|').map(function(name){
+        /*var plugins = q['plugin'].split('|').map(function(name){
             Block.registerPlugin(name);
             return 'plugins/' + name + '.js';
-        });
+        });*/
 
       yepnope({
           test : plugins.length,
