@@ -16,7 +16,7 @@ $('.scripts_workspace').on('click', '.disclosure', function(event){
     }
     self.toggleClass('open closed');
 });
-            
+
 //
 // Value objects get defaults depending on their type. These are the defaults for
 // primitive values when the plugin does not over-ride the default.
@@ -31,9 +31,67 @@ var defaultValue = {
     'color': 'rgb(0,0,0)'
 };
 
+function Deferred(parent, type, idx, spec){
+    this.parent = parent;
+    this.type = type;
+    this.idx = idx;
+    this.spec = spec;
+}
+
+Deferred.prototype.resolve = function(){
+    var block = Block(this.spec);
+    if (block){
+        switch(this.type){
+            case 'value':
+                this.parent.addBlock(block, this.idx);
+                return true;
+            case 'child':
+                this.parent.contained[this.idx] = block;
+                return true;
+            case 'next':
+                this.parent.addNext(block);
+                return true;
+            default:
+                console.log('Error: we should never get here');
+                return false;
+        }
+    }else{
+        console.log('Deferred.resolve() failed: %o', this);
+        return false;
+    }
+}
+Deferred._allDeferreds = [];
+Deferred.add = function(parent, type, idx, spec){
+    Deferred._allDeferreds.push(new Deferred(parent, type, idx, spec));
+};
+Deferred.resolve = function(){
+    var total = Deferred._allDeferreds.length;
+    var count = 0;
+    if (total){
+        console.log('trying to resolve %s Deferreds', total);
+    }
+    while(Deferred._allDeferreds.length){
+        count++;
+        var deferred = Deferred._allDeferreds.shift();
+        if (!deferred.resolve()){
+            Deferred._allDeferreds.push(deferred);
+        }else{
+            console.log('resolved!');
+        }
+        if (count > total){
+            if (total === Deferred._allDeferreds.length){
+                console.log('Something is wrong, no deferreds (%s left) are resolving', total);
+                break;
+            }
+            total = Deferred._allDeferreds.length;
+            count = 0;
+        }
+    }
+};
+
 //
 // Blocks which take parameters store those parameters as Value objects, which may hold primitive
-// values such as numbers or strings, or may be Expression blocks. 
+// values such as numbers or strings, or may be Expression blocks.
 //
 function Value(textValue, index){
     assert.isNumber(index, 'Values must know their place');
@@ -46,24 +104,47 @@ function Value(textValue, index){
         }
         if (textValue.value && textValue.value.signature){
             var block = Block(textValue.value);
-            assert.isObject(block, 'Value blocks must be objects');
-            this.addBlock(block);
+            if (block){
+                this.addBlock(block);
+            }else{
+                Deferred.add(this, 'value', null, textValue.value);
+            }
+            // assert.isObject(block, 'Value blocks must be objects');
         }else{
             this.literal = true;
         }
     }else{
 		print('initializing Value with text: %o', textValue);
 		assert(textValue.length > 0, 'textValue must contain text');
+		    this.literal = true;
         var parts = textValue.slice(1,-1).split(':');
         this.type = parts[0];
-        if (this.type === 'choice'){
+        if (this.type === 'choice' || this.type === 'choicevar'){
+            /*if (this.type === 'choicevar'){
+                this.literal = false;
+            }*/
+            
             this.choiceName = parts[1];
             this.choiceList = choiceLists[this.choiceName];
             if (parts.length === 3){
                 this.value = parts[2];
             }else{
-                this.value = this.choiceList[0];
+                if($.isPlainObject(this.choiceList))
+                {
+                  var choiceArray = [];
+                  $.each( this.choiceList, function( key, value ) {
+                    choiceArray[choiceArray.length] = key;
+                  });
+                  this.value = choiceArray[0];
+                }
+                else
+                {
+                  this.value = this.choiceList[0];
+                }
             }
+            
+            
+            
         }else{
             if (parts.length === 1){
                 this.value = defaultValue[this.type];
@@ -85,14 +166,14 @@ function Value(textValue, index){
         }
         if (this.value !== undefined){
             this.defaultValue = this.value; // for when expressions are removed
-            this.literal = true;
+            //this.literal = true;
         }
     }
 }
 
 Value.prototype.code = function(){
 	if (this.literal){
-        if (this.value && this.value.substring && this.type !== 'any'){ // is it a string?
+        if (this.value && this.value.substring && !(this.type == 'any' || this.type == 'choicevar')){ // is it a string?
             return '"' + this.value + '"';
         }
 		return this.value;
@@ -186,7 +267,7 @@ Value.prototype.update = function(newValue){
         case 'number': this.value = parseFloat(newValue); break;
         case 'boolean': this.value = newValue === 'true'; break;
         case 'string': this.value = newValue; break;
-        case 'date': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break; 
+        case 'date': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break;
         case 'datetime': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break;
         case 'time': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break;
         case 'int': this.value = parseInteger(newValue); break;
@@ -276,7 +357,11 @@ function Block(spec, scope){
     // if called while de-serializing, get the parent spec
     if (spec.signature){
         var template = Block.registry[spec.signature];
-        assert.isObject(template, 'We fail to find a template block for ' + spec.signature + ', has it been initialized yet?');
+        if (!template){
+            console.log('Failed to find template model with signature %s', spec.signature);
+            return null; // let Deferred handle it
+        }
+        // assert.isObject(template, 'We fail to find a template block for ' + spec.signature + ', has it been initialized yet?');
         var instance = {
             isLocal: false,
             isTemplateBlock: false,
@@ -304,14 +389,30 @@ function Block(spec, scope){
 }
 
 Block._nextId = 0;
+
 Block.newId = function(){
     Block._nextId++;
+    console.log('returning new id: %s', Block._nextId);
     return Block._nextId;
 };
 
+Block.registerId = function(id){
+    id = parseInt(id);
+    // if (id < Block._nextId){
+    //     console.log('Warning: registering id %s that may already have been used (next: %s)', id, Block._nextId);
+    // }else{
+    //     console.log('Registered id %s', id);
+    // }
+    Block._nextId = Math.max(id, Block._nextId);
+}
+
 Block.registry = {};
+
 Block.registerBlock = function(model){
     if (!model.isTemplateBlock) return; // only register blocks in the menu
+    if (model.isLocal){
+        console.log('registering model %s', model.signature);
+    }
     if (Block.registry[model.signature]){
         console.warn('Overwriting existing scripts for %s', model.signature);
     }
@@ -328,17 +429,26 @@ Block.prototype.init = function(spec){
     var self = this;
     // normalize labels to a list
     if (spec.label){
-        spec.labels = [spec.label];
-        delete spec.label;
+        throw new Error('Scripts must use labels: not label:');
     }
-    $.extend(this, spec);
+    $.extend(true, this, spec);
     this.spec = spec; // save unmodified description
-    if (! (this.id || this.isTemplateBlock)){
-        this.id = Block.newId();
+    if (this.id){
+        Block.registerId(this.id);
+    }else{
+        if (this.isTemplateBlock){
+            if (this.isLocal){
+                this.id = Block.newId(); // templates only get ids if they are locals (or returns, which have their origin's id)
+            }else{
+                this.id = '';
+            }
+        }else{
+            this.id = Block.newId();
+        }
     }
-	if (this.isTemplateBlock && !this.id){ // local template blocks have ids
-		this.id = '';
-	}
+    if (!this.group){
+        console.log('no group? %o', this);
+    }
     if (this.help){
         this.tooltip = this.group + ' ' + this.id + ': ' + this.help;
     }else{
@@ -387,12 +497,18 @@ Block.prototype.initInstance = function(){
             spec.isLocal = true;
             spec.id = self.id;
         });
-        this.locals = this.spec.locals.map(function(spec){
+        this.locals = this.spec.locals.map(function(spec, idx){
             if (spec === null){
                 return spec;
             }
+            spec.group = self.group;
+            spec.localOrigin = self;
+            spec.localIndex = idx;
+            if (self.customLocals){
+                spec.labels[0] = self.customLocals[idx];
+            }
             var block = Block(spec);
-            assert.isObject(block, 'Blocks must be objects');
+            // assert.isObject(block, 'Blocks must be objects');
             return block;
         });
     }
@@ -403,26 +519,37 @@ Block.prototype.initInstance = function(){
         }else{
             this._returns.isTemplateBlock = true;
             this._returns.isLocal = true;
-            this._returns.id = self.id;
-			this._returns.help = 'value of ' + (this._returns.label || this._returns.labels[0]);
+            this._returns.group = this.group;
+            this._returns.returnOrigin = this;
+            this._returns.id = this.id;
+            if (self.customReturns){
+                this._returns.labels[0] = self.customReturns;
+            }
+            this._returns.help = 'value of ' + this._returns.labels[0].replace('##', self.id);
             this.returns = Block(this._returns);
             assert.isObject(this.returns, 'Returns blocks must be objects');
         }
     }
+    if (this.spec.next){
+        this.next = Block(this.spec.next);
+        if (!this.next){
+            Deferred.add(this, 'next', null, this.spec.next);
+        }
+    }else{
+        this.next = null;
+    }
     if (this.spec.contained && this.spec.contained.length){
-        this.contained = this.spec.contained.map(function(spec){
+        this.contained = this.spec.contained.map(function(spec, idx){
             if (spec === null) return spec;
             var block = Block(spec);
-            assert.isObject(block, 'Contained blocks must be blocks');
+            if (!block){
+                Deferred.add(self, 'child', idx, spec);
+            }
+            // assert.isObject(block, 'Contained blocks must be blocks');
             return block;
         });
     }else{
         this.contained = [];
-    }
-    if (this.spec.next){
-        this.next = Block(this.spec.next);
-    }else{
-        this.next = null;
     }
     if (this.spec.values && this.spec.values.length){
         this.values = this.spec.values.map(function(value, idx){
@@ -438,7 +565,7 @@ Block.prototype.initInstance = function(){
     }else{
         this.values = [];
     }
-    
+
 };
 
 Block.prototype.addValue = function(value){
@@ -449,7 +576,7 @@ Block.prototype.addValue = function(value){
 };
 
 Block.prototype.parseLabel = function(textLabel){
-    // Recognize special values in the label string and replace them with 
+    // Recognize special values in the label string and replace them with
     // appropriate markup. Some values are dynamic and based on the objects currently
     // in the environment
     //
@@ -558,7 +685,7 @@ Block.prototype.clone = function(deep){
     if (!deep){
         spec.contained = [];
         spec.values = this.values.map(function(v){return {
-            type: this.type, 
+            type: this.type,
             value:  v.literal ? v.value : v.defaultValue
         }});
     }
@@ -617,7 +744,30 @@ Block.prototype.view = function(){
         view.find('> .next').append(this.next.view());
         this.next.addLocalsToParentContext(true);
     }
+    if (this.id){
+        view.attr('data-id', this.id);
+    }
     return view;
+};
+
+Block.prototype.changeLabel = function(labelText){
+    this._view.find('> .block > .blockhead > .label').text(labelText);
+    this.spec.labels[0] = labelText;
+    if (this.returnOrigin){
+        // console.log('setting returnOrigin returns label: %o', this.returnOrigin);
+        this.returnOrigin.spec.returns.labels[0] = labelText;
+        this.returnOrigin.customReturns = labelText;
+    }
+    if (this.localOrigin){
+        var locals = this.localOrigin.spec.locals;
+        locals[this.localIndex].labels[0] = labelText;
+        if (!this.localOrigin.customLocals){
+            this.localOrigin.customLocals = locals.map(function(loc){
+                return loc.labels[0];
+            });
+        }
+        this.localOrigin.customLocals[this.localIndex] = labelText;
+    }
 };
 
 // EVENT HANDLERS
@@ -755,7 +905,7 @@ Block.prototype.removeNextStep = function(step){
     this.next.removeLocalsFromParent(true);
     this.next = null;
 };
-    
+
 $('body').on('delete_block', '.wrapper', function(evt, params){
     var view = $(this);
     view.data('model').deleteBlock(view, evt, params);
@@ -774,7 +924,7 @@ function removeFromScriptEvent(view){
         var exprIndex = parent.data('index');
         parentModel.removeExpression(model, exprIndex);
         assert(parent.children('input').length > 0, "No input found, where can it be?")
-        if(parent.hasClass('boolean')){           
+        if(parent.hasClass('boolean')){
             parent.append(
                 '<select><option>true</option><option>false</option></select>');
         }else{
@@ -786,7 +936,7 @@ function removeFromScriptEvent(view){
         parentModel.removeNextStep(model);
     }
 	$('.scripts_workspace').trigger('scriptmodified');
-	
+
 }
 
 function addToScriptEvent(container, view){
@@ -816,6 +966,37 @@ function addToScriptEvent(container, view){
     }
 	$('.scripts_workspace').trigger('scriptmodified');
 }
+
+$('.content').on('dblclick', '.locals .label, .globals .label', function(evt){
+    var label = $(evt.target);
+	var model = label.closest('.wrapper').data('model');
+    // Rather than use jquery to find instances, should origin model keep track of all instances?
+    // How would that survive serialization/reification?
+    var instances = $('.content .value.wrapper[data-id=' + model.id + ']');
+    var input = $('<input class="label_input" value="' + label.text() + '" />');
+    label.after(input).hide();
+    input.select();
+    // FIND ALL INSTANCES
+	return false;
+});
+
+$('.content').on('keypress', '.locals .label_input, .globals .label_input', function(evt){
+    if (evt.which === 13){
+        var labelInput = $(evt.target);
+        var labelText = labelInput.val();
+        var model = labelInput.closest('.wrapper').data('model');
+        labelInput.prev().show();
+        labelInput.remove();
+        if (labelText.length){
+            var instances = $('.content .value.wrapper[data-id=' + model.id + ']');
+            instances.each(function(){
+                $(this).data('model').changeLabel(labelText);
+            });
+            model.changeLabel(labelText);
+        }
+        return false;
+    }
+});
 
 $(document.body).on('scriptloaded', function(evt){
 	$('.scripts_workspace').on('scriptmodified', function(evt){
