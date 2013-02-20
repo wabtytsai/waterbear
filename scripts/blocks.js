@@ -119,10 +119,9 @@ function Value(textValue, index){
 		    this.literal = true;
         var parts = textValue.slice(1,-1).split(':');
         this.type = parts[0];
+        /*this.type === 'choicevar' is used when the dropdownlist of variable names 
+        / constants / other non-literals is needed */
         if (this.type === 'choice' || this.type === 'choicevar'){
-            /*if (this.type === 'choicevar'){
-                this.literal = false;
-            }*/
             
             this.choiceName = parts[1];
             this.choiceList = choiceLists[this.choiceName];
@@ -270,8 +269,8 @@ Value.prototype.update = function(newValue){
         case 'date': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break;
         case 'datetime': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break;
         case 'time': assert.isString(newValue, 'expects an ISO8601 value');this.value = newValue; break;
-        case 'int': this.value = parseInteger(newValue); break;
-        case 'float': this.value = parseInteger(newValue); break;
+        case 'int': this.value = parseInt(newValue); break;
+        case 'float': this.value = parseFloat(newValue); break;
         default: this.value = newValue; break;
     }
 }
@@ -661,6 +660,35 @@ Block.prototype.code = function(){
 		_code = _code + this.next.code();
 	}
 	return _code;
+}
+
+Block.prototype.subcode = function(){
+	// extract code from script, values, contained, and next
+	var self = this;
+	var _code = this.script;
+	function get_values(match){
+        var idx = parseInt(match.slice(2, -2), 10) - 1;
+		if (match[0] === '{'){
+			return [idx, self.values[idx] ? self.values[idx].code() : match];
+		}else{
+			return [idx, self.contained[idx] ? self.contained[idx].code() : match];
+		}
+	}
+
+	var valueskeys = _code.match(/\{\{\d\}\}/g);
+	var subcodekeys = _code.match(/\[\[\d\]\]/g);
+	
+	values = [];
+	subcode = [];
+	if (Array.isArray(valueskeys))
+	{
+	  values = valueskeys.map(get_values);
+	}
+	if (Array.isArray(subcodekeys))
+	{
+	  subcode = subcodekeys.map(get_values);
+	}
+	return {'code':_code, 'values':values, 'subcode':subcode} ;
 }
 
 Block.prototype.cloneScript = function(){
