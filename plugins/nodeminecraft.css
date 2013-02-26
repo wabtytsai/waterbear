@@ -1,0 +1,14 @@
+/* block and border colours for different groups of blocks */
+
+.camera{ border-color: hsl(2264,65%,83%); }
+.camera > .block{ background-color: hsl(264, 65%, 93%); }
+
+.player{ border-color: hsl(264,62%,79%); }
+.player > .block{ background-color: hsl(264,62%,89%); }
+
+.game{ border-color: hsl(156, 90%, 66%); }
+.game > .block { background-color: hsl(156, 85%, 70%); }
+
+.blocks{ border-color: hsl(195, 65%, 79%); }
+.blocks > .block{ background-color: hsl(195, 62%, 89%); }
+
