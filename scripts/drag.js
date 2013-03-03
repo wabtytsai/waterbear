@@ -36,7 +36,7 @@
 
 (function($){
     var dragTarget, potentialDropTargets, dropTarget, dropRects, startPosition, timer, cloned, dragging, currentPosition, distance, dropCursor, dragPlaceholder;
-    window.isTouch = window.hasOwnProperty('ontouchstart') && true;
+    window.isTouch = ('ontouchstart' in window);
     var dragTimeout = 20;
     // TODO: update this whenever we switch to a new workspace
     var targetCanvas = $('.workspace .scripts_workspace').eq(0);
@@ -126,7 +126,7 @@
         // DONE: Don't start drag on a text input or select using :input jquery selector
         if (!blend(event)) {return undefined;}
         var eT = $(event.target);
-        if ((eT.is(':input') || eT.is('option') || eT.is('.disclosure')) && ! eT.containedBy($('.block_menu'))) {return undefined;}
+        if ((eT.is(':input') || eT.is('option') || eT.is('.disclosure')) && ! eT.containedBy($('#block_menu'))) {return undefined;}
         var target = eT.closest('.wrapper');
         if (target.length){
             dragTarget = target;
@@ -233,7 +233,7 @@
                 addToScriptEvent(dropTarget, dragTarget);
                 // dragTarget.trigger('add_to_socket', {dropTarget: dropTarget, parentIndex: dropTarget.data('index')});
             }
-        }else if ($('.block_menu').cursorOver()){
+        }else if ($('#block_menu').cursorOver()){
             // delete block if dragged back to menu
             console.log('triggering delete_block');
             dragTarget.trigger('delete_block');
