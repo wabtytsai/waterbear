@@ -1,7 +1,7 @@
 /*
- *    JAVASCRIPT PLUGIN
+ *    ARDUINO PLUGIN
  *
- *    Support for writing Javascript using Waterbear
+ *    Support for writing Arduino using Waterbear
  *
  */
 
@@ -10,8 +10,8 @@
 
 // Pre-load dependencies
 yepnope({
-    load: [ 'plugins/javascript.css',
-            'lib/beautify.js',
+    load: [ 'plugins/waterbear-arduino/arduino.css',
+            //'lib/beautify-arduino.js',
             'lib/highlight.js',
             'lib/highlight-javascript.js',
             'lib/highlight-github.css'
@@ -34,8 +34,7 @@ Array.prototype.unique =
     }
     return a;
   };
-
-// Add some utilities
+  
 jQuery.fn.extend({
     getIncludeCode:function(){
       var code = this.getIncludes().map(function(file){return '#include <'+file+'>\n';}).join('\n');
@@ -65,12 +64,16 @@ window.choiceLists = {
     onoffhighlow: {'HIGH':'ON', 'LOW':'OFF'},
     onoffbool: {'true':'ON', 'false':'OFF'},
     logic: ['true', 'false'],
-    digitalinputpins:{'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
-    analoginputpins: {'pot_pin':'Potentiometer','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
-    digitaloutputpins:{'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
-    analogoutputpins: {'servo_pin':'Servo', 3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'},
-    alloutputpins:{'servo_pin':'Servo','LED_Green_pin':'Front LED','LED_2_pin':'LED 2',0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
-    baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
+    digitalinputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
+    //'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
+    analoginputpins: {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
+    //'pot_pin':'Potentiometer',
+    digitaloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
+    //'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',
+    analogoutputpins: {3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'},
+    //'servo_pin':'Servo', 
+    alloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
+    //'servo_pin':'Servo','LED_Green_pin':'Front LED','LED_2_pin':'LED 2',baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
     analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'],
     blocktypes: ['step', 'expression', 'context', 'eventhandler'],
     types: ['string', 'number', 'boolean', 'int', 'array', 'object', 'function', 'any'],
@@ -101,7 +104,6 @@ wb.menu('Control', [
       labels: ['Setup - When program starts'],
       concatenate:true,
       script: 'void setup() {[[1]]}',
-      position:'setup',
       help: 'Do Once when the program starts' //does the cutout go in here too? 
     },
     
@@ -110,7 +112,6 @@ wb.menu('Control', [
       labels: ['Main Loop'], 
       concatenate:true,
       script: 'void loop() {[[1]]}',
-      position:'mainloop',
       help: 'Will do these blocks repeatedly' //does the cutout go in here too? 
     },
     /*
@@ -119,7 +120,6 @@ wb.menu('Control', [
       labels: ['When I receive [string:ack] message'], 
           script: 'void {{1}}(){\n[[next]]\n}\nvoid{{1}}_timed(TimerInformation* Sender){{{1}();};',
       help: 'Trigger for blocks to run when message is received',
-      position:'def',
       onAdd:'addBroadcast({{1}})',
       onRemove:'removeBroadcast({{1}})'
     },
@@ -127,7 +127,6 @@ wb.menu('Control', [
       blocktype: 'step',
       labels: ['Broadcast [string:ack] message'], 
       script: '{{1}}();',
-      position:'def',
       help: 'Send a message to all listeners'
     },*/
     {
@@ -179,36 +178,81 @@ wb.menu('Control', [
 
 
   wb.menu('Sensors', [
-     
-    /*{
+    {
       blocktype: 'step',
-      labels: ['Analog input on [choicevar:analoginputpins]'], 
-      script: 'pinMode({{1}}, INPUT);',
+      labels: ['Create Analog Input ## on [choicevar:analoginputpins]'], 
+      script: 'int analog_input##_pin = {{1}}; pinMode(analog_input##_pin, INPUT);',
+      help: 'Use a Pin as an Analog Input',
       returns:{
         blocktype: 'expression',
-        labels: ['value of'], 
+        labels: ['Value of Analog Input ##'], 
         type: 'int', 
-        script: 'analogRead({{1}})',
+        script: 'analogRead(analog_input##_pin)',
         help: 'Value of Input (0-1023)'
-       
       }
-      help: 'Set pin to input mode - not normally needed'
-    },*/
+    },
     
+    {
+      blocktype: 'step',
+      labels: ['Create Digital Input ## on [choicevar:digitalinputpins]'], 
+      script: 'int digital_input##_pin = {{1}}; pinMode(digital_input##_pin, INPUT);',
+      help: 'Use a Pin as a Digital Input',
+      locals:[
+        {
+          blocktype: 'expression',
+          labels: ['Value of Digital Input ##'], 
+          type: 'int', 
+          script: 'digitalRead(digital_input##_pin)',
+          help: 'Value of Input (0-1023)'
+        },
+        {
+          blocktype: 'expression',
+          labels: ['Digital Input ## is [choicevar:onoffhighlow]'], 
+          type: 'boolean', 
+          script: '(digital_input##_pin) == {{1}})',
+          help: 'Is the button Pressed or not'
+        },
+        {
+          blocktype: 'context',
+          labels: ['Wait for a pulse of Digital Input ## being [choice:onoffhighlow] or [int:1000] millisseconds (pulse_length_##_millis)'], 
+          script: 'long pulse_length_##_millis = pulseIn(digital_input##_pin, {{1}}, {{2}});',
+          locals:
+          [{
+                  labels: ['pulse_length_##_millis'],
+                  script: 'pulse_length_##_millis',
+                  type: 'int'
+          }],
+          help: 'Wait for a pulse on a pin and record how long the pulse was'
+        }
+        
+        /*,
+        {
+          blocktype: 'eventhandler',
+          labels: ['When Digital Input ## is ON'],
+          concatenate:true,
+          script: 'ifdigitalRead(digital_input##_pin) == HIGH){[[1]]}',
+          help: 'When the Digital Input ## is ON do this'
+          //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
+        }*/
+      ]
+    }
+    /*
     {
       blocktype: 'step',
       labels: ['Set [choicevar:analoginputpins] to input mode'], 
       script: 'pinMode({{1}}, INPUT);',
       help: 'Set pin to input mode - not normally needed'
-    },
-    {
+    },*/
+    /*{
+      // TODO : change to new model
       blocktype: 'eventhandler',
       labels: ['When [choicevar:digitalinputpins] is ON'],
+      concatenate:true,
       script: 'if(digitalRead({{1}}) == HIGH){[[1]]}',
-      position:'mainloop',
       help: 'When the button pressed do this'
       //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-    },
+    },*/
+    /*
     {
       blocktype: 'expression',
       labels: ['[choicevar:digitalinputpins] is [choicevar:onoffhighlow]'], 
@@ -216,7 +260,7 @@ wb.menu('Control', [
       script: '(digitalRead({{1}}) == {{2}})',
       help: 'Is the button Pressed or not'
     },
-  
+  */
     /*
     {
     labels: ['Wait for a pulse of [choice:digitalinputpins] being [choice:onoffhighlow] or [int:1000] millisseconds (pulse_length_##_millis)'], 
@@ -245,19 +289,13 @@ wb.menu('Control', [
     help: 'Wait for a pulse on a pin and record how long the pulse was'
     },
     */
-    {
+    /*{
       blocktype: 'expression',
       labels: ['value of [choicevar:analoginputpins]'], 
       type: 'int', 
       script: 'analogRead({{1}})',
       help: 'Value of Input (0-1023)'
-    },
-    {
-      blocktype: 'step',
-      labels: ['Set [choicevar:analoginputpins] to input mode'], 
-      script: 'pinMode({{1}}, INPUT);',
-      help: 'Set pin to input mode - not normally needed'
-    }
+    },*/
     ]);
     
     /*
@@ -285,13 +323,12 @@ wb.menu('Control', [
       help: 'Set value of PWM pin (0-255)'
     },
     
-    
     {
       blocktype: 'step',
       labels: ['Create servo## on [choicevar:digitaloutputpins]'],
       script: 'Servo servo##;',
       includes: ['Servo.h'],
-      /*script: { 'include': '#includd something that might be the e <Servo.h>',
+      /*script: { 'include': '#include <Servo.h>',
                 'declaration':'Servo servo_##;',
                 //'setup':  'pinMode({{1}}, OUTPUT);'
       },*/
