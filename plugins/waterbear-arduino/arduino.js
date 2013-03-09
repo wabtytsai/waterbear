@@ -67,7 +67,7 @@ window.choiceLists = {
     digitalinputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
     //'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
     analoginputpins: {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
-    //'pot_pin':'Potentiometer',
+    //'vari_cap_pin':'Potentiometer',
     digitaloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
     //'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',
     analogoutputpins: {3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'},
@@ -183,13 +183,13 @@ wb.menu('Control', [
       labels: ['Create Analog Input ## on [choicevar:analoginputpins]'], 
       script: 'int analog_input##_pin = {{1}}; pinMode(analog_input##_pin, INPUT);',
       help: 'Use a Pin as an Analog Input',
-      returns:{
+      locals:[{
         blocktype: 'expression',
         labels: ['Value of Analog Input ##'], 
         type: 'int', 
         script: 'analogRead(analog_input##_pin)',
         help: 'Value of Input (0-1023)'
-      }
+      }]
     },
     
     {
@@ -198,13 +198,13 @@ wb.menu('Control', [
       script: 'int digital_input##_pin = {{1}}; pinMode(digital_input##_pin, INPUT);',
       help: 'Use a Pin as a Digital Input',
       locals:[
-        {
+        /*{
           blocktype: 'expression',
           labels: ['Value of Digital Input ##'], 
           type: 'int', 
           script: 'digitalRead(digital_input##_pin)',
           help: 'Value of Input (0-1023)'
-        },
+        },*/
         {
           blocktype: 'expression',
           labels: ['Digital Input ## is [choicevar:onoffhighlow]'], 
@@ -235,134 +235,158 @@ wb.menu('Control', [
           //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
         }*/
       ]
-    }
-    /*
+    },
+    
     {
       blocktype: 'step',
-      labels: ['Set [choicevar:analoginputpins] to input mode'], 
-      script: 'pinMode({{1}}, INPUT);',
-      help: 'Set pin to input mode - not normally needed'
-    },*/
-    /*{
-      // TODO : change to new model
-      blocktype: 'eventhandler',
-      labels: ['When [choicevar:digitalinputpins] is ON'],
-      concatenate:true,
-      script: 'if(digitalRead({{1}}) == HIGH){[[1]]}',
-      help: 'When the button pressed do this'
-      //other way would be to use 'position' proprty to add if blocks to a shared function requires a 'pin'=>'name' map in choices to have 
-    },*/
-    /*
-    {
-      blocktype: 'expression',
-      labels: ['[choicevar:digitalinputpins] is [choicevar:onoffhighlow]'], 
-      type: 'boolean', 
-      script: '(digitalRead({{1}}) == {{2}})',
-      help: 'Is the button Pressed or not'
-    },
-  */
-    /*
-    {
-    labels: ['Wait for a pulse of [choice:digitalinputpins] being [choice:onoffhighlow] or [int:1000] millisseconds (pulse_length_##_millis)'], 
-    script: 'long pulse_length_##_millis = pulseIn({{1}}, {{2}}, {{3}});',
-    choiceLists.locals = [
-          {
-              labels: ['pulse_length_##_millis'],
-              script: 'pulse_length_##_millis',
-              type: 'int'
-          };
-      ],
-      help: 'Wait for a pulse on a pin and record how long the pulse was'
-    },
-    */
-    /*
-    {
-    labels: ['if [choice:digitalinputpins] pulses [choice:onoffhighlow] in next [int:1000] ms longer than [int:0] ms'], 
-    script: 'long pulse_ms## = pulseIn({{1}}, {{2}}, {{3}}); if(pulse_ms## > {{4}}){\n[[1]]\n}\n',
-      choiceLists.locals = [
+      labels: ['Create Button ## on [choicevar:digitalinputpins] (<a target="_blank" href="http://arduino.cc/en/uploads/Tutorial/button.png">DIA</a>)'], 
+      script: 'int button##_pin = {{1}}; pinMode(button##_pin, INPUT);',
+      help: 'Attach a Button to a pin ',
+      locals:[
+        /*{
+          blocktype: 'expression',
+          labels: ['Value of Button ##'], 
+          type: 'int', 
+          script: 'digitalRead(button##_pin)',
+          help: 'Value of Input (0-1023)'
+        },*/
         {
-            labels: ['pulse_ms##'],
-            script: 'pulse_ms##',
-            type: 'int'
-        };
-    ],
-    help: 'Wait for a pulse on a pin and record how long the pulse was'
-    },
-    */
-    /*{
-      blocktype: 'expression',
-      labels: ['value of [choicevar:analoginputpins]'], 
-      type: 'int', 
-      script: 'analogRead({{1}})',
-      help: 'Value of Input (0-1023)'
-    },*/
+          blocktype: 'expression',
+          labels: ['Button ## is [choicevar:onoffhighlow]'], 
+          type: 'boolean', 
+          script: '(digitalRead(button##_pin) == {{1}})',
+          help: 'Is the button Pressed or not'
+        },
+        {
+          blocktype: 'context',
+          labels: ['Wait for a pulse of Button ## being [choice:onoffhighlow] or [int:1000] millisseconds (pulse_length_##_millis)'], 
+          script: 'long pulse_length_##_millis = pulseIn(Button##_pin, {{1}}, {{2}});',
+          locals:
+          [{
+                  labels: ['pulse_length_##_millis'],
+                  script: 'pulse_length_##_millis',
+                  type: 'int'
+          }],
+          help: 'Wait for a pulse on a pin and record how long the pulse was'
+        }
+      ]
+    }
+      
     ]);
     
-    /*
-    //Path clear //wall more than 15cm away
-    //distance to nearest object
-    //something light sensy
-    */
   wb.menu('Outputs', [
     {
       blocktype: 'step',
-      labels: ['Set [choicevar:alloutputpins] to output mode'], 
-      script: 'pinMode({{1}}, OUTPUT);',
-      help: 'Set the pin to output mode - normally in Setup'
-    },
-    {
-      blocktype: 'step',
-      labels: ['Set [choicevar:digitaloutputpins] to [choicevar:onoffhighlow]'],
-      script: 'digitalWrite({{1}}, {{2}});',
-      help: 'Switch a Digital Output Pin on or off'
-    },
-    {
-      blocktype: 'step',
-      labels: ['Set [choicevar:analogoutputpins] to [int:255]'], 
-      script: 'analogWrite({{1}}, {{2}});',
-      help: 'Set value of PWM pin (0-255)'
+      labels: ['Create Analog Output ## on [choicevar:analogoutputpins]'], 
+      script: 'int analog_output##_pin = {{1}}; pinMode(analog_output##_pin, OUTPUT);',
+      help: 'Use a Pin as an Analog Output',
+      locals:[
+        {
+          blocktype: 'expression',
+          labels: ['Set value of Analog Output ## to [number:0]'], 
+          type: 'int', 
+          script: 'analogWrite(analog_output##_pin, {{1}})',
+          help: 'Set value of Output (0-1023)'
+        }
+      ]
     },
     
     {
       blocktype: 'step',
-      labels: ['Create servo## on [choicevar:digitaloutputpins]'],
+      labels: ['Create Digital Output ## on [choicevar:digitaloutputpins]'], 
+      script: 'int digital_output##_pin = {{1}}; pinMode(digital_output##_pin, OUTPUT);',
+      help: 'Use a Pin as a Digital Output',
+      locals:[
+        {
+          blocktype: 'expression',
+          labels: ['Set Digital Output ## [choicevar:onoffhighlow:HIGH]'], 
+          type: 'int', 
+          script: 'digitalWrite(digital_output##_pin, {{1}})',
+          help: 'Value of Output (0-1023)'
+        }
+      ]
+    },
+    
+    {
+      blocktype: 'step',
+      labels: ['Create Servo## on [choicevar:digitaloutputpins]'],
       script: 'Servo servo##;',
       includes: ['Servo.h'],
-      /*script: { 'include': '#include <Servo.h>',
-                'declaration':'Servo servo_##;',
-                //'setup':  'pinMode({{1}}, OUTPUT);'
-      },*/
-      returns: {
-          blocktype: 'step',
-          labels: ['Set servo## to [int:0] degrees'], 
-          script: 'servo##.write({{1}});',
-          help: 'Set position of servo in degrees (0-180)'
-        },
+      locals: [
+        {
+            blocktype: 'step',
+            labels: ['Set servo## to [int:0] degrees'], 
+            script: 'servo##.write({{1}});',
+            help: 'Set position of servo in degrees (0-180)'
+        }
+      ],
       help: 'Create a servo'
-    },
-    
-    {
-      blocktype: 'step',
-      labels: ['Set servo to [int:0] degrees'], 
-      script: 'myservo.write({{1}});',
-      help: 'Set position of sevo in degrees (0-180)'
-    },
-    
-    {
-      blocktype: 'step',
-      labels: ['Dispense  a Sweet'],
-      script: 'dispense();',
-      help: 'Dispense a Sweet'
-    },
-    {
-      blocktype: 'expression',
-      labels: ['Map [int:0] from Analog in to Analog out'],
-      type: 'int',
-      script: 'map({{1}}, 0, 1023, 0, 255)',
-      help: 'Convert numbers 0-1023 to 0-255'
     }
     ]);
-    
+  
+  wb.menu('Components', [
+    {
+      blocktype: 'step',
+      labels: ['Edumake Shield'], 
+      script: 'Servo myservo; const int LED_1_pin = 9; const int LED_2_pin = 10; const int push_button_pin  = 4; const int external_button1_pin = 6; const int external_button2_pin = 7; const int servo_pin = 5; const int vari_cap_pin = A0; pinMode(LED_1_pin, OUTPUT); pinMode(LED_2_pin, OUTPUT); pinMode(push_button_pin, INPUT); pinMode(external_button1_pin, INPUT); pinMode(external_button2_pin, INPUT); pinMode(servo_pin, OUTPUT); pinMode(vari_cap_pin, INPUT);',
+      help: 'Set Up pins for use with the EduMake sheild',
+      locals:[
+        {
+          blocktype: 'step',
+          labels: ['Set LED_1_pin [choicevar:onoffhighlow:HIGH]'], 
+          script: 'digitalWrite(LED_1_pin, {{1}});',
+          help: 'Turn LED 1 ON or OFF'
+        },
+        {
+          blocktype: 'step',
+          labels: ['Set LED_2_pin [choicevar:onoffhighlow:HIGH]'], 
+          script: 'digitalWrite(LED_2_pin, {{1}});',
+          help: 'Turn LED 2 ON or OFF'
+        },
+        {
+          blocktype: 'expression',
+          labels: ['Push Button is [choicevar:onoffhighlow]'], 
+          type: 'boolean', 
+          script: '(digitalRead(push_button_pin) == {{1}})',
+          help: 'Is the button Pressed or not'
+        },
+        {
+          blocktype: 'expression',
+          labels: ['External Button 1 is [choicevar:onoffhighlow]'], 
+          type: 'boolean', 
+          script: '(digitalRead(external_button1_pin == {{1}})',
+          help: 'Is the button Pressed or not'
+        },
+        {
+          blocktype: 'expression',
+          labels: ['External Button 2 is [choicevar:onoffhighlow]'], 
+          type: 'boolean', 
+          script: '(digitalRead(external_button2_pin == {{1}})',
+          help: 'Is the button Pressed or not'
+        },
+        {
+            blocktype: 'step',
+            labels: ['Set Servo to [int:0] degrees'], 
+            script: 'myservo.write({{1}});',
+            help: 'Set position of servo in degrees (0-180)'
+        },
+        {
+          blocktype: 'expression',
+          labels: ['Value of Variable Capacitor'], 
+          type: 'int', 
+          script: 'analogRead(vari_cap_pin)',
+          help: 'Value of Input (0-1023)'
+        },
+        {
+          blocktype: 'step',
+          labels: ['Dispense  a Sweet'],
+          script: 'myservo.write(180);delay(1000);myservo.write(0); delay(500);',
+          help: 'Dispense a Sweet'
+        }
+      ]
+    }
+  ]);  
+  
   wb.menu('Timing', [
     {
       blocktype: 'step',
@@ -474,6 +498,7 @@ wb.menu('Control', [
       help: 'Get the value of a true or false variable'
     }
 ]);
+  
 wb.menu('Operators', [
     {
       blocktype: 'expression',
