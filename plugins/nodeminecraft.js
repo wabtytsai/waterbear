@@ -26,7 +26,7 @@ jQuery.fn.extend({
             return $(this).extract_script();
         }).get().join('');
         
-        script = "var Minecraft = require('minecraft-pi'); \n var client = new Minecraft('localhost', 4711, function() {\n"+script+"\n});";
+        script = "var Minecraft = require('./../lib/minecraft.js'); \n var client = new Minecraft('localhost', 4711, function() {\n"+script+"\n});";
         
         return js_beautify(script);
     },
@@ -78,8 +78,8 @@ wb.menu('Blocks', [
         locals: [
             {
                 blocktype: 'expression',
-                labels: ['block##'],
-                script: 'block##',
+                labels: ['BlockType##'],
+                script: 'parseInt(block##)',
                 type: 'number'
             }
         ],
@@ -93,7 +93,7 @@ wb.menu('Blocks', [
             {
                 blocktype: 'expression',
                 labels: ['height##'],
-                script: 'height##',
+                script: 'parseInt(height##)',
                 type: 'number'
             }
         ],
@@ -128,24 +128,24 @@ wb.menu('Player', [
    {
         blocktype: 'context',
         labels: ['Get Player Tile Position'],
-        script: 'client.getTile(function(block##){[[1]]  client.end()});',
+        script: 'client.getTile(function(data){var aData = data.toString().trim().split(","); var posX = parseInt(aData[0]); var posY = parseInt(aData[1]); var posZ = parseInt(aData[2]); [[1]]  client.end()});',
         locals: [
             {
                 blocktype: 'expression',
-                labels: ['x'],
-                script: 'x',
+                labels: ['X'],
+                script: 'posX',
                 type: 'number'
             },
             {
                 blocktype: 'expression',
-                labels: ['y'],
-                script: 'y',
+                labels: ['Y'],
+                script: 'posY',
                 type: 'number'
             },
             {
                 blocktype: 'expression',
-                labels: ['z'],
-                script: 'z',
+                labels: ['Z'],
+                script: 'posZ',
                 type: 'number'
             }
         ],
@@ -161,24 +161,24 @@ wb.menu('Player', [
     {
         blocktype: 'context',
         labels: ['Get Player Position'],
-        script: 'client.getPos(function(block##){[[1]]  client.end()});',
+        script: 'client.getPos(function(data){var aData = data.toString().trim().split(","); var posX = parseInt(aData[0]); var posY = parseInt(aData[1]); var posZ = parseInt(aData[2]); [[1]]  client.end()});',
         locals: [
             {
                 blocktype: 'expression',
-                labels: ['x'],
-                script: 'x',
+                labels: ['X'],
+                script: 'posX',
                 type: 'number'
             },
             {
                 blocktype: 'expression',
-                labels: ['y'],
-                script: 'y',
+                labels: ['Y'],
+                script: 'posY',
                 type: 'number'
             },
             {
                 blocktype: 'expression',
-                labels: ['z'],
-                script: 'z',
+                labels: ['Z'],
+                script: 'posZ',
                 type: 'number'
             }
         ],
@@ -191,9 +191,9 @@ wb.menu('Player', [
         help: 'move Player to x, y, z precisley'
     }
 
-//client.playerSetting(key, value)
+  //client.playerSetting(key, value)
 
-], true);
+  ], true);
 
 
 
@@ -224,16 +224,16 @@ wb.menu('Game', [
     //client.worldSetting(key, value)
     //client.getPlayerIds(callback)
     
-], true);
+  ], true);
 
 /*
-Minecraft.prototype.eventsBlockHits = function(callback) {
-    return this.sendReceive('events.block.hits()', callback);
-};
-
-Minecraft.prototype.eventsClear = function() {
-    return this.send('events.clear()');
-};
+  Minecraft.prototype.eventsBlockHits = function(callback) {
+      return this.sendReceive('events.block.hits()', callback);
+  };
+  
+  Minecraft.prototype.eventsClear = function() {
+      return this.send('events.clear()');
+  };
 */
 
 wb.menu('Camera', [
@@ -251,7 +251,7 @@ wb.menu('Camera', [
         help: 'set camera position to x, y, z'
     }
     
-], true);
+  ], true);
 
 
 wb.menu('Control', [
@@ -290,18 +290,90 @@ wb.menu('Control', [
     {
         blocktype: 'context',
         labels: ['repeat [number:10]'],
-        script: 'range({{1}}).forEach(function(idx, item){local.count## = idx;[[1]]});',
+        script: 'for(var count## = 0; count## < {{1}}, count## ++){[[1]]}',
         help: 'repeat the contained blocks so many times',
         locals: [
             {
                 blocktype: 'expression',
                 labels: ['count##'],
-                script: 'local.count##',
+                script: 'count##',
                 type: 'number'
             }
         ]
     },
     {
+        blocktype: 'context',
+        labels: ['loop between [number:0] and [number:10] '],
+        script: 'for(var count## = {{1}}; count## < {{2}}; count## ++){[[1]]}',
+        help: 'repeat the contained blocks for each so many times',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['count##'],
+                script: 'count##',
+                type: 'number'
+            }
+        ]
+    },
+    {
+        blocktype: 'context',
+        labels: ['for loopX between [number:0] and [number:10] '],
+        script: 'for(var loopX## = {{1}}; loopX## < {{2}}; loopX## ++){[[1]]}',
+        help: 'repeat the contained blocks for each so many times',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['loopX##'],
+                script: 'loopX##',
+                type: 'number'
+            }
+        ]
+    },
+    {
+        blocktype: 'context',
+        labels: ['for loopY between [number:0] and [number:10] '],
+        script: 'for(var loopY## = {{1}}; loopY## < {{2}}; loopY## ++){[[1]]}',
+        help: 'repeat the contained blocks for each so many times',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['loopY##'],
+                script: 'loopY##',
+                type: 'number'
+            }
+        ]
+    },
+    {
+        blocktype: 'context',
+        labels: ['for loopZ between [number:0] and [number:10] '],
+        script: 'for(var loopZ## = {{1}}; loopZ## < {{2}}; loopZ## ++){[[1]]}',
+        help: 'repeat the contained blocks for each so many times',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['loopZ##'],
+                script: 'loopZ##',
+                type: 'number'
+            }
+        ]
+    },
+    /*,
+    {
+        blocktype: 'context',
+        labels: ['loop around Cube between [number:0] and [number:10] '],
+        script: 'for(var count## = {{1}}; count## <= {{2}}; count## ++){[[1]]}',
+        help: 'repeat the contained blocks for each so many times',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['count##'],
+                script: 'count##',
+                type: 'number'
+            }
+        ]
+    },*/
+    
+    /*{
         blocktype: 'step',
         labels: ['broadcast [string:ack] message'],
         script: 'global.stage.dispatchEvent(new CustomEvent("wb_" + {{1}}));',
@@ -332,7 +404,7 @@ wb.menu('Control', [
             }
         ],
         help: 'add a listener for the given message which receives data, run these blocks when it is received'
-    },
+    },*/
     {
         blocktype: 'context',
         labels: ['forever if [boolean:false]'],
@@ -357,8 +429,200 @@ wb.menu('Control', [
         script: 'while(!({{1}})){[[1]]}',
         help: 'repeat forever until condition is true'
     }
-], true);
+ ], true);
 
+
+wb.menu('Operators', [
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] + [number:0]'],
+        type: 'number',
+        script: "({{1}} + {{2}})",
+        help: 'sum of the two operands'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] - [number:0]'],
+        type: 'number',
+        script: "({{1}} - {{2}})",
+        help: 'difference of the two operands'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] * [number:0]'],
+        type: 'number',
+        script: "({{1}} * {{2}})",
+        help: 'product of the two operands'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] / [number:0]'],
+        type: 'number',
+        script: "({{1}} / {{2}})",
+        help: 'quotient of the two operands'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['pick random [number:1] to [number:10]'],
+        type: 'number',
+        script: "randint({{1}}, {{2}})",
+        help: 'random number between two numbers (inclusive)'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] < [number:0]'],
+        type: 'boolean',
+        script: "({{1}} < {{2}})",
+        help: 'first operand is less than second operand'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] = [number:0]'],
+        type: 'boolean',
+        script: "({{1}} === {{2}})",
+        help: 'two operands are equal'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] > [number:0]'],
+        type: 'boolean',
+        script: "({{1}} > {{2}})",
+        help: 'first operand is greater than second operand'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[boolean] and [boolean]'],
+        type: 'boolean',
+        script: "({{1}} && {{2}})",
+        help: 'both operands are true'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[boolean] or [boolean]'],
+        type: 'boolean',
+        script: "({{1}} || {{2}})",
+        help: 'either or both operands are true'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[boolean] xor [boolean]'],
+        type: 'boolean',
+        script: "({{1}} ? !{{2}} : {{2}})",
+        help: 'either, but not both, operands are true'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['not [boolean]'],
+        type: 'boolean',
+        script: "(! {{1}})",
+        help: 'operand is false'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['concatenate [string:hello] with [string:world]'],
+        type: 'string',
+        script: "({{1}} + {{2}})",
+        help: 'returns a string by joining together two strings'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:0] mod [number:0]'],
+        type: 'number',
+        script: "({{1}} % {{2}})",
+        help: 'modulus of a number is the remainder after whole number division'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['round [number:0]'],
+        type: 'number',
+        script: "Math.round({{1}})",
+        help: 'rounds to the nearest whole number'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['absolute of [number:10]'],
+        type: 'number',
+        script: "Math.abs({{1}})",
+        help: 'converts a negative number to positive, leaves positive alone'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['arccosine degrees of [number:10]'],
+        type: 'number',
+        script: 'rad2deg(Math.acos({{1}}))',
+        help: 'inverse of cosine'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['arcsine degrees of [number:10]'],
+        type: 'number',
+        script: 'rad2deg(Math.asin({{1}}))',
+        help: 'inverse of sine'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['arctangent degrees of [number:10]'],
+        type: 'number',
+        script: 'rad2deg(Math.atan({{1}}))',
+        help: 'inverse of tangent'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['ceiling of [number:10]'],
+        type: 'number',
+        script: 'Math.ceil({{1}})',
+        help: 'rounds up to nearest whole number'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['cosine of [number:10] degrees'],
+        type: 'number',
+        script: 'Math.cos(deg2rad({{1}}))',
+        help: 'ratio of the length of the adjacent side to the length of the hypotenuse'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['sine of [number:10] degrees'],
+        type: 'number',
+        script: 'Math.sin(deg2rad({{1}}))',
+        help: 'ratio of the length of the opposite side to the length of the hypotenuse'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['tangent of [number:10] degrees'],
+        type: 'number',
+        script: 'Math.tan(deg2rad({{1}}))',
+        help: 'ratio of the length of the opposite side to the length of the adjacent side'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[number:10] to the power of [number:2]'],
+        type: 'number',
+        script: 'Math.pow({{1}}, {{2}})',
+        help: 'multiply a number by itself the given number of times'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['square root of [number:10]'],
+        type: 'number',
+        script: 'Math.sqrt({{1}})',
+        help: 'the square root is the same as taking the to the power of 1/2'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['pi'],
+        script: 'Math.PI;',
+        type: 'number',
+        help: "pi is the ratio of a circle's circumference to its diameter"
+    },
+    {
+        blocktype: 'expression',
+        labels: ['tau'],
+        script: 'Math.PI * 2',
+        type: 'number',
+        help: 'tau is 2 times pi, a generally more useful number'
+    }
+  ]);
 wb.menu('Variables', [
     {
         blocktype: 'step',
@@ -631,10 +895,10 @@ wb.menu('Variables', [
         script: '{{1}} = {{2}};',
         help: 'first argument must be a variable, not a literal any (ha ha)'
     }
-]);
+  ]);
 
 /*
-wb.menu('Arrays', [
+  wb.menu('Arrays', [
     {
         blocktype: 'step',
         labels: ['new array##'],
@@ -743,9 +1007,9 @@ wb.menu('Arrays', [
         ],
         help: 'run the blocks with each item of a named array'
     }
-], false);
+  ], false);
 
-wb.menu('Objects', [
+  wb.menu('Objects', [
     {
         blocktype: 'step',
         labels: ['new object##'],
@@ -794,7 +1058,7 @@ wb.menu('Objects', [
         help: 'run the blocks with each item of a object'
 
     }
-], false);
+  ], false);
 */
 wb.menu('Strings', [
     {
@@ -870,10 +1134,10 @@ wb.menu('Strings', [
         help: 'for debugging',
         type: 'object'
     }
-], false);
+  ], false);
 
 /*
-wb.menu('Sensing', [
+  wb.menu('Sensing', [
     {
         blocktype: 'step',
         labels: ['ask [string:What\'s your name?] and wait'],
@@ -969,199 +1233,9 @@ wb.menu('Sensing', [
         script: 'global.timer.value()',
         help: 'seconds since the script began running'
     }
-]);
+  ]);
 */
-wb.menu('Operators', [
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] + [number:0]'],
-        type: 'number',
-        script: "({{1}} + {{2}})",
-        help: 'sum of the two operands'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] - [number:0]'],
-        type: 'number',
-        script: "({{1}} - {{2}})",
-        help: 'difference of the two operands'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] * [number:0]'],
-        type: 'number',
-        script: "({{1}} * {{2}})",
-        help: 'product of the two operands'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] / [number:0]'],
-        type: 'number',
-        script: "({{1}} / {{2}})",
-        help: 'quotient of the two operands'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['pick random [number:1] to [number:10]'],
-        type: 'number',
-        script: "randint({{1}}, {{2}})",
-        help: 'random number between two numbers (inclusive)'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] < [number:0]'],
-        type: 'boolean',
-        script: "({{1}} < {{2}})",
-        help: 'first operand is less than second operand'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] = [number:0]'],
-        type: 'boolean',
-        script: "({{1}} === {{2}})",
-        help: 'two operands are equal'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] > [number:0]'],
-        type: 'boolean',
-        script: "({{1}} > {{2}})",
-        help: 'first operand is greater than second operand'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[boolean] and [boolean]'],
-        type: 'boolean',
-        script: "({{1}} && {{2}})",
-        help: 'both operands are true'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[boolean] or [boolean]'],
-        type: 'boolean',
-        script: "({{1}} || {{2}})",
-        help: 'either or both operands are true'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[boolean] xor [boolean]'],
-        type: 'boolean',
-        script: "({{1}} ? !{{2}} : {{2}})",
-        help: 'either, but not both, operands are true'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['not [boolean]'],
-        type: 'boolean',
-        script: "(! {{1}})",
-        help: 'operand is false'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['concatenate [string:hello] with [string:world]'],
-        type: 'string',
-        script: "({{1}} + {{2}})",
-        help: 'returns a string by joining together two strings'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] mod [number:0]'],
-        type: 'number',
-        script: "({{1}} % {{2}})",
-        help: 'modulus of a number is the remainder after whole number division'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['round [number:0]'],
-        type: 'number',
-        script: "Math.round({{1}})",
-        help: 'rounds to the nearest whole number'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['absolute of [number:10]'],
-        type: 'number',
-        script: "Math.abs({{1}})",
-        help: 'converts a negative number to positive, leaves positive alone'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['arccosine degrees of [number:10]'],
-        type: 'number',
-        script: 'rad2deg(Math.acos({{1}}))',
-        help: 'inverse of cosine'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['arcsine degrees of [number:10]'],
-        type: 'number',
-        script: 'rad2deg(Math.asin({{1}}))',
-        help: 'inverse of sine'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['arctangent degrees of [number:10]'],
-        type: 'number',
-        script: 'rad2deg(Math.atan({{1}}))',
-        help: 'inverse of tangent'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['ceiling of [number:10]'],
-        type: 'number',
-        script: 'Math.ceil({{1}})',
-        help: 'rounds up to nearest whole number'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['cosine of [number:10] degrees'],
-        type: 'number',
-        script: 'Math.cos(deg2rad({{1}}))',
-        help: 'ratio of the length of the adjacent side to the length of the hypotenuse'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['sine of [number:10] degrees'],
-        type: 'number',
-        script: 'Math.sin(deg2rad({{1}}))',
-        help: 'ratio of the length of the opposite side to the length of the hypotenuse'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['tangent of [number:10] degrees'],
-        type: 'number',
-        script: 'Math.tan(deg2rad({{1}}))',
-        help: 'ratio of the length of the opposite side to the length of the adjacent side'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:10] to the power of [number:2]'],
-        type: 'number',
-        script: 'Math.pow({{1}}, {{2}})',
-        help: 'multiply a number by itself the given number of times'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['square root of [number:10]'],
-        type: 'number',
-        script: 'Math.sqrt({{1}})',
-        help: 'the square root is the same as taking the to the power of 1/2'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['pi'],
-        script: 'Math.PI;',
-        type: 'number',
-        help: "pi is the ratio of a circle's circumference to its diameter"
-    },
-    {
-        blocktype: 'expression',
-        labels: ['tau'],
-        script: 'Math.PI * 2',
-        type: 'number',
-        help: 'tau is 2 times pi, a generally more useful number'
-    }
-]);
+
 
 $('.scripts_workspace').trigger('init');
 
