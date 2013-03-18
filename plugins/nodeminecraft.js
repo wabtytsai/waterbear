@@ -28,7 +28,14 @@ $('.runScripts').click(function(){
      var blocks = $('.workspace:visible .scripts_workspace > .wrapper');
      var code = blocks.prettyScript();
      var query = $.param({'code':code});
-     $.get('/run?',query);
+     
+     $.ajax({
+      url: '/run?',
+      data: query,
+      success: function(){alert("Code running on RPi");},
+      error: function(){alert("Code failed / server not running on RPi");}
+     });
+     
      
 });
 
