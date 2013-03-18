@@ -19,6 +19,19 @@ yepnope({
     ]
 });
 
+$('.goto_stage, .result').remove();
+
+$('.runScripts').unbind();
+
+
+$('.runScripts').click(function(){
+     var blocks = $('.workspace:visible .scripts_workspace > .wrapper');
+     var code = blocks.prettyScript();
+     var query = $.param({'code':code});
+     $.get('/run?',query);
+     
+});
+
 // Add some utilities
 jQuery.fn.extend({
     prettyScript: function(){
@@ -26,7 +39,7 @@ jQuery.fn.extend({
             return $(this).extract_script();
         }).get().join('');
         
-        script = "var Minecraft = require('./../lib/minecraft.js'); \n var client = new Minecraft('localhost', 4711, function() {\n"+script+"\n});";
+        script = "var Minecraft = require('./minecraft-pi/lib/minecraft.js'); \n var client = new Minecraft('localhost', 4711, function() {\n"+script+"\n});";
         
         return js_beautify(script);
     },
