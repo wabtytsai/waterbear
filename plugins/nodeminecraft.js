@@ -173,6 +173,12 @@ wb.menu('Player', [
                 labels: ['Z'],
                 script: 'posZ',
                 type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['X, Y, Z'],
+                script: 'data.toString().trim() ',
+                type: 'string'
             }
         ],
         help: 'get the tile that the player is on'
@@ -207,6 +213,12 @@ wb.menu('Player', [
                 labels: ['Z'],
                 script: 'posZ',
                 type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['X, Y, Z'],
+                script: 'data.toString().trim() ',
+                type: 'string'
             }
         ],
         help: 'get the exact position that the player is on'
