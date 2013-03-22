@@ -88,65 +88,34 @@ wb.menu('Globals', []);
 // wb.menu('Recent Blocks', []);
 // wb.menu('Favourite Blocks', []);
 
-// Javascript core blocks
+// Mnecraft blocks
 
-wb.menu('Blocks', [
-   {
-        blocktype: 'context',
-        labels: ['get Block Type at [number:0], [number:0], [number:0]'],
-        script: 'client.getBlock({{1}}, {{2}}, {{3}}, function(block##){[[1]]  client.end()});',
-        locals: [
-            {
-                blocktype: 'expression',
-                labels: ['BlockType##'],
-                script: 'parseInt(block##)',
-                type: 'number'
-            }
-        ],
-        help: 'get block type at x, y, z'
-    },
-    {
-        blocktype: 'context',
-        labels: ['get height at [number:0], [number:0]'],
-        script: 'client.getHeight({{1}}, {{2}}, function(height##){[[1]]  client.end()});',
-        locals: [
-            {
-                blocktype: 'expression',
-                labels: ['height##'],
-                script: 'parseInt(height##)',
-                type: 'number'
-            }
-        ],
-        help: 'get height of blocks at x, y'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['block type name [number:0]'],
-        script: 'Object.keys(client.blocks).filter(function(element){return (client.blocks[element] === {{1}});})',
-        type: 'number',
-        help: 'name of a blocktype by number'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[choice:blocks:STONE]'],
-        script: '{{1}}',
-        type: 'number',
-        help: 'a blocktype'
-    },
+wb.menu('Game', [
     {
         blocktype: 'step',
-        labels: ['set Block at [number:0], [number:0], [number:0] to [choice:blocks:STONE]'],
-        script: 'client.setBlock({{1}}, {{2}}, {{3}}, client.blocks[{{4}}]);',
-        help: 'set block at x, y, z'
+        labels: ['say [string:hi] in chat'],
+        script: 'client.chat({{1}});',
+        help: 'send a message as chat'
     },
     
     {
         blocktype: 'step',
-        labels: ['set Blocks between [number:0], [number:0], [number:0] and [number:0], [number:0], [number:0] to [choice:blocks:STONE]'],
-        script: 'client.setBlocks({{1}}, {{2}}, {{3}},{{4}}, {{5}}, {{6}}, client.blocks[{{7}}]);',
-        help: 'set blocks in a line between x, y, z and x2, y2, z2 to ..'
-    }], true);
-
+        labels: ['Save Checkpoint'],
+        script: 'client.saveCheckpoint();',
+        help: 'Save Checkpoint'
+    },
+    
+    
+    {
+        blocktype: 'step',
+        labels: ['Restore Checkpoint'],
+        script: 'client.restoreCheckpoint();',
+        help: 'Restore Last Checkpoint'
+    }
+    //client.worldSetting(key, value)
+    //client.getPlayerIds(callback)
+    
+  ], true);
 
 
 
@@ -226,38 +195,73 @@ wb.menu('Player', [
     
   //client.playerSetting(key, value)
 
-  ], true);
+  ]);
 
-
-
-
-
-wb.menu('Game', [
+wb.menu('Blocks', [
+   {
+        blocktype: 'context',
+        labels: ['get Block Type at [number:0], [number:0], [number:0]'],
+        script: 'client.getBlock({{1}}, {{2}}, {{3}}, function(block##){[[1]]  client.end()});',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['BlockType##'],
+                script: 'parseInt(block##)',
+                type: 'number'
+            }
+        ],
+        help: 'get block type at x, y, z'
+    },
+    {
+        blocktype: 'context',
+        labels: ['get height at [number:0], [number:0]'],
+        script: 'client.getHeight({{1}}, {{2}}, function(height##){[[1]]  client.end()});',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['height##'],
+                script: 'parseInt(height##)',
+                type: 'number'
+            }
+        ],
+        help: 'get height of blocks at x, y'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['block type name [number:0]'],
+        script: 'Object.keys(client.blocks).filter(function(element){return (client.blocks[element] === {{1}});})',
+        type: 'number',
+        help: 'name of a blocktype by number'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[choice:blocks:STONE]'],
+        script: '{{1}}',
+        type: 'number',
+        help: 'a blocktype'
+    },
     {
         blocktype: 'step',
-        labels: ['say [string:hi] in chat'],
-        script: 'client.chat({{1}});',
-        help: 'send a message as chat'
+        labels: ['set Block at [number:0], [number:0], [number:0] to [choice:blocks:STONE]'],
+        script: 'client.setBlock({{1}}, {{2}}, {{3}}, client.blocks[{{4}}]);',
+        help: 'set block at x, y, z'
     },
     
     {
         blocktype: 'step',
-        labels: ['Save Checkpoint'],
-        script: 'client.saveCheckpoint();',
-        help: 'Save Checkpoint'
-    },
-    
-    
-    {
-        blocktype: 'step',
-        labels: ['Restore Checkpoint'],
-        script: 'client.restoreCheckpoint();',
-        help: 'Restore Last Checkpoint'
+        labels: ['set Blocks between [number:0], [number:0], [number:0] and [number:0], [number:0], [number:0] to [choice:blocks:STONE]'],
+        script: 'client.setBlocks({{1}}, {{2}}, {{3}},{{4}}, {{5}}, {{6}}, client.blocks[{{7}}]);',
+        help: 'set blocks in a line between x, y, z and x2, y2, z2 to ..'
     }
-    //client.worldSetting(key, value)
-    //client.getPlayerIds(callback)
-    
-  ], true);
+  ]);
+
+
+
+
+
+
+
+
 
 /*
   Minecraft.prototype.eventsBlockHits = function(callback) {
@@ -284,8 +288,10 @@ wb.menu('Camera', [
         help: 'set camera position to x, y, z'
     }
     
-  ], true);
+  ]);
 
+
+// Javascript core blocks
 
 wb.menu('Control', [
     /*{
@@ -462,7 +468,7 @@ wb.menu('Control', [
         script: 'while(!({{1}})){[[1]]}',
         help: 'repeat forever until condition is true'
     }
- ], true);
+ ]);
 
 
 wb.menu('Maths', [
