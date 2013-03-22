@@ -465,7 +465,7 @@ wb.menu('Control', [
  ], true);
 
 
-wb.menu('Operators', [
+wb.menu('Maths', [
     {
         blocktype: 'expression',
         labels: ['[number:0] + [number:0]'],
@@ -494,13 +494,21 @@ wb.menu('Operators', [
         script: "({{1}} / {{2}})",
         help: 'quotient of the two operands'
     },
+    /*{
+        blocktype: 'expression',
+        labels: ['pick random between [number:1] to [number:10]'],
+        type: 'number',
+        script: "(Math.random() * (max - min) + min)",
+        help: 'random number between two numbers (inclusive)'
+    },*/
     {
         blocktype: 'expression',
-        labels: ['pick random [number:1] to [number:10]'],
+        labels: ['pick random between [number:1] to [number:10]'],
         type: 'number',
-        script: "randint({{1}}, {{2}})",
+        script: "(Math.floor(Math.random() * (max - min + 1)) + min)",
         help: 'random number between two numbers (inclusive)'
     },
+    
     {
         blocktype: 'expression',
         labels: ['[number:0] < [number:0]'],
@@ -549,13 +557,6 @@ wb.menu('Operators', [
         type: 'boolean',
         script: "(! {{1}})",
         help: 'operand is false'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['concatenate [string:hello] with [string:world]'],
-        type: 'string',
-        script: "({{1}} + {{2}})",
-        help: 'returns a string by joining together two strings'
     },
     {
         blocktype: 'expression',
@@ -1094,6 +1095,13 @@ wb.menu('Variables', [
   ], false);
 */
 wb.menu('Strings', [
+    {
+        blocktype: 'expression',
+        labels: ['concatenate [string:hello] with [string:world]'],
+        type: 'string',
+        script: "({{1}} + {{2}})",
+        help: 'returns a string by joining together two strings'
+    },
     {
         blocktype: 'expression',
         labels: ['string [string] split on [string]'],
