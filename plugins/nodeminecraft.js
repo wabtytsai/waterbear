@@ -508,8 +508,21 @@ wb.menu('Maths', [
         script: "(Math.floor(Math.random() * (max - min + 1)) + min)",
         help: 'random number between two numbers (inclusive)'
     },
-    
     {
+        blocktype: 'expression',
+        labels: ['[number:0] mod [number:0]'],
+        type: 'number',
+        script: "({{1}} % {{2}})",
+        help: 'modulus of a number is the remainder after whole number division'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['round [number:0]'],
+        type: 'number',
+        script: "Math.round({{1}})",
+        help: 'rounds to the nearest whole number'
+    },
+        {
         blocktype: 'expression',
         labels: ['[number:0] < [number:0]'],
         type: 'boolean',
@@ -529,48 +542,6 @@ wb.menu('Maths', [
         type: 'boolean',
         script: "({{1}} > {{2}})",
         help: 'first operand is greater than second operand'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[boolean] and [boolean]'],
-        type: 'boolean',
-        script: "({{1}} && {{2}})",
-        help: 'both operands are true'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[boolean] or [boolean]'],
-        type: 'boolean',
-        script: "({{1}} || {{2}})",
-        help: 'either or both operands are true'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[boolean] xor [boolean]'],
-        type: 'boolean',
-        script: "({{1}} ? !{{2}} : {{2}})",
-        help: 'either, but not both, operands are true'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['not [boolean]'],
-        type: 'boolean',
-        script: "(! {{1}})",
-        help: 'operand is false'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['[number:0] mod [number:0]'],
-        type: 'number',
-        script: "({{1}} % {{2}})",
-        help: 'modulus of a number is the remainder after whole number division'
-    },
-    {
-        blocktype: 'expression',
-        labels: ['round [number:0]'],
-        type: 'number',
-        script: "Math.round({{1}})",
-        help: 'rounds to the nearest whole number'
     },
     {
         blocktype: 'expression',
@@ -657,6 +628,40 @@ wb.menu('Maths', [
         help: 'tau is 2 times pi, a generally more useful number'
     }
   ]);
+
+wb.menu('Logic', [
+    {
+        blocktype: 'expression',
+        labels: ['[boolean] and [boolean]'],
+        type: 'boolean',
+        script: "({{1}} && {{2}})",
+        help: 'both operands are true'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[boolean] or [boolean]'],
+        type: 'boolean',
+        script: "({{1}} || {{2}})",
+        help: 'either or both operands are true'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['[boolean] xor [boolean]'],
+        type: 'boolean',
+        script: "({{1}} ? !{{2}} : {{2}})",
+        help: 'either, but not both, operands are true'
+    },
+    {
+        blocktype: 'expression',
+        labels: ['not [boolean]'],
+        type: 'boolean',
+        script: "(! {{1}})",
+        help: 'operand is false'
+    }
+  ]);
+
+
+
 wb.menu('Variables', [
     {
         blocktype: 'step',
@@ -930,6 +935,8 @@ wb.menu('Variables', [
         help: 'first argument must be a variable, not a literal any (ha ha)'
     }
   ]);
+
+
 
 /*
   wb.menu('Arrays', [
