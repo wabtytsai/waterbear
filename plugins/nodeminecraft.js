@@ -123,9 +123,27 @@ wb.menu('Player', [
    {
         blocktype: 'context',
         labels: ['Get Player Tile Position'],
-        script: 'client.getTile(function(data){console.log("data =", data); var aData = data.toString().trim().split(","); console.log("aData =", aData); var posX = parseInt(aData[0]); var posY = parseInt(aData[1]); var posZ = parseInt(aData[2]); [[1]]  client.end()});',
+        script: 'client.getTile(function(data){console.log("data =", data); var aData = data.toString().trim().split(","); console.log("aData =", aData); var playerPos = {x:parseInt(aData[0]), y: parseInt(aData[1]), z: parseInt(aData[2])}; [[1]]  client.end()});',
         locals: [
             {
+                blocktype: 'expression',
+                labels: ['X'],
+                script: 'playerPos.x',
+                type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['Y'],
+                script: 'playerPos.y',
+                type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['Z'],
+                script: 'playerPos.z',
+                type: 'number'
+            },
+            /*{
                 blocktype: 'expression',
                 labels: ['X'],
                 script: 'posX',
@@ -142,16 +160,50 @@ wb.menu('Player', [
                 labels: ['Z'],
                 script: 'posZ',
                 type: 'number'
-            },
+            },*/
             {
                 blocktype: 'expression',
                 labels: ['X, Y, Z'],
                 script: 'data.toString().trim() ',
                 type: 'string'
-            }
+            }/*,
+            {
+                blocktype: 'expression',
+                labels: ['playerPos'],
+                script: 'playerPos',
+                type: 'object'
+            }*/
         ],
         help: 'get the tile that the player is on'
     },
+    {
+        blocktype: 'step',
+        labels: ['new pos## [number:0], [number:0], [number:0] from Player'],
+        script: 'var pos## = {x:(playerPos.x+{{1}}), y:(playerPos.y+{{2}}) , z:(playerPos.z+{{3}})};',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['pos##.x'],
+                script: 'pos##.x',
+                type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['pos##.y'],
+                script: 'pos##.y',
+                type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['pos##.z'],
+                script: 'pos##.z',
+                type: 'number'
+            }
+        ],
+        
+        help: 'move Player to x, y, z'
+    },
+    
     {
         blocktype: 'step',
         labels: ['move Player to [number:0], [number:0], [number:0]'],
@@ -673,12 +725,12 @@ wb.menu('Variables', [
         blocktype: 'step',
         labels: ['variable string## [string]'],
         script: 'string## = {{1}};',
-        returns: {
+        locals:[ {
             blocktype: 'expression',
             labels: ['string##'],
             script: 'string##',
             type: 'string'
-        },
+        }],
         help: 'create a reference to re-use the string'
     },
     {
@@ -691,12 +743,12 @@ wb.menu('Variables', [
         blocktype: 'step',
         labels: ['variable number## [number]'],
         script: 'number## = {{1}};',
-        returns: {
+        locals:[{
             blocktype: 'expression',
             labels: ['number##'],
             script: 'number##',
             type: 'number'
-        },
+        }],
         help: 'create a reference to re-use the number'
     },
     {
@@ -709,12 +761,12 @@ wb.menu('Variables', [
         blocktype: 'step',
         labels: ['variable boolean## [boolean]'],
         script: 'boolean## = {{1}};',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['boolean##'],
             script: 'boolean##',
             type: 'boolean'
-        },
+        }],
         help: 'create a reference to re-use the boolean'
     },
     {
@@ -727,12 +779,12 @@ wb.menu('Variables', [
         blocktype: 'step',
         labels: ['variable array## [array]'],
         script: 'array## = {{1}};',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['array##'],
             script: 'array## = {{1}}',
             type: 'array'
-        },
+        }],
         help: 'create a reference to re-use the array'
     },
     {
@@ -745,12 +797,12 @@ wb.menu('Variables', [
         blocktype: 'step',
         labels: ['variable object## [object]'],
         script: 'object## = {{1}};',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['object##'],
             script: 'object##',
             type: 'object'
-        },
+        }],
         help: 'create a reference to re-use the object'
     },
     {
@@ -761,177 +813,14 @@ wb.menu('Variables', [
     },
     {
         blocktype: 'step',
-        labels: ['variable color## [color]'],
-        script: 'color## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['color##'],
-            script: 'color##',
-            type: 'color'
-        },
-        help: 'create a reference to re-use the color'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [color] to [color]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal color'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable image## [image]'],
-        script: 'image## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['image##'],
-            script: 'image##',
-            type: 'image'
-        },
-        help: 'create a reference to re-use the image'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [image] to [image]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal image'
-    },
-    // 'shape', 'point', 'size', 'rect', 'gradient', 'pattern', 'imagedata', 'any'
-    {
-        blocktype: 'step',
-        labels: ['variable shape## [shape]'],
-        script: 'shape## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['shape##'],
-            script: 'shape##',
-            type: 'shape'
-        },
-        help: 'create a reference to re-use the shape'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [shape] to [shape]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal shape'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable point## [point]'],
-        script: 'point## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['point##'],
-            script: 'point##',
-            type: 'point'
-        },
-        help: 'create a reference to re-use the point'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [point] to [point]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal point'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable size## [size]'],
-        script: 'size## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['size##'],
-            script: 'size##',
-            type: 'size'
-        },
-        help: 'create a reference to re-use the size'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [size] to [size]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal size'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable rect## [rect]'],
-        script: 'rect## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['rect##'],
-            script: 'rect##',
-            type: 'rect'
-        },
-        help: 'create a reference to re-use the rect'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [rect] to [rect]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal rect'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable gradient## [gradient]'],
-        script: 'gradient## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['gradient##'],
-            script: 'gradient##',
-            type: 'gradient'
-        },
-        help: 'create a reference to re-use the gradient'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [gradient] to [gradient]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal gradient'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable pattern## [pattern]'],
-        script: 'pattern## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['pattern##'],
-            script: 'pattern##',
-            type: 'pattern'
-        },
-        help: 'create a reference to re-use the pattern'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [pattern] to [pattern]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal pattern'
-    },
-    {
-        blocktype: 'step',
-        labels: ['variable imagedata## [imagedata]'],
-        script: 'imagedata## = {{1}};',
-        returns: {
-            blocktype: 'expression',
-            labels: ['imagedata##'],
-            script: 'imagedata##',
-            type: 'imagedata'
-        },
-        help: 'create a reference to re-use the imagedata'
-    },
-    {
-        blocktype: 'step',
-        labels: ['set variable [imagedata] to [imagedata]'],
-        script: '{{1}} = {{2}};',
-        help: 'first argument must be a variable, not a literal imagedata'
-    },
-    {
-        blocktype: 'step',
         labels: ['variable any## [any]'],
         script: 'any## = {{1}};',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['any##'],
             script: 'any##',
             type: 'any'
-        },
+        }],
         help: 'create a reference to re-use the any'
     },
     {
@@ -951,24 +840,24 @@ wb.menu('Variables', [
         labels: ['new array##'],
         script: 'array## = [];',
         help: 'Create an empty array',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['array##'],
             script: 'array##',
             type: 'array'
-        }
+        }]
     },
     {
         blocktype: 'step',
         labels: ['new array with array## [array]'],
         script: 'array## = {{1}}.slice();',
         help: 'create a new array with the contents of another array',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['array##'],
             script: 'array##',
             type: 'array'
-        }
+        }]
     },
     {
         blocktype: 'expression',
@@ -1061,12 +950,12 @@ wb.menu('Variables', [
         blocktype: 'step',
         labels: ['new object##'],
         script: 'object## = {};',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['object##'],
             script: 'object##',
             type: 'object'
-        },
+        }],
         help: 'create a new, empty object'
     },
     {
@@ -1196,12 +1085,12 @@ wb.menu('Strings', [
         blocktype: 'step',
         labels: ['ask [string:What\'s your name?] and wait'],
         script: 'answer## = prompt({{1}});',
-        returns: {
+        locals: [{
             blocktype: 'expression',
             labels: ['answer##'],
             type: 'string',
             script: 'answer##'
-        },
+        }],
         help: 'Prompt the user for information'
     },
     {
