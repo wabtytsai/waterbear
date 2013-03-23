@@ -292,8 +292,6 @@ wb.menu('Blocks', [
 */
 
 wb.menu('Position', [
- //create point
- 
  {
         blocktype: 'step',
         labels: ['new pos## [number:0], [number:0], [number:0]'],
@@ -306,10 +304,37 @@ wb.menu('Position', [
                 type: 'object'
             }
         ],
-        
         help: 'create new position relative to extisting position'
     },
  //get parts of point
+    
+    {
+        blocktype: 'step',
+        labels: ['get parts of pos [object]'],
+        script: 'var pos## = {{1}};',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['x##'],
+                script: 'pos##.x',
+                type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['y##'],
+                script: 'pos##.y',
+                type: 'number'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['z##'],
+                script: 'pos##.z',
+                type: 'number'
+            }
+        ],
+        
+        help: 'get parts of position'
+    },
     
  
     {
@@ -461,6 +486,7 @@ wb.menu('Control', [
             }
         ]
     },
+    /*
     {
         blocktype: 'context',
         labels: ['for loopX between [number:0] and [number:10] '],
@@ -502,7 +528,7 @@ wb.menu('Control', [
                 type: 'number'
             }
         ]
-    },
+    },*/
     /*,
     {
         blocktype: 'context',
