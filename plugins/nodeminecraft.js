@@ -127,52 +127,16 @@ wb.menu('Player', [
         locals: [
             {
                 blocktype: 'expression',
-                labels: ['X'],
-                script: 'playerPos.x',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['Y'],
-                script: 'playerPos.y',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['Z'],
-                script: 'playerPos.z',
-                type: 'number'
-            },
-            /*{
-                blocktype: 'expression',
-                labels: ['X'],
-                script: 'posX',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['Y'],
-                script: 'posY',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['Z'],
-                script: 'posZ',
-                type: 'number'
-            },*/
-            {
-                blocktype: 'expression',
-                labels: ['X, Y, Z'],
-                script: 'data.toString().trim() ',
-                type: 'string'
-            }/*,
-            {
-                blocktype: 'expression',
                 labels: ['playerPos'],
                 script: 'playerPos',
                 type: 'object'
-            }*/
+            },
+            {
+                blocktype: 'expression',
+                labels: ['playerPos text'],
+                script: '"x:"+playerPos.x+", y:"+playerPos.y+", z:"+playerPos.z',
+                type: 'string'
+            }
         ],
         help: 'get the tile that the player is on'
     },
@@ -183,62 +147,37 @@ wb.menu('Player', [
         locals: [
             {
                 blocktype: 'expression',
-                labels: ['pos##.x'],
-                script: 'pos##.x',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['pos##.y'],
-                script: 'pos##.y',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['pos##.z'],
-                script: 'pos##.z',
-                type: 'number'
+                labels: ['Pos ##'],
+                script: 'pos##',
+                type: 'object'
             }
         ],
         
-        help: 'move Player to x, y, z'
+        help: 'create new position relative to Player position'
     },
     
     {
         blocktype: 'step',
-        labels: ['move Player to [number:0], [number:0], [number:0]'],
-        script: 'client.setTile({{1}}, {{2}}, {{3}});',
-        help: 'move Player to x, y, z'
+        labels: ['move Player to [object]'],
+        script: 'client.setTile({{1}}.x, {{1}}.y, {{1}}.z);',
+        help: 'move Player to x, y, z of position'
     },
-   
+    
     {
         blocktype: 'context',
         labels: ['Get Player Position'],
-        script: 'client.getPos(function(data){console.log("data =", data); var aData = data.toString().trim().split(","); console.log("aData =", aData); var posX = parseFloat(aData[0]); var posY = parseFloat(aData[1]); var posZ = parseFloat(aData[2]); [[1]]  client.end()});',
-        
+        script: 'client.getTile(function(data){console.log("data =", data); var aData = data.toString().trim().split(","); console.log("aData =", aData); var playerPos = {x:parseFloat(aData[0]), y: parseFloat(aData[1]), z: parseFloat(aData[2])}; [[1]]  client.end()});',
         locals: [
             {
                 blocktype: 'expression',
-                labels: ['X'],
-                script: 'posX',
-                type: 'number'
+                labels: ['playerPos'],
+                script: 'playerPos',
+                type: 'object'
             },
             {
                 blocktype: 'expression',
-                labels: ['Y'],
-                script: 'posY',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['Z'],
-                script: 'posZ',
-                type: 'number'
-            },
-            {
-                blocktype: 'expression',
-                labels: ['X, Y, Z'],
-                script: 'data.toString().trim() ',
+                labels: ['playerPos text'],
+                script: '"x:"+playerPos.x+", y:"+playerPos.y+", z:"+playerPos.z',
                 type: 'string'
             }
         ],
@@ -249,8 +188,26 @@ wb.menu('Player', [
 
   ]);
 
+
+
 wb.menu('Blocks', [
    {
+        blocktype: 'context',
+        labels: ['get Block Type at [object]'],
+        script: 'client.getBlock({{1}}.x, {{1}}.y, {{1}}.z, function(block##){[[1]]  client.end()});',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['BlockType##'],
+                script: 'parseInt(block##)',
+                type: 'number'
+            }
+        ],
+        help: 'get block type at x, y, z'
+    },
+   
+    /*
+    {
         blocktype: 'context',
         labels: ['get Block Type at [number:0], [number:0], [number:0]'],
         script: 'client.getBlock({{1}}, {{2}}, {{3}}, function(block##){[[1]]  client.end()});',
@@ -263,8 +220,9 @@ wb.menu('Blocks', [
             }
         ],
         help: 'get block type at x, y, z'
-    },
-    {
+    },*/
+    
+    /*{
         blocktype: 'context',
         labels: ['get height at [number:0], [number:0]'],
         script: 'client.getHeight({{1}}, {{2}}, function(height##){[[1]]  client.end()});',
@@ -277,7 +235,7 @@ wb.menu('Blocks', [
             }
         ],
         help: 'get height of blocks at x, y'
-    },
+    },*/
     {
         blocktype: 'expression',
         labels: ['block type name [number:0]'],
@@ -285,13 +243,29 @@ wb.menu('Blocks', [
         type: 'number',
         help: 'name of a blocktype by number'
     },
-    {
+    /*{
         blocktype: 'expression',
         labels: ['[choice:blocks:STONE]'],
         script: '{{1}}',
         type: 'number',
         help: 'a blocktype'
+    },*/
+    
+    {
+        blocktype: 'step',
+        labels: ['set Block at [object] to [choice:blocks:STONE]'],
+        script: 'client.setBlock({{1}}.x, {{1}}.y, {{1}}.z, client.blocks[{{2}}]);',
+        help: 'set block at position'
     },
+    
+    {
+        blocktype: 'step',
+        labels: ['set Blocks between [object] and [object] to [choice:blocks:STONE]'],
+        script: 'client.setBlocks({{1}}.x, {{1}}.y, {{1}}.z, {{2}}.x, {{2}}.y, {{2}}.z, client.blocks[{{3}}]);',
+        help: 'set blocks in a line between the first and second postionsto ..'
+    }
+    /*
+    
     {
         blocktype: 'step',
         labels: ['set Block at [number:0], [number:0], [number:0] to [choice:blocks:STONE]'],
@@ -304,16 +278,8 @@ wb.menu('Blocks', [
         labels: ['set Blocks between [number:0], [number:0], [number:0] and [number:0], [number:0], [number:0] to [choice:blocks:STONE]'],
         script: 'client.setBlocks({{1}}, {{2}}, {{3}},{{4}}, {{5}}, {{6}}, client.blocks[{{7}}]);',
         help: 'set blocks in a line between x, y, z and x2, y2, z2 to ..'
-    }
+    }*/
   ]);
-
-
-
-
-
-
-
-
 
 /*
   Minecraft.prototype.eventsBlockHits = function(callback) {
@@ -325,6 +291,89 @@ wb.menu('Blocks', [
   };
 */
 
+wb.menu('Position', [
+ //create point
+ 
+ {
+        blocktype: 'step',
+        labels: ['new pos## [number:0], [number:0], [number:0]'],
+        script: 'var pos## = {x:{{1}}, y:{{2}} , z:{{3}}};',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['Pos ##'],
+                script: 'pos##',
+                type: 'object'
+            }
+        ],
+        
+        help: 'create new position relative to extisting position'
+    },
+ //get parts of point
+    
+ 
+    {
+        blocktype: 'step',
+        labels: ['new pos## adding [number:0], [number:0], [number:0] to pos [object]'],
+        script: 'var pos## = {x:({{4}}.x+{{1}}), y:({{4}}.y+{{2}}) , z:({{4}}.z+{{3}})};',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['Pos ##'],
+                script: 'pos##',
+                type: 'object'
+            }
+        ],
+        
+        help: 'create new position relative to extisting position'
+    },
+    
+    {
+        blocktype: 'step',
+        labels: ['new pos## adding pos [object] to pos [object]'],
+        script: 'var pos## = {x:({{1}}.x+{{2}}.x), y:({{1}}.y+{{2}}.y) , z:({{1}}.z+{{2}}.z)};',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['Pos ##'],
+                script: 'pos##',
+                type: 'object'
+            }
+        ],
+        
+        help: 'create new position by adding 2 others'
+    },
+    {
+        blocktype: 'context',
+        labels: ['position of surface from position [object]'],
+        script: 'client.getHeight({{1}}.x, {{1}}.z, function(height##){surface## = {{1}}; surface.y = parseInt(height##); [[1]]  client.end()});',
+        locals: [
+            {
+                blocktype: 'expression',
+                labels: ['surfacePos##'],
+                script: 'surfacePos##',
+                type: 'object'
+            },
+            {
+                blocktype: 'expression',
+                labels: ['height##'],
+                script: 'parseInt(height##)',
+                type: 'number'
+            }
+        ],
+        help: 'get position of surface above or below current postion'
+    },
+    
+   {
+      blocktype: 'expression',
+      labels: ['position [object] as text'],
+      script: '"x:"+{{1}}.x+", y:"+{{1}}.y+", z:"+{{1}}.z',
+      type: 'string'
+   } 
+    
+]);
+
+
 wb.menu('Camera', [
     {
         blocktype: 'step',
@@ -332,14 +381,20 @@ wb.menu('Camera', [
         script: 'client.setCameraMode({{1}});',
         help: 'set camera mode'
     },
-    
+    {
+        blocktype: 'step',
+        labels: ['set camera position to [object]'],
+        script: 'client.setCameraPosition({{1}}.x, {{1}}.y, {{1}}.z);',
+        help: 'set camera position to a position'
+    }
+    /*
     {
         blocktype: 'step',
         labels: ['set camera position to [number:0], [number:0], [number:0]'],
         script: 'client.setCameraPosition({{1}}, {{2}}, {{3}});',
         help: 'set camera position to x, y, z'
     }
-    
+    */
   ]);
 
 
