@@ -14,7 +14,12 @@
 
 
 .maths{ border-color: hsl(175, 65%, 79%); }
-.maths > .block{ background-color: hsl(195, 62%, 89%); }
+.maths > .block{ background-color: hsl(175, 62%, 89%); }
 
 .logic{ border-color: hsl(135, 65%, 79%); }
-.logic > .block{ background-color: hsl(195, 62%, 89%); }
+.logic > .block{ background-color: hsl(135, 62%, 89%); }
+
+.position{ border-color: hsl(115, 65%, 79%); }
+.position > .block{ background-color: hsl(115, 62%, 89%); }
+
+
