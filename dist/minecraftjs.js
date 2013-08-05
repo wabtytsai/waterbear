@@ -3950,6 +3950,15 @@ wb.choiceLists.cameramode = ['normal','thirdPerson','fixed'];
 
 /*end languages/minecraftjs/string.js*/
 
+/*begin languages/minecraftjs/sprite.js*/
+
+wb.choiceLists.types = wb.choiceLists.types.concat(['sprite']);
+wb.choiceLists.rettypes = wb.choiceLists.rettypes.concat(['sprite']);
+
+wb.choiceLists.types = wb.choiceLists.types.concat(['binary']);
+wb.choiceLists.rettypes = wb.choiceLists.rettypes.concat(['binary']);
+/*end languages/minecraftjs/sprite.js*/
+
 /*begin languages/minecraftjs/control.json*/
 wb.menu({
     "name": "Control",
@@ -5639,6 +5648,141 @@ wb.menu({
 }
 );
 /*end languages/minecraftjs/string.json*/
+
+/*begin languages/minecraftjs/sprite.json*/
+wb.menu({
+    "name": "Sprites",
+    "id": "caabb171-f57a-437c-abc9-3b45352a4742",
+    "blocks": [
+        {
+            "blocktype": "expression",
+            "id": "71dd8f09-053e-453c-90d3-d0af0c1bf514",
+            "sockets": [
+                    {
+                    "type": "binary",
+                    "value": "00000000"
+                }
+                ],
+            "script": "{{1}}",
+            "type": "binary",
+            "help": "a binary number"
+        },
+        {
+            "blocktype": "step",
+            "id": "2263e841-0c57-4f39-a0b2-b6cf58be612a",
+            "script": "{var localpos = {{1}};[[1]]}",
+            "help": "sprite at position",
+            "sockets": [
+                {
+                    "name": "Draw Sprite at"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "with"
+                },
+                {
+                    "type": "choice",
+                    "options": "blocks",
+                    "value": "choice"
+                },
+                {
+                    "type": "binary",
+                    "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "121c586a-4d41-4679-8497-4c781a63a0c8",
+            "sockets": [
+                {
+                    "name": "Add Sprite Line"
+                },
+                {
+                    "type": "binary",
+                    "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
+                }
+            ],
+            
+            "script": "addSpriteLine({{1}});",
+            "help": "add sprite line"
+        },
+        {
+            "blocktype": "step",
+            "id": "b608cd32-bf25-42c4-94d4-7efb00e6e153",
+            "script": "var sprite## = []; [[1]]",
+            "help": "Create a new sprite",
+            "sockets": [
+                {
+                    "name": "Create Sprite##"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Sprite##"
+                        }
+                    ],
+                    "script": "sprite##",
+                    "type":"sprite"
+                },
+                {
+                    "blocktype": "step",
+                    "sockets": [
+                        {
+                            "name": "add line"
+                        },
+                        {
+                            "type": "binary",
+                            "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
+                        },
+                    
+                        {
+                            "name": "to Sprite##"
+                        }
+                    ],
+                    "script": "sprite##.push({{1}});",
+                }
+            ],
+        },
+        {
+            "blocktype": "step",
+            "id": "bfb9092a-1533-47f0-b4f1-8e48f45d1fa7",
+            "script": "var drawingpos##={x:{{3}}.x,y:{{3}}.y+{{1}}.length,z:{{3}}.z}; {{1}}.foreach(function(rowid, rowdata){rowadata.foreach(function(colid, bitval){ if(bitval){client.setBlock(drawingpos##.x+colid, drawingpos##.y-rowid, drawingpos##.z, client.blocks[{{2}}])}else{client.setBlock(drawingpos##.x+colid, drawingpos##.y-rowid, drawingpos##.z, client.blocks[\"AIR\"])}})});",
+            "help": "Create a new sprite",
+            "sockets": [
+                {
+                    "name": "Draw"
+                },
+                {
+                    "type": "sprite"
+                },
+                {
+                    "name": "with"
+                },
+                {
+                    "type": "choice",
+                    "options": "blocks",
+                    "value": "choice"
+                },
+                {
+                    "name": "at"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ]
+        }
+    ]
+}
+);
+/*end languages/minecraftjs/sprite.json*/
 
 /*begin launch.js*/
 // Minimal script to run on load

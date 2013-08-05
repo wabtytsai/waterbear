@@ -850,3 +850,21 @@ pre .tex .formula {
 }
 
 /*end languages/minecraftjs/string.css*/
+
+/*begin languages/minecraftjs/sprite.css*/
+.sprites, .sprites .holder{
+    border-color: hsl(120, 81%, 49%);
+    background-color: hsl(120, 81%, 85%);
+}
+
+.binary, .binary .holder{
+    border-color: black;
+    background-color: grey;
+}
+
+.denary, .denary .holder{
+    border-color: hsl(120, 81%, 49%);
+    background-color: hsl(120, 81%, 85%);
+}
+
+/*end languages/minecraftjs/sprite.css*/

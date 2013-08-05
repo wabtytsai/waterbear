@@ -116,3 +116,7 @@ Position.prototype.set = function(x,y,z){
 /*begin languages/minecraftjs/string_runtime.js*/
 
 /*end languages/minecraftjs/string_runtime.js*/
+
+/*begin languages/minecraftjs/sprite_runtime.js*/
+
+/*end languages/minecraftjs/sprite_runtime.js*/
