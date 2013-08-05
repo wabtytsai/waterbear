@@ -1912,8 +1912,8 @@ hljs.LANGUAGES.javascript = {
             input = input.wbTarget;
         }
         svgtext.textContent = input.value;
-        var width = svgtext.getComputedTextLength();
-        input.style.width = (width + 20) + 'px';
+        var textbox = svgtext.getBBox();
+        input.style.width = (textbox.width*0.7 + 25) + 'px';
     };
 
     // wb.mag = function mag(p1, p2){
@@ -2614,6 +2614,7 @@ hljs.LANGUAGES.javascript = {
                 }else{
                     return wb.findAll(workspace, '.contained').concat([workspace]);
                 }
+            case 'asset':
             case 'expression':
                 var selector = expressionDropTypes(view.dataset.type).map(dataSelector).join(',');
                 if (!selector || !selector.length){
@@ -2761,6 +2762,14 @@ function uuid(){
         }
     }
 
+    var getSockets = function(block){
+        return wb.findChildren(wb.findChild(block, '.label'), '.socket');
+    }
+
+    var getSocketValue = function(socket){
+        return socketValue(wb.findChild(socket, '.holder'));
+    }
+
     var createSockets = function(obj){
         return obj.sockets.map(function(socket_descriptor){
             return Socket(socket_descriptor, obj);
@@ -2787,6 +2796,8 @@ function uuid(){
                     }else if (obj.blocktype === 'eventhandler'){
                         names.push('step');
                         names.push('context');
+                    }else if (obj.blocktype === 'asset'){
+                        names.push('expression');
                     }
                     return names.join(' ');
                 },
@@ -3256,6 +3267,8 @@ function uuid(){
     wb.codeFromBlock = codeFromBlock;
     wb.addBlockHandler = addBlock;
     wb.changeName = changeName;
+    wb.getSockets = getSockets;
+    wb.getSocketValue = getSocketValue;
 })(wb);
 
 
@@ -3502,7 +3515,8 @@ var language = location.pathname.match(/\/(.*)\.html/)[1];
 
 function clearScripts(event, force){
     if (force || confirm('Throw out the current script?')){
-        document.querySelector('.workspace > .scripts_workspace').remove();
+        var workspace = document.querySelector('.workspace > .scripts_workspace')
+        workspace.parentElement.removeChild(workspace);
         createWorkspace('Workspace');
 		document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
     }
@@ -3556,12 +3570,19 @@ function createDownloadUrl(evt){
     evt.preventDefault();
 }
 
-function comingSoon(evt){
-    alert('Restore will be working again soon. You can drag saved json files to the script workspace now.');
-}
-
 Event.on('.save_scripts', 'click', null, createDownloadUrl);
-Event.on('.restore_scripts', 'click', null, comingSoon);
+Event.on('.restore_scripts', 'click', null, loadScriptsFromFilesystem);
+
+function loadScriptsFromFilesystem(){
+    var input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'application/json');
+    input.addEventListener('change', function(evt){
+        var file = input.files[0];
+        loadScriptsFromFile(file);
+    });
+    input.click();
+}
 
 function loadScriptsFromObject(fileObject){
     // console.info('file format version: %s', fileObject.waterbearVersion);
@@ -3694,6 +3715,17 @@ function handleDragover(evt){
     evt.dataTransfer.dropEffect = 'copy';
 }
 
+function loadScriptsFromFile(file){
+    if ( file.type.indexOf( 'json' ) === -1 ) { return; }
+    var reader = new FileReader();
+    reader.readAsText( file );
+    reader.onload = function (evt){
+        clearScripts(null, true);
+        var saved = JSON.parse(evt.target.result);
+        loadScriptsFromObject(saved);
+    };
+}
+
 function getFiles(evt){
     evt.stopPropagation();
     evt.preventDefault();
@@ -3701,14 +3733,7 @@ function getFiles(evt){
     if ( files.length > 0 ){
         // we only support dropping one file for now
         var file = files[0];
-        if ( file.type.indexOf( 'json' ) === -1 ) { return; }
-        var reader = new FileReader();
-        reader.readAsText( file );
-        reader.onload = function (evt){
-            clearScripts(null, true);
-            var saved = JSON.parse(evt.target.result);
-            loadScriptsFromObject(saved);
-        };
+        loadScriptsFromFile(file);
     }
 }
 
