@@ -5688,7 +5688,7 @@ wb.menu({
                     "value": "00000000"
                 }
                 ],
-            "script": "parseInt(\"{{1}}\",2)",
+            "script": "\"{{1}}\"",
             "type": "binary",
             "help": "a binary number"
         },
@@ -5778,7 +5778,7 @@ wb.menu({
         {
             "blocktype": "step",
             "id": "bfb9092a-1533-47f0-b4f1-8e48f45d1fa7",
-            "script": "var drawingpos##={x:{{3}}.x,y:{{3}}.y+{{1}}.length,z:{{3}}.z}; {{1}}.forEach(function(rowid, rowdata){var rowtext = rowdata.toString(2); for(colid=0; colid<rowtext.length; colid++){ bitval = rowtext.charAt(colid); if(bitval===\"1\"){client.setBlock(drawingpos##.x+colid, drawingpos##.y-rowid, drawingpos##.z, client.blocks[{{2}}])}else{client.setBlock(drawingpos##.x+colid, drawingpos##.y-rowid, drawingpos##.z, client.blocks[\"AIR\"])}}});",
+            "script": "var drawingpos##={x:{{3}}.x,y:{{3}}.y+{{1}}.length,z:{{3}}.z}; {{1}}.forEach(function(rowtext, rowid){for(colid=0; colid<rowtext.length; colid++){ bitval = rowtext.charAt(colid); if(bitval===\"1\"){client.setBlock(drawingpos##.x+colid, drawingpos##.y-rowid, drawingpos##.z, client.blocks[{{2}}])}else{client.setBlock(drawingpos##.x+colid, drawingpos##.y-rowid, drawingpos##.z, client.blocks[\"AIR\"])}}});",
             "help": "Create a new sprite",
             "sockets": [
                 {
