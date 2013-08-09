@@ -3,6 +3,7 @@
     "blocks": [
         {
             "blocktype": "step",
+            "id": "a5b6f29f-e767-452f-955a-1ad1198196cc",
             "sockets": [
                 {
                     "name": "Say"
@@ -19,9 +20,24 @@
             "script": "client.chat({{1}});",
             "help": "Send a message as chat"
         },
+        {
+            "blocktype": "expression",
+            "id": "8eaacf8a-18eb-4f21-a1ab-a356326f7eae",
+            "script": "{{1}}.toString()",
+            "type": "string",
+            "help": "convert any object to a string",
+            "sockets": [
+                {
+                    "name": "to string",
+                    "type": "any",
+                    "value": null
+                }
+            ]
+        },
         
         {
             "blocktype": "step",
+            "id": "5f38e88c-0577-48bb-9deb-a3b09b537e5e",
             "sockets": [
                 {
                     "name": "Save Checkpoint"
@@ -34,6 +50,7 @@
         
         {
             "blocktype": "step",
+            "id": "a2f07713-6e72-4a2f-adfe-a262e1665d65",
             "sockets": [
                 {
                     "name": "Restore Checkpoint"
