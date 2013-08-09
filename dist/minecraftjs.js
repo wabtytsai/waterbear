@@ -3858,7 +3858,7 @@ wb.runScript = function(script){
     
     
     wb.ajax.jsonp("../run", query, function(msg){messagebox.innerHTML = "Code running on RPi"; window.setTimeout(function(){messagebox.innerHTML="";}, 5000);console.log("success",msg);}, function(msg){ messagebox.innerHTML = "Code failed / server not running on RPi"; window.setTimeout(function(){messagebox.innerHTML = "";}, 5000);console.log("error",msg);});
-    
+    window.setTimeout(function(){messagebox.innerHTML = "";}, 10000);
     //var runtimeUrl = location.protocol + '//' + location.host + '/dist/javascript_runtime.min.js';
     //console.log('trying to load library %s', runtimeUrl);
     //document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: //runtimeUrl, script: wb.wrap(script)}), '*');
