@@ -217,6 +217,117 @@
             "script": "\"x:\"+{{1}}.x.toString()+\", y:\"+{{1}}.y.toString()+\", z:\"+{{1}}.z.toString()",
             "type": "string",
             "help": "Position as text"
+        },
+        {
+            "blocktype": "step",
+            "id": "285fd9f1-2fe4-42ae-8fab-6ad5794c4d4d",
+            "sockets": [
+                {
+                    "name": "Create Distance## from"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "to"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],  
+            "script": "var posA## = {{1}}; var posB## = {{2}}; var distance## = Math.sqrt(Math.pow(posB##.x-posA##.x, 2)+Math.pow(posB##.y-posA##.y, 2)+Math.pow(posB##.z-posA##.z, 2));",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Distance##"
+                        },
+                    ],  
+                    
+                    "script": "distance##",
+                    "type": "number"
+                }
+            ],
+            "help": "create a distance between 2 positions"
+        },
+        {
+            "blocktype": "context",
+            "id": "10ec4498-1aa8-44ff-9620-b338a2cdc3cb",
+            "sockets": [
+                {
+                    "name": "For each direction from"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": "1"
+                },
+                {
+                    "name": "block(s)"
+                }
+            ],
+            "script": "directions.forEach(function(dir, idx){var position##=directioncalcs[dir]({{1}},{{2}});[[1]]});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Position##"
+                        }
+                    ],
+                    "script": "position##",
+                    "type": "position"
+                }
+            ],
+            "help": "Go around each direction"
+        },
+        {
+            "blocktype": "step",
+            "id": "5dfa6369-b4bc-4bb3-9b98-839015d5f9ee",
+            "sockets": [
+                {
+                    "name": "Create Position## from"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "offset by"
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": "1"
+                },
+                {
+                    "type": "choice",
+                    "options": "directions",
+                    "value": "choice"
+                }
+                
+            ],  
+            "script": "var position##=directioncalcs[{{3}}]({{1}},{{2}});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Position##"
+                        },
+                    ],  
+                    "script": "position##",
+                    "type": "position"
+                }
+            ],
+            "help": "create new position by adding a distance and direction"
         }
     ]
 }

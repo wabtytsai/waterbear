@@ -1,13 +1,10 @@
 
 /*begin languages/minecraftjs/minecraftjs_runtime.js*/
 
-function rad2deg(rad){
-    return rad / DEGREE;
-}
 
-function deg2rad(deg){
-    return deg * DEGREE;
-}
+/*end languages/minecraftjs/minecraftjs_runtime.js*/
+
+/*begin languages/minecraftjs/control_runtime.js*/
 
 function range(start, end, step){
     var rg = [];
@@ -28,17 +25,29 @@ function range(start, end, step){
     return rg;
 }
 
+/*end languages/minecraftjs/control_runtime.js*/
 
-function randint(start, stop){
-    // return an integer between start and stop, inclusive
-    if (stop === undefined){
-        stop = start;
-        start = 0;
-    }
-    var factor = stop - start + 1;
-    return Math.floor(Math.random() * factor) + start;
-}
+/*begin languages/minecraftjs/game_runtime.js*/
 
+/*end languages/minecraftjs/game_runtime.js*/
+
+/*begin languages/minecraftjs/player_runtime.js*/
+
+/*end languages/minecraftjs/player_runtime.js*/
+
+/*begin languages/minecraftjs/position_runtime.js*/
+var directioncalcs = {
+  "up":   function(pos, distance){return {x:pos.x, y:pos.y+distance, z:pos.z};},
+  "down": function(pos, distance){return {x:pos.x, y:pos.y-distance, z:pos.z};},
+  "north":function(pos, distance){return {x:pos.x, y:pos.y, z:pos.z+distance};},
+  "south":function(pos, distance){return {x:pos.x, y:pos.y, z:pos.z-distance};},
+  "west": function(pos, distance){return {x:pos.x-distance, y:pos.y, z:pos.z};},
+  "east": function(pos, distance){return {x:pos.x+distance, y:pos.y, z:pos.z};},
+  "none": function(pos, distance){return pos;}
+};
+var directions = ['up', 'down', 'north', 'south','east','west','none'];
+
+/*
 function Position(x,y,z){
     this.x = x;
     this.y = y;
@@ -73,23 +82,7 @@ Position.prototype.set = function(x,y,z){
     this.z = z;
     return this;
 }
-
-
-/*end languages/minecraftjs/minecraftjs_runtime.js*/
-
-/*begin languages/minecraftjs/control_runtime.js*/
-
-/*end languages/minecraftjs/control_runtime.js*/
-
-/*begin languages/minecraftjs/game_runtime.js*/
-
-/*end languages/minecraftjs/game_runtime.js*/
-
-/*begin languages/minecraftjs/player_runtime.js*/
-
-/*end languages/minecraftjs/player_runtime.js*/
-
-/*begin languages/minecraftjs/position_runtime.js*/
+*/
 
 /*end languages/minecraftjs/position_runtime.js*/
 
@@ -110,6 +103,24 @@ Position.prototype.set = function(x,y,z){
 /*end languages/minecraftjs/boolean_runtime.js*/
 
 /*begin languages/minecraftjs/math_runtime.js*/
+
+function rad2deg(rad){
+    return rad / DEGREE;
+}
+
+function deg2rad(deg){
+    return deg * DEGREE;
+}
+
+function randint(start, stop){
+    // return an integer between start and stop, inclusive
+    if (stop === undefined){
+        stop = start;
+        start = 0;
+    }
+    var factor = stop - start + 1;
+    return Math.floor(Math.random() * factor) + start;
+}
 
 /*end languages/minecraftjs/math_runtime.js*/
 

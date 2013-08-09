@@ -3766,54 +3766,19 @@ Event.on(document.body, 'wb-script-loaded', null, function(evt){console.log('scr
 
 // Add some utilities
 
-/*
-
-$('.runScripts').click(function(){
-     var blocks = $('.workspace:visible .scripts_workspace > .wrapper');
-     var code = blocks.prettyScript();
-     var query = $.param({'code':code});
-     
-     $.ajax({
-      url: '/run?',
-      data: query,
-      success: function(){alert("Code running on RPi");},
-      error: function(){alert("Code failed / server not running on RPi");}
-     });
-     
-     
-});
-
-// Add some utilities
-jQuery.fn.extend({
-    prettyScript: function(){
-        var script = this.map(function(){
-            return $(this).extract_script();
-        }).get().join('');
-        
-        script = "var Minecraft = require('./minecraft-pi/lib/minecraft.js'); \n var client = new Minecraft('localhost', 4711, function() {\n"+script+"\n});";
-        
-        return js_beautify(script);
-    },
-    writeScript: function(view){
-      view.html('<pre class="language-javascript">' + this.prettyScript() + '</pre>');
-      hljs.highlightBlock(view.children()[0]);
-    }
-});
-
-// End UI section
-*/
-
 wb.wrap = function(script){
-    //return 'try{' + script + '}catch(e){console,log(e);}})()';
     return script;
 }
 
 function runCurrentScripts(event){
         var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-        wb.runScript( wb.prettyScript(blocks) );
+        
+        var script = wb.runtimescript;
+        script = script + "\n\n"+ wb.prettyScript(blocks);
+        
+        wb.runScript( script );
         
 }
-Event.on('.runScripts', 'click', null, runCurrentScripts);
 
 
 wb.ajax = {
@@ -3837,9 +3802,32 @@ wb.ajax = {
             };
             xhr.open('GET', url + '?' + data + '&callback=' + callbackname, true);
             xhr.send();
+        },
+        text: function(url, data, success, error){
+            var cb = '&cb=' + Math.round(Math.random() * 10000);
+            var xhr = new XMLHttpRequest({"responseType":"text"});
+            //xhr. = "text";
+            xhr.onreadystatechange = function(){
+                if (xhr.readyState === 4){
+                    if (xhr.status === 200){
+                        // this is particularly unsafe code
+                        success(xhr.responseText); // this should call window[callbackname]
+                    }else{
+                        error(xhr);
+                    }
+                }
+            };
+            xhr.open('GET', url + '?' + data+cb, true);
+            xhr.send();
         }
     };
 
+Event.on('.runScripts', 'click', null, runCurrentScripts);
+wb.runtimescript = "";
+
+wb.ajax.text("./dist/minecraftjs_runtime.min.js","",function(ret){wb.runtimescript = ret;});
+    
+    
 wb.runScript = function(script){
   
     var params = {'code':script};
@@ -3869,7 +3857,7 @@ wb.runScript = function(script){
     
     
     
-    wb.ajax.jsonp("../run", query, function(msg){messagebox.innerHTML = "Code running on RPi"; window.setTimeout(function(){messagebox.innerHTML="";}, 5000);console.log("success",msg);}, function(){ messagebox.innerHTML = "Code failed / server not running on RPi"; window.setTimeout(function(){messagebox.innerHTML = "";}, 5000);console.log("error",msg);});
+    wb.ajax.jsonp("../run", query, function(msg){messagebox.innerHTML = "Code running on RPi"; window.setTimeout(function(){messagebox.innerHTML="";}, 5000);console.log("success",msg);}, function(msg){ messagebox.innerHTML = "Code failed / server not running on RPi"; window.setTimeout(function(){messagebox.innerHTML = "";}, 5000);console.log("error",msg);});
     
     //var runtimeUrl = location.protocol + '//' + location.host + '/dist/javascript_runtime.min.js';
     //console.log('trying to load library %s', runtimeUrl);
@@ -3888,7 +3876,7 @@ wb.prettyScript = function(elements){
     var script = js_beautify(elements.map(function(elem){
             return wb.codeFromBlock(elem);
         }).join(''));
-    script = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nrequire('./waterbear/dist/minecraftjs_runtime.js');\nvar client = new Minecraft('localhost', 4711, function() {\nvar zeros={x:0, y:0, z:0};\n"+script+"\n});";
+    script = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nvar client = new Minecraft('localhost', 4711, function() {\nvar zeros={x:0, y:0, z:0};\n"+script+"\n});";
     return script;
 };
 
@@ -3944,6 +3932,7 @@ Event.on('.socket input', 'click', null, function(event){
 
 wb.choiceLists.types = wb.choiceLists.types.concat(['position']);
 wb.choiceLists.rettypes = wb.choiceLists.rettypes.concat(['position']);
+wb.choiceLists.directions= ['up', 'down', 'north', 'south','east','west','none'];
 /*end languages/minecraftjs/position.js*/
 
 /*begin languages/minecraftjs/blocks.js*/
@@ -4175,6 +4164,7 @@ wb.menu({
     "blocks": [
         {
             "blocktype": "step",
+            "id": "a5b6f29f-e767-452f-955a-1ad1198196cc",
             "sockets": [
                 {
                     "name": "Say"
@@ -4191,9 +4181,24 @@ wb.menu({
             "script": "client.chat({{1}});",
             "help": "Send a message as chat"
         },
+        {
+            "blocktype": "expression",
+            "id": "8eaacf8a-18eb-4f21-a1ab-a356326f7eae",
+            "script": "{{1}}.toString()",
+            "type": "string",
+            "help": "convert any object to a string",
+            "sockets": [
+                {
+                    "name": "to string",
+                    "type": "any",
+                    "value": null
+                }
+            ]
+        },
         
         {
             "blocktype": "step",
+            "id": "5f38e88c-0577-48bb-9deb-a3b09b537e5e",
             "sockets": [
                 {
                     "name": "Save Checkpoint"
@@ -4206,6 +4211,7 @@ wb.menu({
         
         {
             "blocktype": "step",
+            "id": "a2f07713-6e72-4a2f-adfe-a262e1665d65",
             "sockets": [
                 {
                     "name": "Restore Checkpoint"
@@ -4231,7 +4237,7 @@ wb.menu({
                     "name": "Get Player Tile Position"
                 }
             ],
-            "script": "client.getTile(function(data){console.log(\"data =\", data); var aData = data.toString().trim().split(\",\"); console.log(\"aData =\", aData); var playerposition = {x:parseInt(aData[0],10), y: parseInt(aData[1],10), z: parseInt(aData[2],10)}; [[1]]});",
+            "script": "client.getTile(function(data){var aData = data.toString().trim().split(\",\"); var playerposition = {x:parseInt(aData[0],10), y: parseInt(aData[1],10), z: parseInt(aData[2],10)}; [[1]]});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -4545,6 +4551,117 @@ wb.menu({
             "script": "\"x:\"+{{1}}.x.toString()+\", y:\"+{{1}}.y.toString()+\", z:\"+{{1}}.z.toString()",
             "type": "string",
             "help": "Position as text"
+        },
+        {
+            "blocktype": "step",
+            "id": "285fd9f1-2fe4-42ae-8fab-6ad5794c4d4d",
+            "sockets": [
+                {
+                    "name": "Create Distance## from"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "to"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],  
+            "script": "var posA## = {{1}}; var posB## = {{2}}; var distance## = Math.sqrt(Math.pow(posB##.x-posA##.x, 2)+Math.pow(posB##.y-posA##.y, 2)+Math.pow(posB##.z-posA##.z, 2));",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Distance##"
+                        },
+                    ],  
+                    
+                    "script": "distance##",
+                    "type": "number"
+                }
+            ],
+            "help": "create a distance between 2 positions"
+        },
+        {
+            "blocktype": "context",
+            "id": "10ec4498-1aa8-44ff-9620-b338a2cdc3cb",
+            "sockets": [
+                {
+                    "name": "For each direction from"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": "1"
+                },
+                {
+                    "name": "block(s)"
+                }
+            ],
+            "script": "directions.forEach(function(dir, idx){var position##=directioncalcs[dir]({{1}},{{2}});[[1]]});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Position##"
+                        }
+                    ],
+                    "script": "position##",
+                    "type": "position"
+                }
+            ],
+            "help": "Go around each direction"
+        },
+        {
+            "blocktype": "step",
+            "id": "5dfa6369-b4bc-4bb3-9b98-839015d5f9ee",
+            "sockets": [
+                {
+                    "name": "Create Position## from"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "offset by"
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": "1"
+                },
+                {
+                    "type": "choice",
+                    "options": "directions",
+                    "value": "choice"
+                }
+                
+            ],  
+            "script": "var position##=directioncalcs[{{3}}]({{1}},{{2}});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Position##"
+                        },
+                    ],  
+                    "script": "position##",
+                    "type": "position"
+                }
+            ],
+            "help": "create new position by adding a distance and direction"
         }
     ]
 }
@@ -5691,49 +5808,6 @@ wb.menu({
             "script": "\"{{1}}\"",
             "type": "binary",
             "help": "a binary number"
-        },
-        {
-            "blocktype": "step",
-            "id": "2263e841-0c57-4f39-a0b2-b6cf58be612a",
-            "script": "{var localpos = {{1}};[[1]]}",
-            "help": "sprite at position",
-            "sockets": [
-                {
-                    "name": "Draw Sprite at"
-                },
-                {
-                    "type": "position",
-                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
-                },
-                {
-                    "name": "with"
-                },
-                {
-                    "type": "choice",
-                    "options": "blocks",
-                    "value": "choice"
-                },
-                {
-                    "type": "binary",
-                    "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "121c586a-4d41-4679-8497-4c781a63a0c8",
-            "sockets": [
-                {
-                    "name": "Add Sprite Line"
-                },
-                {
-                    "type": "binary",
-                    "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
-                }
-            ],
-            
-            "script": "addSpriteLine({{1}});",
-            "help": "add sprite line"
         },
         {
             "blocktype": "step",
