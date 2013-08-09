@@ -17,49 +17,6 @@
         },
         {
             "blocktype": "step",
-            "id": "2263e841-0c57-4f39-a0b2-b6cf58be612a",
-            "script": "{var localpos = {{1}};[[1]]}",
-            "help": "sprite at position",
-            "sockets": [
-                {
-                    "name": "Draw Sprite at"
-                },
-                {
-                    "type": "position",
-                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
-                },
-                {
-                    "name": "with"
-                },
-                {
-                    "type": "choice",
-                    "options": "blocks",
-                    "value": "choice"
-                },
-                {
-                    "type": "binary",
-                    "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "121c586a-4d41-4679-8497-4c781a63a0c8",
-            "sockets": [
-                {
-                    "name": "Add Sprite Line"
-                },
-                {
-                    "type": "binary",
-                    "block": "71dd8f09-053e-453c-90d3-d0af0c1bf514"
-                }
-            ],
-            
-            "script": "addSpriteLine({{1}});",
-            "help": "add sprite line"
-        },
-        {
-            "blocktype": "step",
             "id": "b608cd32-bf25-42c4-94d4-7efb00e6e153",
             "script": "var sprite## = []; [[1]]",
             "help": "Create a new sprite",
