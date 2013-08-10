@@ -9,7 +9,7 @@
                     "name": "Get Player Tile Position"
                 }
             ],
-            "script": "client.getTile(function(data){var aData = data.toString().trim().split(\",\"); var playerposition = {x:parseInt(aData[0],10), y: parseInt(aData[1],10), z: parseInt(aData[2],10)}; [[1]]});",
+            "script": "client.getTile(function(data){var aData = data.toString().trim().split(\",\"); var playerposition = {x:Math.floor(parseFloat(aData[0],10)), y: Math.floor(parseFloat(aData[1],10))-1, z: Math.floor(parseFloat(aData[2],10))}; [[1]]});",
             "locals": [
                 {
                     "blocktype": "expression",
