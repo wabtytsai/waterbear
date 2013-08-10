@@ -4,9 +4,10 @@
     "blocks": [
         {
             "blocktype": "context",
+            "id": "c500a7f0-7117-40ea-9139-b161e19f190b",
             "sockets": [
                     {
-                        "name": "get Block Type at "
+                        "name": "Get Block Type at "
                     },
                     {
                         "type": "position",
@@ -19,11 +20,21 @@
                     "blocktype": "expression",
                     "sockets": [
                             {
-                                "name": "block##"
+                                "name": "Block Type Number"
                             }
                         ],
-                    "script": "parseInt(block##)",
+                    "script": "parseInt(block##, 10)",
                     "type": "number"
+                },
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                            {
+                                "name": "Block Type Name"
+                            }
+                        ],
+                    "script": "Object.keys(client.blocks).filter(function(element){return (client.blocks[element] === parseInt(block##));})",
+                    "type": "string"
                 }
             ],
             "help": "get block type at x, y, z"
@@ -38,7 +49,7 @@
                     "value": "choice"
                 }
                 ],
-            "script": "{{1}}",
+            "script": "client.blocks[{{1}}]",
             "type": "number",
             "help": "a blocktype"
         },
