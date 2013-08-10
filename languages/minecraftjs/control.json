@@ -20,8 +20,10 @@
             "sockets": [
                 {
                     "name": "if",
-                    "type": "boolean",
-                    "value": null
+                },
+                {
+                    "type":"boolean",
+                    "block":"e3a5ea20-3ca9-42cf-ac02-77ff06836a7e"
                 }
             ]
         },
@@ -33,8 +35,10 @@
             "sockets": [
                 {
                     "name": "if not",
-                    "type": "boolean",
-                    "value": null
+                },
+                {
+                    "type":"boolean",
+                    "block":"e3a5ea20-3ca9-42cf-ac02-77ff06836a7e"
                 }
             ]
         },
@@ -46,8 +50,10 @@
             "sockets": [
                 {
                     "name": "repeat until",
-                    "type": "boolean",
-                    "value": null
+                },
+                {
+                    "type":"boolean",
+                    "block":"e3a5ea20-3ca9-42cf-ac02-77ff06836a7e"
                 }
             ]
         },
