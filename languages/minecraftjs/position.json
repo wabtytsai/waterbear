@@ -26,19 +26,6 @@
             "help": "A position: x is across, y is up and z is depth"
         },
         {
-            "blocktype": "expression",
-            "id": "590c8aef-a755-4df5-8930-b430db5a3c3d",
-            "sockets": [
-                {
-                    "name": "Centre Position"
-                },
-            ], 
-            "type":"position",
-            "script": "zeros",
-            "help": "position"
-        },
-        
-        {
             "blocktype": "step",
             "id": "0ae2eba9-582e-4a3a-92b2-0f8484397e90",
             "sockets": [
@@ -122,6 +109,28 @@
             ],
             
             "help": "create new position by adding 2 others"
+        },
+        {
+            "blocktype": "step",
+            "id": "e28a420d-9b94-4480-ad0f-ebe4e68134b0",
+            "sockets": [
+                {
+                    "name": "Set"
+                },
+                {
+                    "type": "position",
+                    "block": "590c8aef-a755-4df5-8930-b430db5a3c3d"
+                },
+                {
+                    "name": "to"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],  
+            "script": "{{1}} = {{2));",
+            "help": "Set position variable to a new postion"
         },
         {
             "blocktype": "context",
@@ -290,7 +299,7 @@
         },
         {
             "blocktype": "step",
-            "id": "5dfa6369-b4bc-4bb3-9b98-839015d5f9ee",
+            "id": "4072476e-cdc4-43b1-b36b-a8c5829c113c",
             "sockets": [
                 {
                     "name": "Create Position## from"
@@ -328,6 +337,18 @@
                 }
             ],
             "help": "create new position by adding a distance and direction"
+        },
+        {
+            "blocktype": "expression",
+            "id": "590c8aef-a755-4df5-8930-b430db5a3c3d",
+            "sockets": [
+                {
+                    "name": "Temp Position"
+                },
+            ], 
+            "type":"position",
+            "script": "tempposition",
+            "help": "position"
         }
     ]
 }
