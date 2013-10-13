@@ -5,6 +5,22 @@ html, body{
     overflow: hidden;
     background-color: #FFF;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	/*CSS rules to disable text selection highlighting*/
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.scripts_text_view {
+	-webkit-touch-callout: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 }
 
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,aside,section,hgroup,footer,nav,figure,header,article,input,textarea,p,blockquote,th,td {
@@ -128,8 +144,8 @@ body.editor #block_menu{
 }
 
 .dropCursor {
-    height: 0;
-    outline: 2px solid red;
+    height: 2px;
+    background-color: red;
     width: 75%
     float: left;
     clear: left;
@@ -759,6 +775,10 @@ pre .tex .formula {
 
 /*end languages/javascript/javascript.css*/
 
+/*begin languages/javascript/asset.css*/
+
+/*end languages/javascript/asset.css*/
+
 /*begin languages/javascript/control.css*/
 .controls, .controls .holder{
     border-color: hsl(44, 81%, 49%);
@@ -779,6 +799,18 @@ pre .tex .formula {
     background-color: hsl(150, 81%, 85%);
 }
 /*end languages/javascript/sprite.css*/
+
+/*begin languages/javascript/voice.css*/
+.voices, .voices .holder{
+    border-color: hsl(120, 81%, 49%);
+    background-color: hsl(120, 81%, 85%);
+}
+
+.movingvoice, .movingvoice .holder{
+    border-color: hsl(150, 81%, 49%);
+    background-color: hsl(150, 81%, 85%);
+}
+/*end languages/javascript/voice.css*/
 
 /*begin languages/javascript/array.css*/
 .arrays, .arrays .holder{

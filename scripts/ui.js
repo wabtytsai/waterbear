@@ -30,9 +30,13 @@ Event.on('#block_menu', 'click', '.accordion-header', accordion);
 function showWorkspace(mode){
     var workspace = document.querySelector('.workspace');
     if (mode === 'block'){
+	    document.querySelector('.scripts_workspace').style.display = '';
+	    document.querySelector('.scripts_text_view').style.display = 'none';
         workspace.classList.remove('textview');
         workspace.classList.add('blockview');
     }else if (mode === 'text'){
+    	document.querySelector('.scripts_workspace').style.display = 'none';
+    	document.querySelector('.scripts_text_view').style.display = '';
         workspace.classList.remove('blockview');
         workspace.classList.add('textview');
     }
@@ -191,20 +195,18 @@ function is_touch_device() {
 wb.menu = function(blockspec){
     var title = blockspec.name.replace(/\W/g, '');
     var specs = blockspec.blocks;
-	switch(wb.view){
-		case 'result': return run_menu(title, specs);
-		case 'blocks': return edit_menu(title, specs);
-		case 'editor': return edit_menu(title, specs);
-		default: return edit_menu(title, specs);
-	}
+    return edit_menu(title, specs);
+	// switch(wb.view){
+	// 	case 'result': return run_menu(title, specs);
+	// 	case 'blocks': return edit_menu(title, specs);
+	// 	case 'editor': return edit_menu(title, specs);
+	// 	default: return edit_menu(title, specs);
+	// }
 };
 
 if (wb.view === 'result'){
+    console.log('listen for script load');
     Event.once(document.body, 'wb-script-loaded', null, runCurrentScripts);
-}
-
-function run_menu(title, specs){
-    edit_menu(title, specs);
 }
 
 

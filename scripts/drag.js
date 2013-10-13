@@ -51,6 +51,7 @@
     var dragTimeout = 20;
     var snapDist = 25; //In pixels
     var startParent;
+    var startSibling;
     var startIndex;
     var timer;
     var dragTarget;
@@ -93,12 +94,16 @@
         // DONE: Don't start drag on a text input or select using :input jquery selector
         var eT = event.wbTarget;
         //Check whther the original target was an input ....
-        if (wb.matches(event.target, 'input, select, option, .disclosure,.scripts_workspace')  && !wb.matches(eT, '#block_menu *')) {
-            console.log('not a drag handle');
+        if (wb.matches(event.target, 'input, select, option, .disclosure, .contained')  && !wb.matches(eT, '#block_menu *')) {
+            // console.log('not a drag handle');
             return undefined;
         }
         var target = wb.closest(eT, '.block');
         if (target){
+            if (wb.matches(target, '.scripts_workspace')){
+                // don't start drag on workspace block
+                return undefined;
+            }
             // console.log('got a drag target: %o', target);
             dragTarget = target;
             if (target.parentElement.classList.contains('block-menu')){
@@ -111,6 +116,11 @@
             startPosition = wb.rect(target);
             if (! wb.matches(target.parentElement, '.scripts_workspace')){
                 startParent = target.parentElement;
+            }
+            startSibling = target.nextElementSibling;
+            if(startSibling && !wb.matches(startSibling, '.block')) {
+            	// Sometimes the "next sibling" ends up being the cursor
+            	startSibling = startSibling.nextElementSibling;
             }
             // Need index too, if it is a step
             if (wb.matches(target, '.step')){
@@ -220,12 +230,12 @@
         clearTimeout(timer);
         timer = null;
         if (!dragging) {return undefined;}
-        handleDrop();
+        handleDrop(end.altKey || end.ctrlKey);
         reset();
         return false;
     }
 
-    function handleDrop(){
+    function handleDrop(copyBlock){
         // TODO:
            // is it over the menu
            // 1. Drop if there is a target
@@ -246,11 +256,19 @@
             if (wb.matches(dragTarget, '.step')){
                 // Drag a step to snap to a step
                 // dropTarget.parent().append(dragTarget);
+                if(copyBlock) {
+                	revertDrop();
+                	dragTarget = wb.cloneBlock(dragTarget);
+                }
                 dropTarget.insertBefore(dragTarget, dropCursor());
                 dragTarget.removeAttribute('style');
                 Event.trigger(dragTarget, 'wb-add');
             }else{
                 // Insert a value block into a socket
+                if(copyBlock) {
+                	revertDrop();
+                	dragTarget = wb.cloneBlock(dragTarget);
+                }
                 dropTarget.appendChild(dragTarget);
                 dragTarget.removeAttribute('style');
                 Event.trigger(dragTarget, 'wb-add');
@@ -260,22 +278,31 @@
                 // remove cloned block (from menu)
                 dragTarget.parentElement.removeChild(dragTarget);
             }else{
-                // Put blocks back where we got them from
-                if (startParent){
-                    if (wb.matches(startParent, '.socket')){
-                        // wb.findChildren(startParent, 'input').forEach(function(elem){
-                        //     elem.hide();
-                        // });
-                    }
-                    startParent.appendChild(dragTarget); // FIXME: We'll need an index into the contained array
-                    dragTarget.removeAttribute('style');
-                    startParent = null;
-                }else{
-                    workspace.appendChild(dragTarget); // FIXME: We'll need an index into the canvas array
-                    wb.reposition(dragTarget, startPosition);
-                }
+            	revertDrop();
             }
         }
+    }
+    
+    function revertDrop() {
+		// Put blocks back where we got them from
+		if (startParent){
+			if (wb.matches(startParent, '.socket')){
+				// wb.findChildren(startParent, 'input').forEach(function(elem){
+				//     elem.hide();
+				// });
+			}
+			if(startSibling) {
+				startParent.insertBefore(dragTarget, startSibling);
+			} else {
+				startParent.appendChild(dragTarget);
+			}
+			dragTarget.removeAttribute('style');
+			startParent = null;
+		}else{
+			workspace.appendChild(dragTarget); // FIXME: We'll need an index into the canvas array
+			wb.reposition(dragTarget, startPosition);
+		}
+        Event.trigger(dragTarget, 'wb-add');
     }
 
     function positionExpressionDropCursor(){

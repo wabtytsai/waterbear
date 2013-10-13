@@ -2076,7 +2076,7 @@ hljs.LANGUAGES.javascript = {
     wb.jsonp = function(url, callback){
         var id = 'handler' + Math.floor(Math.random() * 0xFFFF);
         var handler = function(data){
-            // remove jsonp element
+            // remove jsonp 
             var script = document.getElementById(id);
             script.parentElement.removeChild(script);
             // remove self
@@ -2084,10 +2084,28 @@ hljs.LANGUAGES.javascript = {
             callback(data);
         };
         window[id] = handler;
-        document.head.appendChild(wb.elem('script', {src: url + '?callback=' + id, id: id}));
+        document.head.appendChild(wb.elem('script', {src: url + '?callback=' + id, id: id, language: 'text/json'}));
     }
 
-
+    /* adapted from code here: http://javascriptexample.net/ajax01.php */
+    wb.ajax = function(url, success, failure){
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function() {
+            var cType;
+            if (req.readyState === 4) {
+                if (req.status === 200) {
+                    cType = this.getResponseHeader("Content-Type");
+                    success(this.responseText, cType);
+                }else{
+                    if (failure){
+                        failure(this.status, this);
+                    }
+                }
+            }
+        }
+        req.open('GET', url, true);
+        req.send(null);
+    }
 
 
 })(this);
@@ -2282,6 +2300,7 @@ hljs.LANGUAGES.javascript = {
     var dragTimeout = 20;
     var snapDist = 25; //In pixels
     var startParent;
+    var startSibling;
     var startIndex;
     var timer;
     var dragTarget;
@@ -2324,12 +2343,16 @@ hljs.LANGUAGES.javascript = {
         // DONE: Don't start drag on a text input or select using :input jquery selector
         var eT = event.wbTarget;
         //Check whther the original target was an input ....
-        if (wb.matches(event.target, 'input, select, option, .disclosure,.scripts_workspace')  && !wb.matches(eT, '#block_menu *')) {
-            console.log('not a drag handle');
+        if (wb.matches(event.target, 'input, select, option, .disclosure, .contained')  && !wb.matches(eT, '#block_menu *')) {
+            // console.log('not a drag handle');
             return undefined;
         }
         var target = wb.closest(eT, '.block');
         if (target){
+            if (wb.matches(target, '.scripts_workspace')){
+                // don't start drag on workspace block
+                return undefined;
+            }
             // console.log('got a drag target: %o', target);
             dragTarget = target;
             if (target.parentElement.classList.contains('block-menu')){
@@ -2342,6 +2365,11 @@ hljs.LANGUAGES.javascript = {
             startPosition = wb.rect(target);
             if (! wb.matches(target.parentElement, '.scripts_workspace')){
                 startParent = target.parentElement;
+            }
+            startSibling = target.nextElementSibling;
+            if(startSibling && !wb.matches(startSibling, '.block')) {
+            	// Sometimes the "next sibling" ends up being the cursor
+            	startSibling = startSibling.nextElementSibling;
             }
             // Need index too, if it is a step
             if (wb.matches(target, '.step')){
@@ -2451,12 +2479,12 @@ hljs.LANGUAGES.javascript = {
         clearTimeout(timer);
         timer = null;
         if (!dragging) {return undefined;}
-        handleDrop();
+        handleDrop(end.altKey || end.ctrlKey);
         reset();
         return false;
     }
 
-    function handleDrop(){
+    function handleDrop(copyBlock){
         // TODO:
            // is it over the menu
            // 1. Drop if there is a target
@@ -2477,11 +2505,19 @@ hljs.LANGUAGES.javascript = {
             if (wb.matches(dragTarget, '.step')){
                 // Drag a step to snap to a step
                 // dropTarget.parent().append(dragTarget);
+                if(copyBlock) {
+                	revertDrop();
+                	dragTarget = wb.cloneBlock(dragTarget);
+                }
                 dropTarget.insertBefore(dragTarget, dropCursor());
                 dragTarget.removeAttribute('style');
                 Event.trigger(dragTarget, 'wb-add');
             }else{
                 // Insert a value block into a socket
+                if(copyBlock) {
+                	revertDrop();
+                	dragTarget = wb.cloneBlock(dragTarget);
+                }
                 dropTarget.appendChild(dragTarget);
                 dragTarget.removeAttribute('style');
                 Event.trigger(dragTarget, 'wb-add');
@@ -2491,22 +2527,31 @@ hljs.LANGUAGES.javascript = {
                 // remove cloned block (from menu)
                 dragTarget.parentElement.removeChild(dragTarget);
             }else{
-                // Put blocks back where we got them from
-                if (startParent){
-                    if (wb.matches(startParent, '.socket')){
-                        // wb.findChildren(startParent, 'input').forEach(function(elem){
-                        //     elem.hide();
-                        // });
-                    }
-                    startParent.appendChild(dragTarget); // FIXME: We'll need an index into the contained array
-                    dragTarget.removeAttribute('style');
-                    startParent = null;
-                }else{
-                    workspace.appendChild(dragTarget); // FIXME: We'll need an index into the canvas array
-                    wb.reposition(dragTarget, startPosition);
-                }
+            	revertDrop();
             }
         }
+    }
+    
+    function revertDrop() {
+		// Put blocks back where we got them from
+		if (startParent){
+			if (wb.matches(startParent, '.socket')){
+				// wb.findChildren(startParent, 'input').forEach(function(elem){
+				//     elem.hide();
+				// });
+			}
+			if(startSibling) {
+				startParent.insertBefore(dragTarget, startSibling);
+			} else {
+				startParent.appendChild(dragTarget);
+			}
+			dragTarget.removeAttribute('style');
+			startParent = null;
+		}else{
+			workspace.appendChild(dragTarget); // FIXME: We'll need an index into the canvas array
+			wb.reposition(dragTarget, startPosition);
+		}
+        Event.trigger(dragTarget, 'wb-add');
     }
 
     function positionExpressionDropCursor(){
@@ -3162,6 +3207,13 @@ function uuid(){
                 value = obj.uValue || obj.value || '';
         }
         var input = elem('input', {type: type, value: value});
+
+        //Only enable editing for the appropriate types
+        if (!(type === "string" || type === "any" || 
+              type === "number" || type === "color")) {
+            input.readOnly = true;
+        }
+
         wb.resize(input);
         return input;
     }
@@ -3172,7 +3224,7 @@ function uuid(){
         }else{
             var value = wb.findChild(holder, 'input, select').value;
             var type = holder.parentElement.dataset.type;
-            if (type === 'string' || type === 'choice'){
+            if (type === 'string' || type === 'choice' || type === 'color'){
                 if (value[0] === '"'){value = value.slice(1);}
                 if (value[value.length-1] === '"'){value = value.slice(0,-1);}
                 value = value.replace(/"/g, '\\"');
@@ -3235,6 +3287,19 @@ function uuid(){
         instances.forEach(function(elem){
             wb.find(elem, '.name').textContent = newName;
         });
+
+        //Change name of parent
+        var parent = document.getElementById(source.dataset.localSource);
+        var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
+        nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
+
+        //Change locals name of parent
+        var parentLocals = JSON.parse(parent.dataset.locals);
+        var localSocket = parentLocals[0].sockets[0];
+        localSocket.name = newName;
+        parent.dataset.locals = JSON.stringify(parentLocals);
+
+        wb.find(parent, '.name').textContent = nameTemplate;
     }
 
     function cancelUpdateName(event){
@@ -3307,9 +3372,13 @@ Event.on('#block_menu', 'click', '.accordion-header', accordion);
 function showWorkspace(mode){
     var workspace = document.querySelector('.workspace');
     if (mode === 'block'){
+	    document.querySelector('.scripts_workspace').style.display = '';
+	    document.querySelector('.scripts_text_view').style.display = 'none';
         workspace.classList.remove('textview');
         workspace.classList.add('blockview');
     }else if (mode === 'text'){
+    	document.querySelector('.scripts_workspace').style.display = 'none';
+    	document.querySelector('.scripts_text_view').style.display = '';
         workspace.classList.remove('blockview');
         workspace.classList.add('textview');
     }
@@ -3468,20 +3537,18 @@ function is_touch_device() {
 wb.menu = function(blockspec){
     var title = blockspec.name.replace(/\W/g, '');
     var specs = blockspec.blocks;
-	switch(wb.view){
-		case 'result': return run_menu(title, specs);
-		case 'blocks': return edit_menu(title, specs);
-		case 'editor': return edit_menu(title, specs);
-		default: return edit_menu(title, specs);
-	}
+    return edit_menu(title, specs);
+	// switch(wb.view){
+	// 	case 'result': return run_menu(title, specs);
+	// 	case 'blocks': return edit_menu(title, specs);
+	// 	case 'editor': return edit_menu(title, specs);
+	// 	default: return edit_menu(title, specs);
+	// }
 };
 
 if (wb.view === 'result'){
+    console.log('listen for script load');
     Event.once(document.body, 'wb-script-loaded', null, runCurrentScripts);
-}
-
-function run_menu(title, specs){
-    edit_menu(title, specs);
 }
 
 
@@ -3620,6 +3687,14 @@ function loadScriptsFromGist(gist){
 	loadScriptsFromObject(JSON.parse(file));
 }
 
+function loadScriptsFromExample(name){
+    wb.ajax('examples/' + name + '.json', function(exampleJson){
+        loadScriptsFromObject(JSON.parse(exampleJson));
+    }, function(xhr, status){
+        console.error('Error in wb.ajax: %s', status);
+    });
+}
+
 function runScriptFromGist(gist){
 	console.log('running script from gist');
 	var keys = Object.keys(gist.data.files);
@@ -3647,6 +3722,8 @@ wb.loadCurrentScripts = function(queryParsed){
     			'https://api.github.com/gists/' + queryParsed.gist,
     			loadScriptsFromGist
     		);
+        }else if (queryParsed.example){
+            loadScriptsFromExample(queryParsed.example);
     	}else if (localStorage['__' + language + '_current_scripts']){
             var fileObject = JSON.parse(localStorage['__' + language + '_current_scripts']);
             if (fileObject){
@@ -3659,20 +3736,6 @@ wb.loadCurrentScripts = function(queryParsed){
     }
     Event.trigger(document.body, 'wb-loaded');
 };
-
-wb.runCurrentScripts = function(queryParsed){
-	if (queryParsed.gist){
-		wp.json(
-			'https://api.github.com/gists/' + queryParsed.gist,
-			runScriptFromGist
-		);
-	}else if (localStorage['__' + language + '_current_scripts']){
-		var fileObject = localStorage['__' + language + '_current_scripts'];
-		if (fileObject){
-			wb.runScript(fileObject);
-		}
-	}
-}
 
 
 // Allow saved scripts to be dropped in
@@ -3716,7 +3779,11 @@ function handleDragover(evt){
 }
 
 function loadScriptsFromFile(file){
-    if ( file.type.indexOf( 'json' ) === -1 ) { return; }
+    fileName = file.name;
+    if (fileName.indexOf('.json', fileName.length - 5) === -1) {
+        console.error("File not a JSON file");
+        return;
+    }
     var reader = new FileReader();
     reader.readAsText( file );
     reader.onload = function (evt){
@@ -3748,7 +3815,7 @@ Event.on('.workspace', 'click', '.disclosure', function(evt){
 
 Event.on('.workspace', 'dblclick', '.locals .name', wb.changeName);
 Event.on('.workspace', 'keypress', 'input', wb.resize);
-Event.on(document.body, 'wb-loaded', null, function(evt){console.log('loaded');});
+Event.on(document.body, 'wb-loaded', null, function(evt){console.log('menu loaded');});
 Event.on(document.body, 'wb-script-loaded', null, function(evt){console.log('script loaded');});
 })(wb);
 
@@ -3774,7 +3841,9 @@ wb.wrap = function(script){
                 'local.canvas.setAttribute("width", global.stage_width);',
                 'local.canvas.setAttribute("height", global.stage_height);',
                 'global.stage.appendChild(local.canvas);',
+                'local.canvas.focus()',
                 'local.ctx = local.canvas.getContext("2d");',
+                'local.ctx.textAlign = "center";',
                 'var main = function(){',
                     script,
                 '}',
@@ -3795,21 +3864,35 @@ function assetUrls(){
 }
 
 function runCurrentScripts(event){
-    if (document.body.className === 'result' && wb.script){
-        wb.runScript(wb.script);
-    }else{
-        var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-        document.body.className = 'result';
-        wb.runScript( wb.prettyScript(blocks) );
-    }
+    var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
+    document.body.className = 'result';
+    wb.runScript( wb.prettyScript(blocks) );
 }
 Event.on('.runScripts', 'click', null, runCurrentScripts);
 
+window.addEventListener('load', function(event){
+    console.log('iframe ready');
+    wb.iframeready = true;
+    if (wb.iframewaiting){
+        wb.iframewaiting();
+    }
+    wb.iframewaiting = null;
+}, false);
+
 wb.runScript = function(script){
-    wb.script = script;
-    var runtimeUrl = location.protocol + '//' + location.host + '/dist/javascript_runtime.js';
-    console.log('trying to load library %s', runtimeUrl);
-    document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: runtimeUrl, script: wb.wrap(script)}), '*');
+    var run = function(){
+        wb.script = script;
+        var path = location.pathname.slice(0,location.pathname.lastIndexOf('/'));
+        var runtimeUrl = location.protocol + '//' + location.host + path + '/dist/javascript_runtime.js';
+        // console.log('trying to load library %s', runtimeUrl);
+        document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: runtimeUrl, script: wb.wrap(script)}), '*');
+        document.querySelector('.stageframe').focus();
+    };
+    if (wb.iframeready){
+        run();
+    }else{
+        wb.iframewaiting = run;
+    }
 }
 
 function clearStage(event){
@@ -3867,6 +3950,10 @@ Event.on('.socket input', 'click', null, function(event){
 
 /*end languages/javascript/javascript.js*/
 
+/*begin languages/javascript/asset.js*/
+
+/*end languages/javascript/asset.js*/
+
 /*begin languages/javascript/control.js*/
 
 /*end languages/javascript/control.js*/
@@ -3885,6 +3972,21 @@ wb.choiceLists.rettypes.push('sprite');
 
 
 /*end languages/javascript/sprite.js*/
+
+/*begin languages/javascript/voice.js*/
+/*
+ *    Music Plugin
+ *
+ *    Support for playing music/sounds using Waterbear
+ *
+ */
+
+
+wb.choiceLists.types.push('voice');
+wb.choiceLists.rettypes.push('voice');
+
+
+/*end languages/javascript/voice.js*/
 
 /*begin languages/javascript/array.js*/
 
@@ -3997,7 +4099,7 @@ wb.menu({
         {
             "blocktype": "eventhandler",
             "id": "f4a604cd-f0b5-4133-9f91-4e1abe48fb6a",
-            "script": "$(document).bind(\"keydown\", {{1}}, function(){[[1]]; return false;});",
+            "script": "document.addEventListener('keydown', function(event){ if (global.keyForEvent(event) === {{1}}){[[1]];}});",
             "help": "this trigger will run the attached blocks every time this key is pressed",
             "sockets": [
                 {
@@ -4026,7 +4128,7 @@ wb.menu({
                     "type": "number"
                 }
             ],
-            "script": "local.count##=0;(function(){setInterval(function(){local.count##++;[[1]]},1000/{{1}})})();",
+            "script": "(function(){local.count##=0;setInterval(function(){local.count##++;[[1]]},1000/{{1}})})();",
             "help": "this trigger will run the attached blocks periodically",
             "sockets": [
                 {
@@ -4036,6 +4138,36 @@ wb.menu({
                 },
                 {
                     "name": "times a second"
+                }
+            ]
+        },
+        {
+            "blocktype": "eventhandler",
+            "id": "47AA31E2-5A90-4AF1-8F98-5FDD437561B6",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "count##"
+                        }
+                    ],
+                    "script": "local.count##",
+                    "type": "number"
+                }
+            ],
+            "script": "(function(){local.count##=0;local.timerid##=setInterval(function(){local.count##++;if({{2}}){clearInterval(local.timerid##);return;}[[1]]},1000/{{1}});})();",
+            "help": "this trigger will run the attached blocks periodically",
+            "sockets": [
+                {
+                    "name": "repeat",
+                    "type": "number",
+                    "value": "30"
+                },
+                {
+                    "name": "times a second until",
+                    "type": "boolean",
+                    "value": "true"
                 }
             ]
         },
@@ -4058,7 +4190,7 @@ wb.menu({
             "help": "create a reference to re-use the any",
             "sockets": [
                 {
-                    "name": "variable",
+                    "name": "variable variable##",
                     "type": "any",
                     "value": null
                 }
@@ -4083,13 +4215,31 @@ wb.menu({
             ]
         },
         {
+            "blocktype": "step",
+            "id": "9AED48C9-A90B-49FB-9C1A-FD632F0388F5",
+            "script": "{{1}} += {{2}};",
+            "help": "first argument must be a variable",
+            "sockets": [
+                {
+                    "name": "increment variable",
+                    "type": "any",
+                    "value": null
+                },
+                {
+                    "name": "by",
+                    "type": "any",
+                    "value": 1
+                }
+            ]
+        },
+        {
             "blocktype": "context",
             "id": "66b33236-c9ce-4b6c-9b69-e8c4fdadbf52",
             "script": "setTimeout(function(){[[1]]},1000*{{1}});",
             "help": "pause before running the following blocks",
             "sockets": [
                 {
-                    "name": "wait",
+                    "name": "schedule in",
                     "type": "number",
                     "value": "1"
                 },
@@ -4230,7 +4380,7 @@ wb.menu({
         {
             "blocktype": "context",
             "id": "6dddaf61-caf0-4976-a3f1-9d9c3bbbf5a4",
-            "script": "if( ! {{1}} ){ [[1]]} }",
+            "script": "if( ! {{1}} ){ [[1]] }",
             "help": "run the  blocks if the condition is not true",
             "sockets": [
                 {
@@ -4337,6 +4487,108 @@ wb.menu({
             ]
         },
         {
+            "blocktype": "step",
+            "id": "468e4180-2221-11e3-8224-0800200c9a66",
+            "script": "{{1}}.setFacingDirectionBy({{2}});",
+            "help": "Rotate the sprites facing direction absolutely",
+            "sockets": [
+                {
+                    "name": "Turn sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "name": "degrees"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "69998440-22f4-11e3-8224-0800200c9a66",
+            "script": "{{1}}.setFacingDirection({{2}});",
+            "help": "Rotate the sprites facing direction",
+            "sockets": [
+                {
+                    "name": "Turn sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "to",
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "name": "degrees"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "71c09d20-22f4-11e3-8224-0800200c9a66",
+            "script": "{{1}}.setMovementDirectionBy({{2}});",
+            "help": "Rotate the sprites movement direction",
+            "sockets": [
+                {
+                    "name": "Steer sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "name": "degrees"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "7ecb947f-28ac-4418-bc44-cd797be697c9",
+            "script": "{{1}}.setMovementDirection({{2}});",
+            "help": "Rotate the sprites movement direction",
+            "sockets": [
+                {
+                    "name": "Steer sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "to",
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "name": "degrees"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "7381ea40-22f6-11e3-8224-0800200c9a66",
+            "script": "{{1}}.autosteer = ({{2}});",
+            "help": "Set the sprite to sync facing and movement directions",
+            "sockets": [
+                {
+                    "name": "Autosteer sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "",
+                    "type": "boolean",
+                    "value": 0
+                }
+            ]
+        },
+        {
             "blocktype": "expression",
             "id": "04c9dfd8-82eb-4f64-9d1c-54b78d744c21",
             "script": "{{1}}.collides({{2}})",
@@ -4358,7 +4610,7 @@ wb.menu({
         {
             "blocktype": "step",
             "id": "d1521a30-c7bd-4f42-b21d-6330a2a73631",
-            "script": "(function(sprite,dx,dy){sprite.x += dx;sprite.y += dy;})({{1}},{{2}},{{3}});",
+            "script": "{{1}}.moveRelative({{2}},{{3}});",
             "help": "move a sprite relatively",
             "sockets": [
                 {
@@ -4382,7 +4634,7 @@ wb.menu({
             "blocktype": "step",
             "id": "372de8c1-5f72-49cb-a2bd-faf66c36e318",
             "help": "move a sprite by its own speed and direction",
-            "script": "(function(sprite){sprite.x+=sprite.dx;sprite.y+=sprite.dy;})({{1}});",
+            "script": "{{1}}.move();",
             "sockets": [
                 {
                     "name": "move",
@@ -4393,21 +4645,16 @@ wb.menu({
         },
         {
             "blocktype": "step",
-            "id": "7ecb947f-28ac-4418-bc44-cd797be697c9",
-            "help": "set the direction (angle in degrees) and speed of a sprite",
-            "script": "(function(sprite,degrees,speed){sprite.dx=Math.cos(degrees*Math.PI/180)*speed;sprite.dy=Math.sin(degrees*Math.PI/180)*speed;sprite.direction=degrees;sprite.speed=speed;})({{1}},{{2}},{{3}});",
+            "id": "4d7d6b10-222b-11e3-8224-0800200c9a66",
+            "help": "set the speed of a sprite",
+            "script": "{{1}}.setSpeed({{2}});",
             "sockets": [
                 {
                     "name": "set sprite",
-                    "type": "sprite",
+                    "type": "sprite"
                 },
                 {
-                    "name": "direction",
-                    "type": "number",
-                    "value": 0
-                },
-                {
-                    "name": "degrees and speed",
+                    "name": "speed",
                     "type": "number",
                     "value": 3
                 }
@@ -4428,7 +4675,7 @@ wb.menu({
         {
             "blocktype": "step",
             "id": "88c75c2b-18f1-4195-92bc-a90d99743551",
-            "script": "(function(sprite,pos){sprite.x = pos.x; sprite.y=pos.y;})({{1}},{{2}})",
+            "script": "{{1}}.moveAbsolute({{2}}.x, {{2}}.y);",
             "help": "move a sprite absolutely",
             "sockets": [
                 {
@@ -4440,6 +4687,120 @@ wb.menu({
                     "name": "to",
                     "type": "point",
                     "value": null
+                }
+            ]
+        },
+    {
+            "blocktype": "step",
+            "id": "badee0b6-8f7c-4cbd-9173-f450c765045d",
+            "script": "{{1}}.color = {{2}};",
+            "help": "Recolor a sprite",
+            "sockets": [
+                {
+                    "name": "Color sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "to color",
+                    "type": "color",
+                    "block": "13236aef-cccd-42b3-a041-e26528174323"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "36DD3165-1168-4345-9198-E9B230FF84A3",
+            "script": "{{1}}.movementDirection",
+            "type": "number",
+            "sockets": [
+                {
+                    "name": "sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "facing direction"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "495336f3-68ed-4bc7-a145-11756803876b",
+            "script": "{{1}}.movementDirection",
+            "type": "number",
+            "sockets": [
+                {
+                    "name": "sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "movement direction"
+                }
+            ]
+        },
+         {
+            "blocktype": "expression",
+            "id": "86aa39be-5419-4abb-9765-e63f824608f0",
+            "script": "{{1}}.polygon.average",
+            "type": "point",
+            "sockets": [
+                {
+                    "name": "sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "center"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "DF9E52B5-CE65-477A-BE10-95DF88C53FD0",
+            "script": "{{1}}.speed",
+            "type": "number",
+            "sockets": [
+                {
+                    "name": "sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "speed"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "8D0880EA-1722-435A-989D-06E8A9B62FB0",
+            "script": "{{1}}.dx",
+            "type": "number",
+            "sockets": [
+                {
+                    "name": "sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "horizontal speed"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "21A7A835-9647-4DC2-80AE-AE9B06346706",
+            "script": "{{1}}.dy",
+            "type": "number",
+            "sockets": [
+                {
+                    "name": "sprite",
+                    "type": "sprite",
+                    "value": null
+                },
+                {
+                    "name": "vertical speed"
                 }
             ]
         },
@@ -4463,7 +4824,7 @@ wb.menu({
         {
             "blocktype": "expression",
             "id": "23b4ffd1-3812-4372-8873-8a1b3107bdac",
-            "script": "{{1}}.x + {{1}}.w",
+            "script": "({{1}}.x + {{1}}.w)",
             "help": "get x+w (right) position of sprite",
             "type": "number",
             "sockets": [
@@ -4497,7 +4858,7 @@ wb.menu({
         {
             "blocktype": "expression",
             "id": "8c73e3fd-7c53-4c92-be1d-286db5357cbb",
-            "script": "{{1}}.y + {{1}}.h",
+            "script": "({{1}}.y + {{1}}.h)",
             "type": "number",
             "sockets": [
                 {
@@ -4513,6 +4874,125 @@ wb.menu({
     ]
 });
 /*end languages/javascript/sprite.json*/
+
+/*begin languages/javascript/voice.json*/
+wb.menu({
+    "name": "Music",
+    "blocks": [
+        {
+            "blocktype": "step",
+            "id": "ac1d8b1a-013c-46e0-b5e7-f241c594a7c7",
+            "script": "local.voice## = new Voice();",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "voice##"
+                        }
+                    ],
+                    "script": "local.voice##",
+                    "type": "voice"
+                }
+            ],
+            "help": "create a simple voice to play tones",
+            "sockets": [
+                {
+                    "name": "voice##",
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "ee91b7ec-d52b-45ff-bd13-ff8a8e5e50fb",
+            "help": "set the frequency of the voice",
+            "script": "(function(voice, freq){voice.osc.frequency.value = freq;})({{1}}, {{2}});",
+            "sockets": [
+                {
+                    "name": "set voice",
+                    "type": "voice",
+                },
+                {
+                    "name": "tone",
+                    "type": "number",
+                    "value": 400
+                },
+                {
+                    "name": "Hz"
+                }
+            ]
+        },
+                {
+            "blocktype": "step",
+            "id": "a133f0ad-27e6-444c-898a-66410c447a07",
+            "help": "set the volume of the voice",
+            "script": "(function(voice, vol){voice.amp.gain.value = vol;})({{1}}, {{2}});",
+            "sockets": [
+                {
+                    "name": "set voice",
+                    "type": "voice",
+                },
+                {
+                    "name": "volume",
+                    "type": "number",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "c1ce82b2-9810-41e0-b96e-44702982372b",
+            "script": "{{1}}.osc.frequency.value",
+            "help": "get frequency of a voice",
+            "type": "number",
+            "sockets": [
+                {
+                    "name": "voice",
+                    "type": "voice",
+                    "value": null
+                },
+                {
+                    "name": "Hz"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "e4a4949f-1010-4026-a070-2555dbf3be0e",
+            "script": "{{1}}.toggle({{2}});",
+            "help": "turn the voice on or off",
+            "sockets": [
+                {
+                    "name": "turn voice",
+                    "type": "voice"
+                },
+                {
+                    "name": "on",
+                    "type": "boolean",
+                    "value": null
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "112ffdd3-7832-43df-85a5-85587e951295",
+            "script": "{{1}}.on",
+            "help": "get if the voice is turned on",
+            "type": "boolean",
+            "sockets": [
+                {
+                    "name": "voice",
+                    "type": "voice",
+                    "value": null
+                },
+                {
+                    "name": "is on?"
+                }
+            ]
+        }
+    ]
+});
+/*end languages/javascript/voice.json*/
 
 /*begin languages/javascript/array.json*/
 wb.menu({
@@ -5454,7 +5934,7 @@ wb.menu({
             "help": "initialize a new imageData with the specified dimensions",
             "sockets": [
                 {
-                    "name": "create ImageData## with size",
+                    "name": "create ImageData ImageData## with size",
                     "type": "size",
                     "value": null
                 }
@@ -5479,7 +5959,7 @@ wb.menu({
             "help": "initialized a new imageData the same size as an existing imageData",
             "sockets": [
                 {
-                    "name": "createImageData## from imageData",
+                    "name": "create ImageData ImageData## from imageData",
                     "type": "imageData",
                     "value": null
                 }
@@ -5606,7 +6086,7 @@ wb.menu({
             "type": "image",
             "sockets": [
                 {
-                    "name": "image from url",
+                    "name": "create ImageData image## from url",
                     "type": "string",
                     "value": null
                 }
@@ -5925,6 +6405,20 @@ wb.menu({
         {
             "blocktype": "expression",
             "id": "46bcac2d-eb76-417c-81af-cb894a54a86c",
+            "type": "number",
+            "script": "Math.floor({{1}})",
+            "help": "rounds down to nearest whole number",
+            "sockets": [
+                {
+                    "name": "floor of",
+                    "type": "number",
+                    "value": "10"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "4945df27-f4f3-490b-94ae-67c7081f744b",
             "type": "number",
             "script": "Math.ceil({{1}})",
             "help": "rounds up to nearest whole number",
@@ -6301,12 +6795,12 @@ wb.menu({
         {
             "blocktype": "step",
             "id": "48bb8639-0092-4384-b5a0-3a772699dea9",
-            "script": "// {{1}};\n",
+            "script": "/* {{1}}; */",
             "help": "this is a comment and will not be run by the program",
             "sockets": [
                 {
                     "name": "comment",
-                    "type": "string",
+                    "type": "any",
                     "value": null
                 }
             ]
@@ -6864,9 +7358,9 @@ wb.menu({
     "name": "Sensing",
     "blocks": [
         {
-            "blocktype": "step",
+            "blocktype": "expression",
             "id": "916c79df-40f1-4280-a093-6d9dfe54d87e",
-            "script": "local.answer## = prompt({{1}});",
+            "script": "prompt({{1}})",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -6882,7 +7376,7 @@ wb.menu({
             "help": "Prompt the user for information",
             "sockets": [
                 {
-                    "name": "ask [string:What's your name?] and wait",
+                    "name": "ask",
                     "type": "string",
                     "value": "What's your name?"
                 },
