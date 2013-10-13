@@ -3876,7 +3876,7 @@ wb.prettyScript = function(elements){
     var script = js_beautify(elements.map(function(elem){
             return wb.codeFromBlock(elem);
         }).join(''));
-    script = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nvar client = new Minecraft('localhost', 4711, function() {\nvar zeros={x:0, y:0, z:0};\n"+script+"\n});";
+    script = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nvar client = new Minecraft('localhost', 4711, function() {\nvar tempposition={x:0, y:0, z:0};\n"+script+"\n});";
     return script;
 };
 
@@ -3996,8 +3996,10 @@ wb.menu({
             "sockets": [
                 {
                     "name": "if",
-                    "type": "boolean",
-                    "value": null
+                },
+                {
+                    "type":"boolean",
+                    "block":"e3a5ea20-3ca9-42cf-ac02-77ff06836a7e"
                 }
             ]
         },
@@ -4009,8 +4011,10 @@ wb.menu({
             "sockets": [
                 {
                     "name": "if not",
-                    "type": "boolean",
-                    "value": null
+                },
+                {
+                    "type":"boolean",
+                    "block":"e3a5ea20-3ca9-42cf-ac02-77ff06836a7e"
                 }
             ]
         },
@@ -4022,8 +4026,10 @@ wb.menu({
             "sockets": [
                 {
                     "name": "repeat until",
-                    "type": "boolean",
-                    "value": null
+                },
+                {
+                    "type":"boolean",
+                    "block":"e3a5ea20-3ca9-42cf-ac02-77ff06836a7e"
                 }
             ]
         },
@@ -4237,7 +4243,7 @@ wb.menu({
                     "name": "Get Player Tile Position"
                 }
             ],
-            "script": "client.getTile(function(data){var aData = data.toString().trim().split(\",\"); var playerposition = {x:parseInt(aData[0],10), y: parseInt(aData[1],10), z: parseInt(aData[2],10)}; [[1]]});",
+            "script": "client.getTile(function(data){var aData = data.toString().trim().split(\",\"); var playerposition = {x:Math.floor(parseFloat(aData[0],10)), y: Math.floor(parseFloat(aData[1],10))-1, z: Math.floor(parseFloat(aData[2],10))}; [[1]]});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -4360,19 +4366,6 @@ wb.menu({
             "help": "A position: x is across, y is up and z is depth"
         },
         {
-            "blocktype": "expression",
-            "id": "590c8aef-a755-4df5-8930-b430db5a3c3d",
-            "sockets": [
-                {
-                    "name": "Centre Position"
-                },
-            ], 
-            "type":"position",
-            "script": "zeros",
-            "help": "position"
-        },
-        
-        {
             "blocktype": "step",
             "id": "0ae2eba9-582e-4a3a-92b2-0f8484397e90",
             "sockets": [
@@ -4456,6 +4449,28 @@ wb.menu({
             ],
             
             "help": "create new position by adding 2 others"
+        },
+        {
+            "blocktype": "step",
+            "id": "e28a420d-9b94-4480-ad0f-ebe4e68134b0",
+            "sockets": [
+                {
+                    "name": "Set"
+                },
+                {
+                    "type": "position",
+                    "block": "590c8aef-a755-4df5-8930-b430db5a3c3d"
+                },
+                {
+                    "name": "to"
+                },
+                {
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],  
+            "script": "{{1}} = {{2));",
+            "help": "Set position variable to a new postion"
         },
         {
             "blocktype": "context",
@@ -4624,7 +4639,7 @@ wb.menu({
         },
         {
             "blocktype": "step",
-            "id": "5dfa6369-b4bc-4bb3-9b98-839015d5f9ee",
+            "id": "4072476e-cdc4-43b1-b36b-a8c5829c113c",
             "sockets": [
                 {
                     "name": "Create Position## from"
@@ -4662,6 +4677,18 @@ wb.menu({
                 }
             ],
             "help": "create new position by adding a distance and direction"
+        },
+        {
+            "blocktype": "expression",
+            "id": "590c8aef-a755-4df5-8930-b430db5a3c3d",
+            "sockets": [
+                {
+                    "name": "Temp Position"
+                },
+            ], 
+            "type":"position",
+            "script": "tempposition",
+            "help": "position"
         }
     ]
 }
@@ -4675,9 +4702,10 @@ wb.menu({
     "blocks": [
         {
             "blocktype": "context",
+            "id": "c500a7f0-7117-40ea-9139-b161e19f190b",
             "sockets": [
                     {
-                        "name": "get Block Type at "
+                        "name": "Get Block Type at "
                     },
                     {
                         "type": "position",
@@ -4690,11 +4718,21 @@ wb.menu({
                     "blocktype": "expression",
                     "sockets": [
                             {
-                                "name": "block##"
+                                "name": "Block Type Number"
                             }
                         ],
-                    "script": "parseInt(block##)",
+                    "script": "parseInt(block##, 10)",
                     "type": "number"
+                },
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                            {
+                                "name": "Block Type Name"
+                            }
+                        ],
+                    "script": "Object.keys(client.blocks).filter(function(element){return (client.blocks[element] === parseInt(block##));})",
+                    "type": "string"
                 }
             ],
             "help": "get block type at x, y, z"
@@ -4709,7 +4747,7 @@ wb.menu({
                     "value": "choice"
                 }
                 ],
-            "script": "{{1}}",
+            "script": "client.blocks[{{1}}]",
             "type": "number",
             "help": "a blocktype"
         },
