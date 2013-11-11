@@ -3,9 +3,9 @@
     "blocks": [
         {
             "blocktype": "eventhandler",
-            "id": "25339ea4-1bc2-4c66-bde8-c455b9a3d1cd",
-            "script": "void setup()\n{\n[[1]]\n}\n",
-            "help": "Start scripts when program starts",
+            "id": "902bcee4-c70c-42d0-b7c7-459cf0743830",
+            "script": "void setup() {[[1]]}",
+            "help": "Do Once when the program starts",
             "sockets": [
                 {
                     "name": "Setup - When program starts"
@@ -14,76 +14,20 @@
         },
         {
             "blocktype": "eventhandler",
-            "id": "fb958a3d-0372-4ab7-95c1-70dd9c454d19",
-            "script": "void loop()\n{\n[[1]]\n}\n",
-            "help": "Trigger for main loop",
+            "id": "c1a4b779-7167-4348-8536-3f0eec4fab89", 
+            "script": "void loop() {[[1]]}",
+            "help": "Will do these blocks repeatedly",
             "sockets": [
                 {
-                    "name": "Main loop"
-                }
-            ]
-        },
-        {
-            "blocktype": "eventhandler",
-            "id": "1e4b61cf-c4ce-4b08-9944-7ea1ebf54775",
-            "script": "/*Global Settings*/\n\n[[1]]\n\n",
-            "help": "Trigger for blocks in global setup",
-            "sockets": [
-                {
-                    "name": "Global Settings"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "b54a3daa-3dfa-4885-afc4-9592944296df",
-            "script": "{{1}}();",
-            "help": "Send a message to all listeners",
-            "sockets": [
-                {
-                    "name": "broadcast",
-                    "type": "string",
-                    "value": "ack"
-                },
-                {
-                    "name": "message"
-                }
-            ]
-        },
-        {
-            "blocktype": "eventhandler",
-            "id": "64fd2a90-a689-4ffd-bd66-bc8c61775cd4",
-            "script": "function {{1}}(){\n[[next]]\n}",
-            "help": "Trigger for blocks to run when message is received",
-            "sockets": [
-                {
-                    "name": "when I receive",
-                    "type": "string",
-                    "value": "ack"
-                },
-                {
-                    "name": "message"
+                    "name": "Main Loop"
                 }
             ]
         },
         {
             "blocktype": "context",
-            "id": "c79f205e-eab3-4ebd-9c72-2e6a54209593",
-            "script": "while({{1}}){\n[[1]]\n}",
-            "help": "loop until condition fails",
-            "sockets": [
-                {
-                    "name": "forever if",
-                    "type": "boolean",
-                    "value": "false"
-                }
-            ]
-        },
-        {
-            "blocktype": "context",
-            "id": "0a313a7a-1187-4619-9819-fbfd7a32f6a6",
+            "id": "04e99dd2-5e89-40ed-8008-5044bc763bf6",
             "script": "if({{1}}){\n[[1]]\n}",
-            "help": "only run blocks if condition is true",
+            "help": "run the following blocks only if the condition is true",
             "sockets": [
                 {
                     "name": "if",
@@ -94,9 +38,22 @@
         },
         {
             "blocktype": "context",
-            "id": "dc724c8c-27b3-4c93-9420-050dd2466c43",
-            "script": "if(! {{1}} ){\n[[1]]\n}",
-            "help": "run blocks if condition is not true",
+            "id": "a095ea16-93a0-4b2d-b3a8-28a7ba8977ae",
+            "script": "if({{1}}){\n[[1]]\n}else{\n[[2]]\n}",
+            "help": "run first set of blocks if condition is true, second set otherwise",
+            "sockets": [
+                {
+                    "name": "if",
+                    "type": "boolean",
+                    "value": null
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "6dddaf61-caf0-4976-a3f1-9d9c3bbbf5a4",
+            "script": "if( ! {{1}} ){ [[1]] }",
+            "help": "run the  blocks if the condition is not true",
             "sockets": [
                 {
                     "name": "if not",
@@ -107,9 +64,80 @@
         },
         {
             "blocktype": "context",
-            "id": "a11f426a-9a48-4e0f-83f5-cff4ec5b4154",
-            "script": "while(!({{1}})){\n[[1]]\n}",
-            "help": "loop until condition is true",
+            "id": "a1352b7e-a4c2-4eea-ab3c-2f7f5b30069a",
+            "script": "for (int index##=0; index## <= {{1}}; index##++){[[1]]};",
+            "help": "repeat the contained blocks so many times",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "index##"
+                        }
+                    ],
+                    "script": "index##",
+                    "type": "number"
+                }
+            ],
+            "sockets": [
+                {
+                    "name": "repeat",
+                    "type": "number",
+                    "value": "10"
+                },
+                {
+                    "name": "times",
+                }
+            ]
+        },
+      
+    
+    
+        {
+            "blocktype": "context",
+            "id": "c3aaf699-7c68-4556-b098-a7c194ae7fe6",
+            "script": "while({{1}}){[[1]]}",
+            "help": "repeat until the condition is false",
+            "sockets": [
+                {
+                    "name": "forever if",
+                    "type": "boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "35ec2272-4ede-4c26-a8ff-35c2f4bb2be1",
+            "script": "while(!{{1}}){\n}\n",
+            "help": "repeat until the condition is false",
+            "sockets": [
+                {
+                    "name": "wait until",
+                    "type": "boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "78aba1c0-6723-43de-8d98-a1d26c5a18e7",
+            "script": "do{[[1]]} while({{1}});",
+            "help": "do once then repeat until the condition is false",
+            "sockets": [
+                {
+                    "name": "once and forever while",
+                    "type": "boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        
+        {
+            "blocktype": "context",
+            "id": "5a09e58a-4f45-4fa8-af98-84de735d0fc8",
+            "script": "while(!({{1}})){[[1]]}",
+            "help": "repeat forever until condition is true",
             "sockets": [
                 {
                     "name": "repeat until",

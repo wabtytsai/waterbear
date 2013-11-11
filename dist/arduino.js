@@ -1938,12 +1938,8 @@ function saveCurrentScriptsToGist(){
 
         //save gist id to local storage
         var localGists = localStorage['__' + language + '_recent_gists'];
-
         var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
-
         gistArray.push(gistID);
-        console.log(gistArray);
-
         localStorage['__' + language + '_recent_gists'] = JSON.stringify(gistArray);
 
     }, JSON.stringify({
@@ -2184,137 +2180,246 @@ Event.on(document.body, 'wb-script-loaded', null, function(evt){console.log('scr
 /*end workspace.js*/
 
 /*begin languages/arduino/arduino.js*/
-(function(){
+var BrowserDetect = {
+init: function ()
+{
+this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+this.version = this.searchVersion(navigator.userAgent)
+|| this.searchVersion(navigator.appVersion)
+|| "an unknown version";
+this.OS = this.searchString(this.dataOS) || "an unknown OS";
+},
+searchString: function (data)
+{
+for (var i = 0; i < data.length; i++)
+{
+var dataString = data[i].string;
+var dataProp = data[i].prop;
+this.versionSearchString = data[i].versionSearch || data[i].identity;
+if (dataString)
+{
+if (dataString.indexOf(data[i].subString) != -1)
+return data[i].identity;
+}
+else if (dataProp)
+return data[i].identity;
+}
+},
+searchVersion: function (dataString)
+{
+var index = dataString.indexOf(this.versionSearchString);
+if (index == -1) return;
+return parseFloat(dataString.substring(index + this.versionSearchString.length + 1));
+},
+dataBrowser: [
+{
+string: navigator.userAgent,
+subString: "Chrome",
+identity: "Chrome"
+},
+{ string: navigator.userAgent,
+subString: "OmniWeb",
+versionSearch: "OmniWeb/",
+identity: "OmniWeb"
+},
+{
+string: navigator.vendor,
+subString: "Apple",
+identity: "Safari",
+versionSearch: "Version"
+},
+{
+prop: window.opera,
+identity: "Opera",
+versionSearch: "Version"
+},
+{
+string: navigator.vendor,
+subString: "iCab",
+identity: "iCab"
+},
+{
+string: navigator.vendor,
+subString: "KDE",
+identity: "Konqueror"
+},
+{
+string: navigator.userAgent,
+subString: "Firefox",
+identity: "Firefox"
+},
+{
+string: navigator.vendor,
+subString: "Camino",
+identity: "Camino"
+},
+{ // for newer Netscapes (6+)
+string: navigator.userAgent,
+subString: "Netscape",
+identity: "Netscape"
+},
+{
+string: navigator.userAgent,
+subString: "MSIE",
+identity: "Explorer",
+versionSearch: "MSIE"
+},
+{
+string: navigator.userAgent,
+subString: "Gecko",
+identity: "Mozilla",
+versionSearch: "rv"
+},
+{ // for older Netscapes (4-)
+string: navigator.userAgent,
+subString: "Mozilla",
+identity: "Netscape",
+versionSearch: "Mozilla"
+}
+],
+dataOS: [
+{
+string: navigator.platform,
+subString: "Win",
+identity: "Windows"
+},
+{
+string: navigator.platform,
+subString: "Mac",
+identity: "Mac"
+},
+{
+string: navigator.userAgent,
+subString: "iPhone",
+identity: "iPhone/iPod"
+},
+{
+string: navigator.platform,
+subString: "Linux",
+identity: "Linux"
+}
+]
+};
+BrowserDetect.init();
 
-    // This file depends on the runtime extensions, which should probably be moved into this namespace rather than made global
 
-// expose these globally so the Block/Label methods can find them
-window.choiceLists = {
-    /*keys: 'abcdefghijklmnopqrstuvwxyz0123456789*+-./'
-        .split('').concat(['up', 'down', 'left', 'right',
-        'backspace', 'tab', 'return', 'shift', 'ctrl', 'alt',
-        'pause', 'capslock', 'esc', 'space', 'pageup', 'pagedown',
-        'end', 'home', 'insert', 'del', 'numlock', 'scroll', 'meta']),*/
-    boolean: ['true', 'false'],
-    highlow: ['HIGH', 'LOW'],
-    inoutput: ['INPUT', 'OUTPUT'],
-    onoff: ['ON', 'OFF'],
-    logic: ['true', 'false'],
-    digitalpins: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,'A0','A1','A2','A3','A4','A5'],
-    analoginpins: ['A0','A1','A2','A3','A4','A5'],
-    pwmpins: [3, 5, 6, 9, 10, 11],
-    baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
-    analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL']
+
+
+// Add some utilities
+wb.wrap = function(script){
+    return [
+        'var global = new Global();',
+        script,
+        ''
+    ].join('\n');
 };
 
-window.setDefaultScript = function(script){
-    window.defaultscript = script;
-};
 
-window.loadDefaultScript = function(script){
-    if (typeof window.defaultscript != 'undefined'){
-        loadScriptsFromObject(window.defaultscript);
+function runCurrentScripts(event){
+    var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
+    //document.body.className = 'result';
+    window.files = [wb.prettyScript(blocks)]
+    usbflash();
+}
+
+Event.on('.runScripts', 'click', null, runCurrentScripts);
+
+window.addEventListener('fghjkload', function(event){
+    console.log('iframe ready');
+    wb.iframeready = true;
+    if (wb.iframewaiting){
+        wb.iframewaiting();
+    }
+    wb.iframewaiting = null;
+}, false);
+
+wb.runScript = function(script){
+    var run = function(){
+        wb.script = script;
+        var path = location.pathname.slice(0,location.pathname.lastIndexOf('/'));
+        var runtimeUrl = location.protocol + '//' + location.host + path + '/dist/arduino_runtime.js';
+        // console.log('trying to load library %s', runtimeUrl);
+        document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: runtimeUrl, script: wb.wrap(script)}), '*');
+        document.querySelector('.stageframe').focus();
+    };
+    if (wb.iframeready){
+        run();
+    }else{
+        wb.iframewaiting = run;
     }
 };
 
-wb.writeScript = function(elements, view){
-    var code = elements.map(function(elem){
+
+wb.prettyScript = function(elements){
+    //return js_beautify(
+      return elements.map(function(elem){
         return wb.codeFromBlock(elem);
-    }).join('\n');
-    view.innerHTML = '<pre class="language-arduino">' + code + '</pre>';
+    }).join('');
+    //);
+};
+
+wb.writeScript = function(elements, view){
+    view.innerHTML = '<pre class="language-arduino">' + wb.prettyScript(elements) + '</pre>';
+    //hljs.highlightBlock(view.firstChild);
 };
 
 
-jQuery.fn.extend({
-  wrapScript: function(){
-      // wrap the top-level script to prevent leaking into globals
-      var script = this.map(function(){return wb.Block.model(this).code();}).get().join('\n\n');
-      return script;
-  },
-  writeScript: function(view){
-      view.html('<code><pre class="script_view">' + this.wrapScript() +  '</pre></code>');
-  }
-});
+/* Add Demo type and toolkists list */
+wb.choiceLists = {
+    highlow: ['HIGH', 'LOW'],
+    inoutput: ['INPUT', 'OUTPUT'],
+    onoff: ['ON', 'OFF'],
+    //onoffhighlow: {'HIGH':'ON', 'LOW':'OFF'},
+    //onoffbool: {'true':'ON', 'false':'OFF'},
+    "boolean": ['true', 'false'],
+    logic: ['true', 'false'],
+    //digitalinputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
+    //'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
+    //analoginputpins: {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
+    //'vari_cap_pin':'Potentiometer',
+    //digitaloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
+    //'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',
+    //analogoutputpins: {3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'},
+    //'servo_pin':'Servo', 
+    //alloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
+    //'servo_pin':'Servo','LED_Green_pin':'Front LED','LED_2_pin':'LED 2',baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
+    analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'],
+    blocktypes: ['step', 'expression', 'context', 'eventhandler'],
+    types: ['string', 'number', 'boolean', 'int', 'array', 'object', 'function', 'any'],
+    rettypes: ['none', 'string', 'number', 'boolean', 'int', 'array', 'object', 'function', 'any'] 
+};
 
 
-function clearScriptsDefault(event, force){
-  clearScripts(event, force);
-  loadDefaultScript();
-}
+//wb.choiceLists.types.push('arduino');
+//wb.choiceLists.rettypes.push('demo');
+/*
+// with the object notation
+wb.choiceLists.highlow = ['HIGH', 'LOW'];
+wb.choiceLists.inoutput = ['INPUT', 'OUTPUT'];
+wb.choiceLists.onoff = ['ON', 'OFF'];
+//wb.choiceLists.onoffhighlow = {'HIGH':'ON', 'LOW':'OFF'};
+//wb.choiceLists.onoffbool = {'true':'ON', 'false':'OFF'};
+wb.choiceLists.logic = ['true', 'false'];
+//wb.choiceLists.digitalinputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
+//'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
+//wb.choiceLists.analoginputpins = {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'};
+//'vari_cap_pin':'Potentiometer',
+//wb.choiceLists.digitaloutputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
+//'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',
+//wb.choiceLists.analogoutputpins =  {3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'};
+//'servo_pin':'Servo', 
+//wb.choiceLists.alloutputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'};
+//'servo_pin':'Servo','LED_Green_pin':'Front LED','LED_2_pin':'LED 2',baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200];
+wb.choiceLists.analogrefs = ['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'];
+*/
 
 
-$('.clearScripts').click(clearScriptsDefault);
-
-
-
-var defaultscript=[{"klass":"control","label":"Global Settings","script":"/*Global Settings*/\u000a\u000a[[next]]\u000a\u000a","containers":0,"trigger":true,"sockets":[],"contained":[],"next":""},{"klass":"control","label":"Setup - When program starts","script":"void setup()\u000a{\u000a[[next]]\u000a}\u000a","containers":0,"trigger":true,"sockets":[],"contained":[],"next":""},{"klass":"control","label":"Main loop","script":"void loop()\u000a{\u000a[[1]]\u000a}\u000a","containers":1,"trigger":true,"sockets":[],"contained":[""],"next":""}];
-setDefaultScript(defaultscript);
-
-
-})();
 
 /*end languages/arduino/arduino.js*/
 
-/*begin languages/arduino/boolean.json*/
-wb.menu({
-    "name": "Boolean",
-    "blocks": [
-        {
-            "blocktype": "expression",
-            "id": "03d1df81-c7de-40a0-a88f-95b732d19936",
-            "type": "boolean",
-            "script": "({{1}} && {{2}})",
-            "help": "Check if both are true",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "boolean",
-                    "value": null
-                },
-                {
-                    "name": "and",
-                    "type": "boolean",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "482db566-b14b-4381-8135-1e29f8c4e7c3",
-            "type": "boolean",
-            "script": "({{1}} || {{2}})",
-            "help": "Check if one is true",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "boolean",
-                    "value": null
-                },
-                {
-                    "name": "or",
-                    "type": "boolean",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "866a1181-e0ff-4ebc-88dd-55e2b70d7c52",
-            "type": "boolean",
-            "script": "(! {{1}})",
-            "help": "Not true is false and Not false is true",
-            "sockets": [
-                {
-                    "name": "not",
-                    "type": "boolean",
-                    "value": null
-                }
-            ]
-        }
-    ]
-}
-);
-/*end languages/arduino/boolean.json*/
+/*begin languages/arduino/control.js*/
+
+/*end languages/arduino/control.js*/
 
 /*begin languages/arduino/control.json*/
 wb.menu({
@@ -2322,9 +2427,9 @@ wb.menu({
     "blocks": [
         {
             "blocktype": "eventhandler",
-            "id": "25339ea4-1bc2-4c66-bde8-c455b9a3d1cd",
-            "script": "void setup()\n{\n[[1]]\n}\n",
-            "help": "Start scripts when program starts",
+            "id": "902bcee4-c70c-42d0-b7c7-459cf0743830",
+            "script": "void setup() {[[1]]}",
+            "help": "Do Once when the program starts",
             "sockets": [
                 {
                     "name": "Setup - When program starts"
@@ -2333,76 +2438,20 @@ wb.menu({
         },
         {
             "blocktype": "eventhandler",
-            "id": "fb958a3d-0372-4ab7-95c1-70dd9c454d19",
-            "script": "void loop()\n{\n[[1]]\n}\n",
-            "help": "Trigger for main loop",
+            "id": "c1a4b779-7167-4348-8536-3f0eec4fab89", 
+            "script": "void loop() {[[1]]}",
+            "help": "Will do these blocks repeatedly",
             "sockets": [
                 {
-                    "name": "Main loop"
-                }
-            ]
-        },
-        {
-            "blocktype": "eventhandler",
-            "id": "1e4b61cf-c4ce-4b08-9944-7ea1ebf54775",
-            "script": "/*Global Settings*/\n\n[[1]]\n\n",
-            "help": "Trigger for blocks in global setup",
-            "sockets": [
-                {
-                    "name": "Global Settings"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "b54a3daa-3dfa-4885-afc4-9592944296df",
-            "script": "{{1}}();",
-            "help": "Send a message to all listeners",
-            "sockets": [
-                {
-                    "name": "broadcast",
-                    "type": "string",
-                    "value": "ack"
-                },
-                {
-                    "name": "message"
-                }
-            ]
-        },
-        {
-            "blocktype": "eventhandler",
-            "id": "64fd2a90-a689-4ffd-bd66-bc8c61775cd4",
-            "script": "function {{1}}(){\n[[next]]\n}",
-            "help": "Trigger for blocks to run when message is received",
-            "sockets": [
-                {
-                    "name": "when I receive",
-                    "type": "string",
-                    "value": "ack"
-                },
-                {
-                    "name": "message"
+                    "name": "Main Loop"
                 }
             ]
         },
         {
             "blocktype": "context",
-            "id": "c79f205e-eab3-4ebd-9c72-2e6a54209593",
-            "script": "while({{1}}){\n[[1]]\n}",
-            "help": "loop until condition fails",
-            "sockets": [
-                {
-                    "name": "forever if",
-                    "type": "boolean",
-                    "value": "false"
-                }
-            ]
-        },
-        {
-            "blocktype": "context",
-            "id": "0a313a7a-1187-4619-9819-fbfd7a32f6a6",
+            "id": "04e99dd2-5e89-40ed-8008-5044bc763bf6",
             "script": "if({{1}}){\n[[1]]\n}",
-            "help": "only run blocks if condition is true",
+            "help": "run the following blocks only if the condition is true",
             "sockets": [
                 {
                     "name": "if",
@@ -2413,9 +2462,22 @@ wb.menu({
         },
         {
             "blocktype": "context",
-            "id": "dc724c8c-27b3-4c93-9420-050dd2466c43",
-            "script": "if(! {{1}} ){\n[[1]]\n}",
-            "help": "run blocks if condition is not true",
+            "id": "a095ea16-93a0-4b2d-b3a8-28a7ba8977ae",
+            "script": "if({{1}}){\n[[1]]\n}else{\n[[2]]\n}",
+            "help": "run first set of blocks if condition is true, second set otherwise",
+            "sockets": [
+                {
+                    "name": "if",
+                    "type": "boolean",
+                    "value": null
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "6dddaf61-caf0-4976-a3f1-9d9c3bbbf5a4",
+            "script": "if( ! {{1}} ){ [[1]] }",
+            "help": "run the  blocks if the condition is not true",
             "sockets": [
                 {
                     "name": "if not",
@@ -2426,9 +2488,80 @@ wb.menu({
         },
         {
             "blocktype": "context",
-            "id": "a11f426a-9a48-4e0f-83f5-cff4ec5b4154",
-            "script": "while(!({{1}})){\n[[1]]\n}",
-            "help": "loop until condition is true",
+            "id": "a1352b7e-a4c2-4eea-ab3c-2f7f5b30069a",
+            "script": "for (int index##=0; index## <= {{1}}; index##++){[[1]]};",
+            "help": "repeat the contained blocks so many times",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "index##"
+                        }
+                    ],
+                    "script": "index##",
+                    "type": "number"
+                }
+            ],
+            "sockets": [
+                {
+                    "name": "repeat",
+                    "type": "number",
+                    "value": "10"
+                },
+                {
+                    "name": "times",
+                }
+            ]
+        },
+      
+    
+    
+        {
+            "blocktype": "context",
+            "id": "c3aaf699-7c68-4556-b098-a7c194ae7fe6",
+            "script": "while({{1}}){[[1]]}",
+            "help": "repeat until the condition is false",
+            "sockets": [
+                {
+                    "name": "forever if",
+                    "type": "boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "35ec2272-4ede-4c26-a8ff-35c2f4bb2be1",
+            "script": "while(!{{1}}){\n}\n",
+            "help": "repeat until the condition is false",
+            "sockets": [
+                {
+                    "name": "wait until",
+                    "type": "boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "78aba1c0-6723-43de-8d98-a1d26c5a18e7",
+            "script": "do{[[1]]} while({{1}});",
+            "help": "do once then repeat until the condition is false",
+            "sockets": [
+                {
+                    "name": "once and forever while",
+                    "type": "boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        
+        {
+            "blocktype": "context",
+            "id": "5a09e58a-4f45-4fa8-af98-84de735d0fc8",
+            "script": "while(!({{1}})){[[1]]}",
+            "help": "repeat forever until condition is true",
             "sockets": [
                 {
                     "name": "repeat until",
@@ -2441,879 +2574,6 @@ wb.menu({
 }
 );
 /*end languages/arduino/control.json*/
-
-/*begin languages/arduino/digitalio.json*/
-wb.menu({
-    "name": "Digital I/O",
-    "blocks": [
-        {
-            "blocktype": "step",
-            "id": "451eda35-be10-498f-a714-4a32f3bcbe53",
-            "script": "digital_output## = \"{{1}}\"; pinMode(digital_output##, OUTPUT);",
-            "help": "Create a named pin set to output",
-            "locals": [
-                {
-                    "blocktype": "expression",
-                    "sockets": [
-                        {
-                            "name": "digital_output##"
-                        }
-                    ],
-                    "script": "digital_output##",
-                    "type": "string"
-                }
-            ],
-            "sockets": [
-                {
-                    "name": "Create digital_output## on Pin",
-                    "type": "choice",
-                    "options": "digitalpins",
-                    "value": "choice"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "d0a3d825-0d2d-4339-838f-b30d06441c23",
-            "script": "if({{2}} == HIGH)\n{\ndigitalWrite({{1}}, HIGH);\n}\nelse\n{\ndigitalWrite({{1}}, LOW);\n}\n",
-            "help": "Write a boolean value to given pin",
-            "sockets": [
-                {
-                    "name": "Digital Pin",
-                    "type": "string",
-                    "value": null
-                },
-                {
-                    "name": "ON if",
-                    "type": "boolean",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "ef757ca5-053d-4cfd-8ed4-9345cefef569",
-            "script": "digital_input## = \"{{1}}\"; pinMode(digital_input##, INPUT);",
-            "help": "Create a named pin set to input",
-            "locals": [
-                {
-                    "blocktype": "expression",
-                    "sockets": [
-                        {
-                            "name": "digital_input##"
-                        }
-                    ],
-                    "script": "digital_input##",
-                    "type": "string"
-                }
-            ],
-            "sockets": [
-                {
-                    "name": "Create digital_input## on Pin",
-                    "type": "choice",
-                    "options": "digitalpins",
-                    "value": "choice"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "010020b8-4e76-4e56-9cd5-65541bf2dbc9",
-            "type": "boolean",
-            "script": "(digitalRead({{1}}) == HIGH)",
-            "help": "Is the digital input pin ON",
-            "sockets": [
-                {
-                    "name": "Digital Pin",
-                    "type": "string",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "220caace-bd77-4e82-9f5d-0457a5bbfe9f",
-            "script": "analog_input## = \"{{1}}\"; pinMode(analog_input##, INPUT);",
-            "help": "Create a named pin set to input",
-            "locals": [
-                {
-                    "blocktype": "expression",
-                    "sockets": [
-                        {
-                            "name": "analog_input##"
-                        }
-                    ],
-                    "script": "analog_input##",
-                    "type": "string"
-                }
-            ],
-            "sockets": [
-                {
-                    "name": "Create analog_input## on Pin",
-                    "type": "choice",
-                    "options": "analoginpins",
-                    "value": "choice"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "5b76796a-7fa9-4d56-b532-5194bf5db20f",
-            "type": "int",
-            "script": "(analogRead({{1}}))",
-            "help": "Value of analog pin",
-            "sockets": [
-                {
-                    "name": "Analog Pin",
-                    "type": "string",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "4fa77d69-30fb-4734-8697-5ed56ba67433",
-            "script": "analog_output## = \"{{1}}\"; pinMode(analog_output##, OUTPUT);",
-            "help": "Create a named pin set to output",
-            "locals": [
-                {
-                    "blocktype": "expression",
-                    "sockets": [
-                        {
-                            "name": "analog_output##"
-                        }
-                    ],
-                    "script": "analog_output##",
-                    "type": "string"
-                }
-            ],
-            "sockets": [
-                {
-                    "name": "Create analog_output## on Pin",
-                    "type": "choice",
-                    "options": "pwmpins",
-                    "value": "choice"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "4b29af90-96e0-4de9-a7d8-2c88a35e1f49",
-            "script": "analogWrite({{1}}, {{2}});",
-            "help": "Set value of a pwm pin",
-            "sockets": [
-                {
-                    "name": "Analog",
-                    "type": "string",
-                    "value": null
-                },
-                {
-                    "name": "outputs",
-                    "type": "int",
-                    "value": "255"
-                }
-            ]
-        }
-    ]
-}
-);
-/*end languages/arduino/digitalio.json*/
-
-/*begin languages/arduino/math.json*/
-wb.menu({
-    "name": "Math",
-    "blocks": [
-        {
-            "blocktype": "expression",
-            "id": "cbb65aa7-b36c-4311-a479-f1776579dcd3",
-            "type": "number",
-            "script": "({{1}} + {{2}})",
-            "help": "Add two numbers",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "+",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "594700d5-64c6-4b21-bc70-f3fbf6913a69",
-            "type": "number",
-            "script": "({{1}} - {{2}})",
-            "help": "Subtract two numbers",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "-",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "afec758c-7ccc-4ee5-8d2c-f95160da83d4",
-            "type": "number",
-            "script": "({{1}} * {{2}})",
-            "help": "Multiply two numbers",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "*",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "5cec08b8-eb58-4ef0-a73e-f5245d6859a2",
-            "type": "number",
-            "script": "({{1}} / {{2}})",
-            "help": "Divide two numbers",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "/",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "90a5d524-fa8a-4a52-a4df-0beb83d32c40",
-            "type": "number",
-            "script": "(random({{1}}, {{2}}))",
-            "help": "Generate a random number between two other numbers",
-            "sockets": [
-                {
-                    "name": "pick random",
-                    "type": "number",
-                    "value": "1"
-                },
-                {
-                    "name": "to",
-                    "type": "number",
-                    "value": "10"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "d35330ee-5b49-492b-b7dd-41c3fd1496d0",
-            "script": "(randomSeed({{1}}))",
-            "help": "",
-            "sockets": [
-                {
-                    "name": "set seed for random numbers to",
-                    "type": "number",
-                    "value": "1"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "7f047e8a-3a87-49f8-b9c7-daad742faa9d",
-            "type": "boolean",
-            "script": "({{1}} < {{2}})",
-            "help": "Check if one number is less than another",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "<",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "faddd68c-6c75-4908-9ee6-bccc246f9d89",
-            "type": "boolean",
-            "script": "({{1}} == {{2}})",
-            "help": "Check if one number is equal to another",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "=",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "e4d81ccd-f9dc-4a0b-b41f-a5cd146a8c27",
-            "type": "boolean",
-            "script": "({{1}} > {{2}})",
-            "help": "Check if one number is greater than another",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": ">",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "8353c1f3-a1da-4d80-9bf9-0c9584c3896b",
-            "type": "number",
-            "script": "({{1}} % {{2}})",
-            "help": "Gives the remainder from the division of these two number",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "0"
-                },
-                {
-                    "name": "mod",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "1fde8b93-1306-4908-97c8-d628dd91eb4f",
-            "type": "int",
-            "script": "(int({{1}}))",
-            "help": "Gives the whole number, without the decimal part",
-            "sockets": [
-                {
-                    "name": "round",
-                    "type": "number",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "b7634de4-69ed-492c-bc9a-16ac3bb5ca45",
-            "type": "number",
-            "script": "(abs({{1}}))",
-            "help": "Gives the positive of the number",
-            "sockets": [
-                {
-                    "name": "absolute of",
-                    "type": "number",
-                    "value": "10"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "20268318-b168-4519-a32a-10b94c264226",
-            "type": "float",
-            "script": "(cos((180 / {{1}})/ 3.14159))",
-            "help": "Gives the cosine of the angle",
-            "sockets": [
-                {
-                    "name": "cosine of",
-                    "type": "number",
-                    "value": "10"
-                },
-                {
-                    "name": "degrees"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "86c2f303-861f-4ad7-a7de-3108637ce264",
-            "type": "float",
-            "script": "(sin((180 / {{1}})/ 3.14159))",
-            "help": "Gives the sine of the angle",
-            "sockets": [
-                {
-                    "name": "sine of",
-                    "type": "number",
-                    "value": "10"
-                },
-                {
-                    "name": "degrees"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "0e018648-0b45-4096-9052-e3080a47793a",
-            "type": "float",
-            "script": "(tan((180 / {{1}})/ 3.14159))",
-            "help": "Gives the tangent of the angle given",
-            "sockets": [
-                {
-                    "name": "tangent of",
-                    "type": "number",
-                    "value": "10"
-                },
-                {
-                    "name": "degrees"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "814444c5-f3f4-4412-975c-7284409f1f3d",
-            "type": "number",
-            "script": "(pow({{1}}, {{2}}))",
-            "help": "Gives the first number multiplied by itself the second number of times",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "10"
-                },
-                {
-                    "name": "to the power of",
-                    "type": "number",
-                    "value": "2"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "1f4df24e-22ea-460e-87c5-4b0f92e233ce",
-            "type": "float",
-            "script": "(sqrt({{1}}))",
-            "help": "Gives the two numbers that if multiplied will be equal to the number input",
-            "sockets": [
-                {
-                    "name": "square root of",
-                    "type": "number",
-                    "value": "10"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "18a0560d-beff-43da-8708-55398cc08d30",
-            "type": "string",
-            "script": "{{1}}",
-            "help": "Allows you to use a numeric result as a string",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "number",
-                    "value": "10"
-                },
-                {
-                    "name": "as string"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "e37dae6d-608f-43e9-9cd9-57ff03aba29d",
-            "type": "number",
-            "script": "map({{1}}, 0, 1023, 0, 255)",
-            "help": "",
-            "sockets": [
-                {
-                    "name": "Map",
-                    "type": "number",
-                    "value": null
-                },
-                {
-                    "name": "from Analog in to Analog out"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "007bccc5-36b2-4ff8-a0bc-f80def66ff49",
-            "type": "number",
-            "script": "map({{1}}, 0, 1023, 0, 255)",
-            "help": "",
-            "sockets": [
-                {
-                    "name": "Map",
-                    "type": "number",
-                    "value": null
-                },
-                {
-                    "name": "from",
-                    "type": "number",
-                    "value": "0]-[number"
-                },
-                {
-                    "name": "to",
-                    "type": "number",
-                    "value": "0]-[number"
-                }
-            ]
-        }
-    ]
-}
-);
-/*end languages/arduino/math.json*/
-
-/*begin languages/arduino/serialio.json*/
-wb.menu({
-    "name": "Serial I/O",
-    "blocks": [
-        {
-            "blocktype": "step",
-            "id": "11c7b422-0549-403e-9f2e-e1db13964f1b",
-            "script": "Serial.begin({{1}});",
-            "help": "Eanble serial communications at a chosen speed",
-            "sockets": [
-                {
-                    "name": "Setup serial communication at",
-                    "type": "choice",
-                    "options": "baud",
-                    "value": "choice"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "9ffc70c4-b0da-4d2c-a38a-f1ec2ec743ac",
-            "script": "Serial.println({{1}});",
-            "help": "Send a message over the serial connection followed by a line return",
-            "sockets": [
-                {
-                    "name": "Send",
-                    "type": "any",
-                    "value": "Message"
-                },
-                {
-                    "name": "as a line"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "40fb939a-a393-4d26-8902-93ee78bd01b0",
-            "script": "Serial.print({{1}});",
-            "help": "Send a message over the serial connection",
-            "sockets": [
-                {
-                    "name": "Send",
-                    "type": "any",
-                    "value": "Message"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "a1630959-fc16-4ba8-af98-4724edc636b4",
-            "type": "string",
-            "script": "Serial.read()",
-            "help": "Read a message from the serial connection",
-            "sockets": [
-                {
-                    "name": "Message Value"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "43618563-c8a3-4330-bfef-89469a797a90",
-            "script": "Serial.end();",
-            "help": "Disable serial communications",
-            "sockets": [
-                {
-                    "name": "End serial communication"
-                }
-            ]
-        }
-    ]
-}
-);
-/*end languages/arduino/serialio.json*/
-
-/*begin languages/arduino/timing.json*/
-wb.menu({
-    "name": "Timing",
-    "blocks": [
-        {
-            "blocktype": "step",
-            "id": "5f4a98ff-3a12-4f2d-8327-7c6a375c0192",
-            "script": "delay(1000*{{1}});",
-            "help": "pause before running subsequent blocks",
-            "sockets": [
-                {
-                    "name": "wait",
-                    "type": "int",
-                    "value": "1"
-                },
-                {
-                    "name": "secs"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "937921ed-49f4-4915-ba39-be217ddb6175",
-            "type": "int",
-            "script": "(millis())",
-            "help": "int value of time elapsed",
-            "sockets": [
-                {
-                    "name": "Milliseconds since program started"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "7d4ab88b-7769-497a-8822-8f0cc92c81de",
-            "type": "int",
-            "script": "(int(millis()/1000))",
-            "help": "int value of time elapsed",
-            "sockets": [
-                {
-                    "name": "Seconds since program started"
-                }
-            ]
-        }
-    ]
-}
-);
-/*end languages/arduino/timing.json*/
-
-/*begin languages/arduino/variables.json*/
-wb.menu({
-    "name": "Variables",
-    "blocks": [
-        {
-            "blocktype": "step",
-            "id": "eda33e3e-c6de-4f62-b070-f5035737a241",
-            "script": "String {{1}} = '{{2}}';",
-            "help": "Create a string variable",
-            "sockets": [
-                {
-                    "name": "Create",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "set to",
-                    "type": "string",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "3423bd33-6a55-4660-ba78-2304308b653d",
-            "script": "{{1}} = '{{2}}';",
-            "help": "Change the value of an already created string variable",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "=",
-                    "type": "string",
-                    "value": null
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "076b71fc-23eb-485a-8002-7e84abe8b6cf",
-            "type": "string",
-            "script": "{{1}}",
-            "help": "Get the value of a string variable",
-            "sockets": [
-                {
-                    "name": "value of",
-                    "type": "string",
-                    "value": "var"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "1236184b-2397-44b3-8c69-0b184e24ffd8",
-            "script": "int {{1}} = {{2}}'",
-            "help": "Create an integer variable",
-            "sockets": [
-                {
-                    "name": "Create",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "set to",
-                    "type": "int",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "60a81c46-fd2e-4eb4-a828-00d201534baa",
-            "script": "{{1}} = {{2}};",
-            "help": "Change the value of an already created integer variable",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "=",
-                    "type": "int",
-                    "value": "0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "06a44aae-31a8-4909-80b9-61151dc2d666",
-            "type": "int",
-            "script": "{{1}}",
-            "help": "Get the value of an integer variable",
-            "sockets": [
-                {
-                    "name": "value of",
-                    "type": "string",
-                    "value": "var"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "645f8dde-a050-4106-b436-57c9f2301b17",
-            "script": "float {{1}} = {{2}}",
-            "help": "Create a decimal variable",
-            "sockets": [
-                {
-                    "name": "Create",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "set to",
-                    "type": "float",
-                    "value": "0.0"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "f487db77-3f81-47ae-8fb5-478e24019c0b",
-            "script": "{{1}} = {{2}};",
-            "help": "Change the value of an already created deciaml variable",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "=",
-                    "type": "float",
-                    "value": "0.0"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "705a5ef3-c0b9-49f5-885d-f195c2f4c464",
-            "type": "float",
-            "script": "{{1}}",
-            "help": "Get the value of a decimal variable",
-            "sockets": [
-                {
-                    "name": "value of",
-                    "type": "string",
-                    "value": "var"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "c4ab9c5d-4493-429c-beb1-be9b411c0a7e",
-            "script": "int {{1}} = {{2}};",
-            "help": "Create a new true or false variable",
-            "sockets": [
-                {
-                    "name": "Create",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "set to",
-                    "type": "boolean",
-                    "value": "false"
-                }
-            ]
-        },
-        {
-            "blocktype": "step",
-            "id": "027bbe7b-6b50-4d94-b447-9bca02ec513f",
-            "script": "{{1}} = {{2}};",
-            "help": "Change the value of an already created true or false variable",
-            "sockets": [
-                {
-                    "name": "",
-                    "type": "string",
-                    "value": "var"
-                },
-                {
-                    "name": "=",
-                    "type": "boolean",
-                    "value": "false"
-                }
-            ]
-        },
-        {
-            "blocktype": "expression",
-            "id": "a41881a2-7cce-4ee5-98f4-c8067e3d57a6",
-            "type": "boolean",
-            "script": "{{1}}",
-            "help": "Get the value of a true or false variable",
-            "sockets": [
-                {
-                    "name": "value of",
-                    "type": "string",
-                    "value": "var"
-                }
-            ]
-        }
-    ]
-}
-);
-/*end languages/arduino/variables.json*/
 
 /*begin launch.js*/
 // Minimal script to run on load
