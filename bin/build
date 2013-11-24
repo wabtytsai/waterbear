@@ -7,7 +7,7 @@ var path = require('path');
 // var UglifyJS = require('uglify-js');
 
 var plugins = {
-    arduino: ['arduino', 'control' ],//boolean', , 'digitalio', 'math', 'serialio', 'timing', 'variables'.'input'],
+    arduino: ['arduino', 'control', 'input' ],//boolean', , 'digitalio', 'math', 'serialio', 'timing', 'variables'.'input'],
     javascript: ['javascript', 'asset', 'control', 'sprite', 'voice', 'array', 'boolean', 'canvas', 'color',  'image', 'math', 'object', 'string', 'path', 'point', 'rect', 'sensing', 'shape', 'size', /*'social',*/ /*'fb'*/, 'text', 'matrix' /*'demo'*/],
     minecraftjs: ['minecraftjs', 'control', 'game', 'player', 'position', 'blocks',  'camera', 'array', 'boolean', 'math', 'string'],
     demo: ['javascript', 'demo']

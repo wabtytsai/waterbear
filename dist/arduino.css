@@ -936,3 +936,12 @@ ul#menu li:hover ul.sub-menu {
 
 
 /*end languages/arduino/control.css*/
+
+/*begin languages/arduino/input.css*/
+.input  , .input .holder{
+    border-color: hsl(250, 65%, 79%);
+    background-color: hsl(250, 62%, 89%);
+}
+
+
+/*end languages/arduino/input.css*/

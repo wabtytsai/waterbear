@@ -2366,52 +2366,19 @@ wb.writeScript = function(elements, view){
 
 /* Add Demo type and toolkists list */
 wb.choiceLists = {
+    "boolean": ['true', 'false'],
+    logic: ['true', 'false'],
+
     highlow: ['HIGH', 'LOW'],
     inoutput: ['INPUT', 'OUTPUT'],
     onoff: ['ON', 'OFF'],
     //onoffhighlow: {'HIGH':'ON', 'LOW':'OFF'},
     //onoffbool: {'true':'ON', 'false':'OFF'},
-    "boolean": ['true', 'false'],
-    logic: ['true', 'false'],
-    //digitalinputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
-    //'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
-    //analoginputpins: {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
-    //'vari_cap_pin':'Potentiometer',
-    //digitaloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'},
-    //'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',
-    //analogoutputpins: {3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'},
-    //'servo_pin':'Servo', 
-    //alloutputpins:{0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'},
-    //'servo_pin':'Servo','LED_Green_pin':'Front LED','LED_2_pin':'LED 2',baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200],
-    analogrefs:['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'],
+
     blocktypes: ['step', 'expression', 'context', 'eventhandler'],
     types: ['string', 'number', 'boolean', 'int', 'array', 'object', 'function', 'any'],
     rettypes: ['none', 'string', 'number', 'boolean', 'int', 'array', 'object', 'function', 'any'] 
 };
-
-
-//wb.choiceLists.types.push('arduino');
-//wb.choiceLists.rettypes.push('demo');
-/*
-// with the object notation
-wb.choiceLists.highlow = ['HIGH', 'LOW'];
-wb.choiceLists.inoutput = ['INPUT', 'OUTPUT'];
-wb.choiceLists.onoff = ['ON', 'OFF'];
-//wb.choiceLists.onoffhighlow = {'HIGH':'ON', 'LOW':'OFF'};
-//wb.choiceLists.onoffbool = {'true':'ON', 'false':'OFF'};
-wb.choiceLists.logic = ['true', 'false'];
-//wb.choiceLists.digitalinputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
-//'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
-//wb.choiceLists.analoginputpins = {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'};
-//'vari_cap_pin':'Potentiometer',
-//wb.choiceLists.digitaloutputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
-//'LED_Green_pin':'Front LED','LED_2_pin':'LED 2',
-//wb.choiceLists.analogoutputpins =  {3:'Pin 3', 5:'Pin 5', 6:'Pin 6', 9:'Pin 9', 10:'Pin 10', 11:'Pin 11'};
-//'servo_pin':'Servo', 
-//wb.choiceLists.alloutputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12',13:'Pin 13','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'};
-//'servo_pin':'Servo','LED_Green_pin':'Front LED','LED_2_pin':'LED 2',baud:[9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200];
-wb.choiceLists.analogrefs = ['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'];
-*/
 
 
 
@@ -2420,6 +2387,27 @@ wb.choiceLists.analogrefs = ['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56
 /*begin languages/arduino/control.js*/
 
 /*end languages/arduino/control.js*/
+
+/*begin languages/arduino/input.js*/
+/* Add Input type and toolkists list */
+
+//wb.choiceLists.digitalinputpins = {0:'Pin 0',1:'Pin 1',2:'Pin 2',3:'Pin 3',4:'Pin 4',5:'Pin 5',6:'Pin 6',7:'Pin 7',8:'Pin 8',9:'Pin 9',10:'Pin 10',11:'Pin 11',12:'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
+wb.choiceLists.digitalinputpins = [0, 1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,10 , 11, 12, 'A0', 'A1', 'A2', 'A3', 'A4', 'A5'];
+
+//'push_button_pin':'Push Button','external_button1_pin':'External Button 1','external_button2_pin':'External Button 2',0:
+wb.choiceLists.analoginputpins = ['A0','A1', 'A2','A3','A4','A5'];
+
+
+//wb.choiceLists.analoginputpins = {'A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'Pin A5'};
+//'vari_cap_pin':'Potentiometer',
+wb.choiceLists.analogrefs = ['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'];
+
+
+
+//wb.choiceLists.types.push('input');
+//wb.choiceLists.rettypes.push('input');
+
+/*end languages/arduino/input.js*/
 
 /*begin languages/arduino/control.json*/
 wb.menu({
@@ -2574,6 +2562,75 @@ wb.menu({
 }
 );
 /*end languages/arduino/control.json*/
+
+/*begin languages/arduino/input.json*/
+wb.menu({
+    "name": "Input",
+    "blocks": [
+        {
+            "blocktype": "step",
+            "id": "59b0a823-20e9-4594-bd1d-831d0caff063",
+            "script": "int analog_input##_pin = {{1}}; pinMode(analog_input##_pin, INPUT);",
+            "help": "Use a Pin as an Analog Input",
+            "sockets": [
+                {   
+                    "name": "Create Analog Input ##"
+                },
+                {   
+                    "name": "on",
+                    "type": "choice",
+                    "options": "analoginputpins",
+                    "value": "choice"
+                    
+                },
+            ],
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "id": "6b2e3c87-4b26-4fc5-9e9a-9300a26c6fd1",
+                    "type": "int", 
+                    "script": "analogRead(analog_input##_pin)",
+                    "help": "Value of Input (0-1023)",
+                    "sockets": [
+                        {
+                            "name": "Value of Analog Input ##"  
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "a53ee568-da8c-4523-a18d-b3abd3e8dea5",
+            "script": "/* do nothing */",
+            "help": "make a point",
+            "sockets": [
+                {
+                    "name": "draw pattern at",
+                    "type": "point",
+                    "block": "29803c49-5bd5-4473-bff7-b3cf66ab9711"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "name": "binary",
+                    "script": "/* do nothing */",
+                    "help": "should only allow binary here",
+                    "sockets": [
+                        {
+                            "name": "binary",
+                            "type": "binary",
+                            "value": "01010101"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+);
+/*end languages/arduino/input.json*/
 
 /*begin launch.js*/
 // Minimal script to run on load

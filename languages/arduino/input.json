@@ -1,0 +1,65 @@
+{
+    "name": "Input",
+    "blocks": [
+        {
+            "blocktype": "step",
+            "id": "59b0a823-20e9-4594-bd1d-831d0caff063",
+            "script": "int analog_input##_pin = {{1}}; pinMode(analog_input##_pin, INPUT);",
+            "help": "Use a Pin as an Analog Input",
+            "sockets": [
+                {   
+                    "name": "Create Analog Input ##"
+                },
+                {   
+                    "name": "on",
+                    "type": "choice",
+                    "options": "analoginputpins",
+                    "value": "choice"
+                    
+                },
+            ],
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "id": "6b2e3c87-4b26-4fc5-9e9a-9300a26c6fd1",
+                    "type": "int", 
+                    "script": "analogRead(analog_input##_pin)",
+                    "help": "Value of Input (0-1023)",
+                    "sockets": [
+                        {
+                            "name": "Value of Analog Input ##"  
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "a53ee568-da8c-4523-a18d-b3abd3e8dea5",
+            "script": "/* do nothing */",
+            "help": "make a point",
+            "sockets": [
+                {
+                    "name": "draw pattern at",
+                    "type": "point",
+                    "block": "29803c49-5bd5-4473-bff7-b3cf66ab9711"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "name": "binary",
+                    "script": "/* do nothing */",
+                    "help": "should only allow binary here",
+                    "sockets": [
+                        {
+                            "name": "binary",
+                            "type": "binary",
+                            "value": "01010101"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
