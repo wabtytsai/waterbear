@@ -4,6 +4,7 @@
 
 function tabSelect(event){
     var target = event.wbTarget;
+    event.preventDefault();
     document.querySelector('.tabbar .selected').classList.remove('selected');
     target.classList.add('selected');
     if (wb.matches(target, '.scripts_workspace_tab')){
@@ -16,6 +17,7 @@ function tabSelect(event){
 Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 function accordion(event){
+    event.preventDefault();
     var open = document.querySelector('#block_menu .open');
     if (open){
         open.classList.remove('open');
@@ -26,17 +28,20 @@ function accordion(event){
 
 Event.on('#block_menu', 'click', '.accordion-header', accordion);
 
-
 function showWorkspace(mode){
+    console.log('showWorkspace');
     var workspace = document.querySelector('.workspace');
+    var scriptsWorkspace = document.querySelector('.scripts_workspace');
+    if (!scriptsWorkspace) return;
+    var scriptsTextView = document.querySelector('.scripts_text_view');
     if (mode === 'block'){
-	    document.querySelector('.scripts_workspace').style.display = '';
-	    document.querySelector('.scripts_text_view').style.display = 'none';
+	    scriptsWorkspace.style.display = '';
+	    scriptsTextView.style.display = 'none';
         workspace.classList.remove('textview');
         workspace.classList.add('blockview');
     }else if (mode === 'text'){
-    	document.querySelector('.scripts_workspace').style.display = 'none';
-    	document.querySelector('.scripts_text_view').style.display = '';
+    	scriptsWorkspace.style.display = 'none';
+    	scriptsTextView.style.display = '';
         workspace.classList.remove('blockview');
         workspace.classList.add('textview');
     }
@@ -51,6 +56,56 @@ function updateScriptsView(){
 }
 window.updateScriptsView = updateScriptsView;
 
+// Undo list
+
+// Undo actions must support two methods:
+// - undo() which reverses the effect of the action
+// - redo() which reapplies the effect of the action, assuming it has been redone.
+// These methods may safely assume that no other actions have been performed.
+
+// This is the maximum number of actions that will be stored in the undo list.
+// There's no reason why it needs to be constant; there could be an interface to alter it.
+// (Of course, that'd require making it public first.)
+var MAX_UNDO = 30;
+var undoActions = [];
+// When currentAction == undoActions.length, there are no actions available to redo
+var currentAction = 0;
+
+function undoLastAction() {
+	if(currentAction <= 0) return; // No action to undo!
+	currentAction--;
+	undoActions[currentAction].undo();
+}
+
+function redoLastAction() {
+	if(currentAction >= undoActions.length) return; // No action to redo!
+	undoActions[currentAction].redo();
+	currentAction++;
+}
+
+function addUndoAction(action) {
+	if(!action.hasOwnProperty('redo') || !action.hasOwnProperty('undo')) {
+		console.log("Tried to add invalid action!");
+		return;
+	}
+	if(currentAction < undoActions.length) {
+		// Truncate any actions available to be redone
+		undoActions.length = currentAction;
+	} else if(currentAction >= MAX_UNDO) {
+		// Drop the oldest action
+		currentAction--;
+		undoActions.shift();
+	}
+	undoActions[currentAction] = action;
+	currentAction++;
+	console.log('undo stack: %s', undoActions.length);
+}
+
+wb.history = {
+	add: addUndoAction,
+	undo: undoLastAction,
+	redo: redoLastAction,
+}
 
 // Context Menu
 //
@@ -77,28 +132,70 @@ function collapseCommand(key, opt){
 function copyCommand(evt) {
 	console.log("Copying a block!");
 	console.log(this);
-	pasteboard = wb.cloneBlock(this);
+	action = {
+		copied: wb.cloneBlock(this),
+		oldPasteboard: pasteboard,
+		undo: function() {
+			pasteboard = this.oldPasteboard;
+		},
+		redo: function() {
+			pasteboard = this.copied;
+		},
+	}
+	wb.history.add(action);
+	action.redo();
 }
 
 function cutCommand(evt) {
 	console.log("Cutting a block!");
-	Event.trigger(this, 'wb-remove');
-	this.remove();
-	pasteboard = this;
+	action = {
+		removed: this,
+		// Storing parent and next sibling in case removing the node from the DOM clears them
+		parent: this.parentNode,
+		before: this.nextSibling,
+		oldPasteboard: pasteboard,
+		undo: function() {console.log(this);
+			if(wb.matches(this.removed,'.step')) {
+				this.parent.insertBefore(this.removed, this.before);
+			} else {
+				this.parent.appendChild(this.removed);
+			}
+			Event.trigger(this.removed, 'wb-add');
+			pasteboard = this.oldPasteboard;
+		},
+		redo: function() {
+			Event.trigger(this.removed, 'wb-remove');
+			this.removed.remove();
+			pasteboard = this.removed;
+		},
+	}
+	wb.history.add(action);
+	action.redo();
 }
 
 function pasteCommand(evt) {
 	console.log(pasteboard);
-	var paste = wb.cloneBlock(pasteboard);
-	if(wb.matches(pasteboard,'.step')) {
-		console.log("Pasting a step!");
-		cmenu_target.parentNode.insertBefore(paste,cmenu_target.nextSibling);
-		Event.trigger(paste, 'wb-add');
-	} else {
-		console.log("Pasting an expression!");
-		cmenu_target.appendChild(paste);
-		Event.trigger(paste, 'wb-add');
+	action = {
+		pasted: wb.cloneBlock(pasteboard),
+		into: cmenu_target.parentNode,
+		before: cmenu_target.nextSibling,
+		undo: function() {
+			Event.trigger(this.pasted, 'wb-remove');
+			this.pasted.remove();
+		},
+		redo: function() {
+			if(wb.matches(pasteboard,'.step')) {
+				console.log("Pasting a step!");
+				this.into.insertBefore(this.pasted,this.before);
+			} else {
+				console.log("Pasting an expression!");
+				cmenu_target.appendChild(this.pasted);
+			}
+			Event.trigger(this.pasted, 'wb-add');
+		},
 	}
+	wb.history.add(action);
+	action.redo();
 }
 
 function canPaste() {
@@ -243,104 +340,35 @@ function enableContextMenu(evt) {
 var block_cmenu = {
 	//expand: {name: 'Expand All', callback: dummyCallback},
 	//collapse: {name: 'Collapse All', callback: dummyCallback},
-	cut: {name: 'Cut', callback: cutCommand},
+	undo: {name: 'Undo', callback: undoLastAction, enabled: function() {return currentAction > 0}},
+	redo: {name: 'Redo', callback: redoLastAction, enabled: function() {return currentAction < undoActions.length}},
+	cut: {name: 'Cut', callback: cutCommand, startGroup: true},
 	copy: {name: 'Copy', callback: copyCommand},
 	//copySubscript: {name: 'Copy Subscript', callback: dummyCallback},
 	paste: {name: 'Paste', callback: pasteCommand, enabled: canPaste},
 	//cancel: {name: 'Cancel', callback: dummyCallback},
 }
 
-// $.contextMenu({
-//     selector: '.scripts_workspace .block',
-//     items: {
-//         //clone: {'name': 'Clone', icon: 'add', callback: cloneCommand},
-//         //edit: {'name': 'Edit', icon: 'edit', callback: editCommand},
-//         //expand: {'name': 'Expand', callback: expandCommand},
-//         //collapse: {'name': 'Collapse', callback: collapseCommand},
-//         cut: {'name': 'Cut block', icon: 'cut', callback: cutBlockCommand},
-//         copy: {'name': 'Copy block', icon: 'copy', callback: copyBlockCommand},
-//         copySubscript: {'name': 'Copy subscript', callback: copySubscriptCommand},
-//         //paste: {'name': 'Paste', icon: 'paste', callback: pasteCommand},
-//         cancel: {'name': 'Cancel', callback: cancelCommand}
-//     }
-// });
-//
-// $.contextMenu({
-//    selector: '.scripts_workspace',
-//    items: {
-//        paste: {'name': 'Paste', icon: 'paste', callback: pasteCommand},
-//        cancel: {'name': 'Cancel', callback: cancelCommand}
-//    }
-// });
-//
-// $.contextMenu({
-//     selector: '.scripts_workspace .value > input',
-//     items: {
-//         paste: {'name': 'Paste', icon: 'paste', callback: pasteExpressionCommand},
-//         cancel: {'name': 'Cancel', callback: cancelCommand}
-//     }
-// });
-//
-// $.contextMenu({
-//     selector: '.scripts_workspace .contained',
-//     items: {
-//         paste: {'name': 'Paste', icon: 'paste', callback: pasteStepCommand},
-//         cancel: {'name': 'Cancel', callback: cancelCommand}
-//     }
-// });
-//
-
-// TODO: add event handler to enable/disable, hide/show items based on state of block
-
-// Handle Context menu for touch devices:
 // Test drawn from modernizr
-
 function is_touch_device() {
   return !!('ontouchstart' in window);
 }
 
 initContextMenus();
-// if (is_touch_device()){
-//     $.tappable({
-//         container: '.blockmenu, .workspace',
-//         selector: '.block',
-//         callback: function(){
-//             console.info('long tap detected');
-//             console.info(this);
-//             this.contextMenu();
-//         },
-//         touchDelay: 150
-//     });
-// }
-
-// var menu_built = false;
-// var saved_menus = [];
 
 // Build the Blocks menu, this is a public method
 wb.menu = function(blockspec){
     var title = blockspec.name.replace(/\W/g, '');
     var specs = blockspec.blocks;
     return edit_menu(title, specs);
-	// switch(wb.view){
-	// 	case 'result': return run_menu(title, specs);
-	// 	case 'blocks': return edit_menu(title, specs);
-	// 	case 'editor': return edit_menu(title, specs);
-	// 	default: return edit_menu(title, specs);
-	// }
 };
-
-if (wb.view === 'result'){
-    console.log('listen for script load');
-    Event.once(document.body, 'wb-script-loaded', null, runCurrentScripts);
-}
-
 
 function edit_menu(title, specs, show){
 	menu_built = true;
     var group = title.toLowerCase().split(/\s+/).join('');
     var submenu = document.querySelector('.' + group + '+ .submenu');
     if (!submenu){
-        var header = wb.elem('h3', {'class': group + ' accordion-header'}, title);
+        var header = wb.elem('h3', {'class': group + ' accordion-header', 'id': 'group_'+group}, title);
         var submenu = wb.elem('div', {'class': 'submenu block-menu accordion-body'});
         var blockmenu = document.querySelector('#block_menu');
         blockmenu.appendChild(header);

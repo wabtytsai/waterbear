@@ -1823,6 +1823,7 @@ hljs.LANGUAGES.javascript = {
 /*end highlight-javascript.js*/
 
 /*begin ajax.js*/
+(function(global){
 function $(e){if(typeof e=='string')e=document.getElementById(e);return e};
 function collect(a,f){var n=[];for(var i=0;i<a.length;i++){var v=f(a[i]);if(v!=null)n.push(v)}return n};
 
@@ -1835,56 +1836,59 @@ ajax.gets=function(url){var x=ajax.x();x.open('GET',url,false);x.send(null);retu
 ajax.post=function(url,func,args){ajax.send(url,func,'POST',args)};
 ajax.update=function(url,elm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.get(url,f)};
 ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.post(url,f,ajax.serialize(frm))};
+global.ajax = ajax;
+})(this);
 /*end ajax.js*/
 
 /*begin queryparams.js*/
 // Sets up wb namespace (wb === waterbear)
 // Extracts parameters from URL, used to switch embed modes, load from gist, etc.
+(function(global){
+	var wb = {
+		scriptModified: true
+	};
 
-    	var wb = {};
+	// Source: http://stackoverflow.com/a/13984429
+	wb.urlToQueryParams = function(url){
+	    var qparams = {},
+	        parts = (url||'').split('?'),
+	        qparts, qpart,
+	        i=0;
 
-		// Source: http://stackoverflow.com/a/13984429
-		wb.urlToQueryParams = function(url){
-		    var qparams = {},
-		        parts = (url||'').split('?'),
-		        qparts, qpart,
-		        i=0;
+	    if(parts.length <= 1 ){
+	        return qparams;
+	    }else{
+	        qparts = parts[1].split('&');
+	        for(i in qparts){
 
-		    if(parts.length <= 1 ){
-		        return qparams;
-		    }else{
-		        qparts = parts[1].split('&');
-		        for(i in qparts){
+	            qpart = qparts[i].split('=');
+	            qparams[decodeURIComponent(qpart[0])] =
+	                           decodeURIComponent(qpart[1] || '').split('#')[0];
+	        }
+	    }
+	    return qparams;
+	};
 
-		            qpart = qparts[i].split('=');
-		            qparams[decodeURIComponent(qpart[0])] =
-		                           decodeURIComponent(qpart[1] || '');
-		        }
-		    }
-
-		    return qparams;
-		};
-
-		wb.queryParamsToUrl = function(params){
-			var base = location.href.split('?')[0];
-			var keys = Object.keys(params);
-			var parts = [];
-			keys.forEach(function(key){
-				if (Array.isArray(params[key])){
-					params[key].forEach(function(value){
-						parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
-					});
-				}else{
-					parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
-				}
-			});
-			return base + '?' + parts.join('&');
+	wb.queryParamsToUrl = function(params){
+		var base = location.href.split('?')[0];
+		var keys = Object.keys(params);
+		var parts = [];
+		keys.forEach(function(key){
+			if (Array.isArray(params[key])){
+				params[key].forEach(function(value){
+					parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+				});
+			}else{
+				parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+			}
+		});
+		if (!parts.length){
+			return base;
 		}
-
-	    var q = wb.urlToQueryParams(location.href);
-		wb.queryParams = q;
-		wb.view = wb.queryParams.view || 'editor';
-	    // if they don't have the plugin part of the query string lets send them back home.
+		return base + '?' + parts.join('&');
+	}
+	global.wb = wb;
+})(this);
 
 /*end queryparams.js*/
 
@@ -1923,10 +1927,11 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
 
     var svgtext = document.querySelector('svg text');
     wb.resize = function(input){
+        if (!input) return;
         if (input.wbTarget){
             input = input.wbTarget;
         }
-        svgtext.textContent = input.value;
+        svgtext.textContent = input.value || '';
         var textbox = svgtext.getBBox();
         input.style.width = (textbox.width*0.7 + 25) + 'px';
     };
@@ -1989,7 +1994,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
             idx++;
         }
         return idx;
-    }
+    };
 
     wb.find = function find(elem, selector){
         return elem.querySelector(selector);
@@ -2017,7 +2022,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
             }
         }
         return null;
-    }
+    };
 
     wb.elem = function elem(name, attributes, children){
         // name can be a jquery object, an element, or a string
@@ -2100,7 +2105,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
         };
         window[id] = handler;
         document.head.appendChild(wb.elem('script', {src: url + '?callback=' + id, id: id, language: 'text/json'}));
-    }
+    };
 
     /* adapted from code here: http://javascriptexample.net/ajax01.php */
     wb.ajax = function(url, success, failure){
@@ -2117,10 +2122,10 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
                     }
                 }
             }
-        }
+        };
         req.open('GET', url, true);
         req.send(null);
-    }
+    };
 
 
 })(this);
@@ -2143,7 +2148,10 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
                 return on(e, eventname, selector, handler);
             });
         }
-        if (!elem.tagName){ console.error('first argument must be element'); }
+        if (!elem.tagName){ 
+            console.error('first argument must be element: %o', elem); 
+            debugger;
+        }
         if (typeof eventname !== 'string'){ console.error('second argument must be eventname'); }
         if (selector && typeof selector !== 'string'){ console.log('third argument must be selector or null'); }
         if (typeof handler !== 'function'){ console.log('fourth argument must be handler'); }
@@ -2327,6 +2335,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
     var blockMenu = document.querySelector('#block_menu');
     var potentialDropTargets;
     var selectedSocket;
+    var dragAction = {};
 
     var _dropCursor;
 
@@ -2338,7 +2347,9 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
     }
 
     function reset(){
+        // console.log('reset dragTarget to null');
         dragTarget = null;
+        dragAction = {undo: undoDrag, redo: redoDrag};
         potentialDropTargets = [];
         dropRects = [];
         dropTarget = null;
@@ -2362,6 +2373,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
             // console.log('not a drag handle');
             return undefined;
         }
+        // console.log('initDrag');
         var target = wb.closest(eT, '.block');
         if (target){
             if (wb.matches(target, '.scripts_workspace')){
@@ -2373,6 +2385,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
             if (target.parentElement.classList.contains('block-menu')){
                 target.dataset.isTemplateBlock = 'true';
             }
+        	dragAction.target = target;
             if (target.parentElement.classList.contains('local')){
                 target.dataset.isLocal = 'true';
             }
@@ -2405,12 +2418,20 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
         // }
         dragTarget.classList.add("dragIndication");
         currentPosition = {left: event.wbPageX, top: event.wbPageY};
+		// Track source for undo/redo
+		dragAction.target = dragTarget;
+		dragAction.fromParent = startParent;
+		dragAction.fromBefore = startSibling;
         // target = clone target if in menu
         // FIXME: Set different listeners on menu blocks than on the script area
         if (dragTarget.dataset.isTemplateBlock){
             dragTarget.classList.remove('dragIndication');
             var parent = dragTarget.parentElement;
+            // console.log('set drag target to clone of old drag target');
             dragTarget = wb.cloneBlock(dragTarget); // clones dataset and children, yay
+            dragAction.target = dragTarget;
+			// If we're dragging from the menu, there's no source to track for undo/redo
+			dragAction.fromParent = dragAction.fromBefore = null;
             // Event.trigger(dragTarget, 'wb-clone'); // not in document, won't bubble to document.body
             dragTarget.classList.add('dragIndication');
             if (dragTarget.dataset.isLocal){
@@ -2506,15 +2527,14 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
            // 2. Remove, if not over a canvas
            // 3. Remove, if dragging a clone
            // 4. Move back to start position if not a clone (maybe not?)
-        dragTarget.classList.remove('dragActive');
-        dragTarget.classList.remove('dragIndication');
-        potentialDropTargets.forEach(function(elem){
-            elem.classList.remove('dropTarget');
-        });
+        resetDragStyles();
         if (wb.overlap(dragTarget, blockMenu)){
             // delete block if dragged back to menu
             Event.trigger(dragTarget, 'wb-delete');
             dragTarget.parentElement.removeChild(dragTarget);
+        	// If we're dragging to the menu, there's no destination to track for undo/redo
+        	dragAction.toParent = dragAction.toBefore = null;
+        	wb.history.add(dragAction);
         }else if (dropTarget){
             dropTarget.classList.remove('dropActive');
             if (wb.matches(dragTarget, '.step')){
@@ -2522,6 +2542,7 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
                 // dropTarget.parent().append(dragTarget);
                 if(copyBlock) {
                 	revertDrop();
+                    // console.log('clone dragTarget block to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
                 }
                 dropTarget.insertBefore(dragTarget, dropCursor());
@@ -2531,12 +2552,20 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
                 // Insert a value block into a socket
                 if(copyBlock) {
                 	revertDrop();
+                    // console.log('clone dragTarget value to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
                 }
                 dropTarget.appendChild(dragTarget);
                 dragTarget.removeAttribute('style');
                 Event.trigger(dragTarget, 'wb-add');
             }
+            dragAction.toParent = dragTarget.parentNode;
+            dragAction.toBefore = dragTarget.nextElementSibling;
+            if(dragAction.toBefore && !wb.matches(dragAction.toBefore, '.block')) {
+            	// Sometimes the "next sibling" ends up being the cursor
+            	dragAction.toBefore = dragAction.toBefore.nextElementSibling;
+            }
+            wb.history.add(dragAction);
         }else{
             if (cloned){
                 // remove cloned block (from menu)
@@ -2545,6 +2574,72 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
             	revertDrop();
             }
         }
+    }
+    
+    /* There's basically four types of drag actions
+- Drag-in – dragging a block from the menu to the workspace
+ 	If fromParent is null, this is the type of drag that occurred.
+ 	- To undo: remove the block from the workspace
+ 	- To redo: re-insert the block into the workspace
+- Drag-around - dragging a block from one position to another in the workspace
+	Indicated by neither of fromParent and toParent being null.
+	- To undo: remove the block from the old position and re-insert it at the new position.
+	- To redo: remove the block from the old position and re-insert it at the new position.
+- Drag-out - dragging a block from the workspace to the menu (thus deleting it)
+	If toParent is null, this is the type of drag that occurred.
+	- To undo: re-insert the block into the workspace.
+	- To redo: remove the block from the workspace.
+- Drag-copy - dragging a block from one position to another in the workspace and duplicating it
+	At the undo/redo level, no distinction from drag-in is required.
+	- To undo: remove the block from the new location.
+	- To redo: re-insert the block at the new location.
+	
+	Note: If toBefore or fromBefore is null, that just means the location refers to the last
+	possible position (ie, the block was added to or removed from the end of a sequence). Thus,
+	we don't check those to determine what action to undo/redo.
+ 	*/
+    
+    function undoDrag() {
+    	if(this.toParent != null) {
+    		// Remove the inserted block
+    		Event.trigger(this.target, 'wb-remove');
+    		this.target.remove();
+    	}
+    	if(this.fromParent != null) {
+    		// Put back the removed block
+    		this.target.removeAttribute('style');
+    		if(wb.matches(this.target,'.step')) {
+    			this.fromParent.insertBefore(this.target, this.fromBefore);
+    		} else {
+    			this.fromParent.appendChild(this.target);
+    		}
+			Event.trigger(this.target, 'wb-add');
+    	}
+    }
+    
+    function redoDrag() {
+    	if(this.toParent != null) {
+    		if(wb.matches(this.target,'.step')) {
+    			this.toParent.insertBefore(this.target, this.toBefore);
+    		} else {
+    			this.toParent.appendChild(this.target);
+    		}
+			Event.trigger(this.target, 'wb-add');
+    	}
+    	if(this.fromParent != null) {
+    		Event.trigger(this.target, 'wb-remove');
+    		this.target.remove();
+    	}
+    }
+
+    function resetDragStyles() {
+        if (dragTarget){
+            dragTarget.classList.remove('dragActive');
+            dragTarget.classList.remove('dragIndication');
+        }
+        potentialDropTargets.forEach(function(elem){
+            elem.classList.remove('dropTarget');
+        });
     }
     
     function revertDrop() {
@@ -2698,18 +2793,34 @@ ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};
         }
         return '.socket[data-type=' + name + '] > .holder';
     }
+    
+    function cancelDrag(event) {
+    	// Cancel if escape key pressed
+        console.log('cancel drag of %o', dragTarget);
+    	if(event.keyCode == 27) {
+    		resetDragStyles();
+	    	revertDrop();
+			clearTimeout(timer);
+			timer = null;
+			reset();
+			return false;
+	    }
+    }
 
     // Initialize event handlers
     wb.initializeDragHandlers = function(){
+        console.log('initializeDragHandlers');
         if (Event.isTouch){
-            Event.on('.scripts_workspace .contained, .block-menu', 'touchstart', '.block', initDrag);
+            Event.on('.content', 'touchstart', '.block', initDrag);
             Event.on('.content', 'touchmove', null, drag);
             Event.on('.content', 'touchend', null, endDrag);
+            // TODO: A way to cancel the drag?
             // Event.on('.scripts_workspace', 'tap', '.socket', selectSocket);
         }else{
-            Event.on('.scripts_workspace .contained, .block-menu', 'mousedown', '.block', initDrag);
+            Event.on('.content', 'mousedown', '.block', initDrag);
             Event.on('.content', 'mousemove', null, drag);
             Event.on('.content', 'mouseup', null, endDrag);
+            Event.on(document.body, 'keyup', null, cancelDrag);
             // Event.on('.scripts_workspace', 'click', '.socket', selectSocket);
         }
     };
@@ -2927,6 +3038,7 @@ function uuid(){
         }else{
             removeStep(event);
         }
+        Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'removed'});
     }
 
     function addBlock(event){
@@ -2936,6 +3048,7 @@ function uuid(){
         }else{
             addStep(event);
         }
+        Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'added'});
     }
 
     function removeStep(event){
@@ -3315,6 +3428,7 @@ function uuid(){
         parent.dataset.locals = JSON.stringify(parentLocals);
 
         wb.find(parent, '.name').textContent = nameTemplate;
+        Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
     }
 
     function cancelUpdateName(event){
@@ -3361,6 +3475,7 @@ function uuid(){
 
 function tabSelect(event){
     var target = event.wbTarget;
+    event.preventDefault();
     document.querySelector('.tabbar .selected').classList.remove('selected');
     target.classList.add('selected');
     if (wb.matches(target, '.scripts_workspace_tab')){
@@ -3373,6 +3488,7 @@ function tabSelect(event){
 Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 function accordion(event){
+    event.preventDefault();
     var open = document.querySelector('#block_menu .open');
     if (open){
         open.classList.remove('open');
@@ -3383,17 +3499,20 @@ function accordion(event){
 
 Event.on('#block_menu', 'click', '.accordion-header', accordion);
 
-
 function showWorkspace(mode){
+    console.log('showWorkspace');
     var workspace = document.querySelector('.workspace');
+    var scriptsWorkspace = document.querySelector('.scripts_workspace');
+    if (!scriptsWorkspace) return;
+    var scriptsTextView = document.querySelector('.scripts_text_view');
     if (mode === 'block'){
-	    document.querySelector('.scripts_workspace').style.display = '';
-	    document.querySelector('.scripts_text_view').style.display = 'none';
+	    scriptsWorkspace.style.display = '';
+	    scriptsTextView.style.display = 'none';
         workspace.classList.remove('textview');
         workspace.classList.add('blockview');
     }else if (mode === 'text'){
-    	document.querySelector('.scripts_workspace').style.display = 'none';
-    	document.querySelector('.scripts_text_view').style.display = '';
+    	scriptsWorkspace.style.display = 'none';
+    	scriptsTextView.style.display = '';
         workspace.classList.remove('blockview');
         workspace.classList.add('textview');
     }
@@ -3408,6 +3527,56 @@ function updateScriptsView(){
 }
 window.updateScriptsView = updateScriptsView;
 
+// Undo list
+
+// Undo actions must support two methods:
+// - undo() which reverses the effect of the action
+// - redo() which reapplies the effect of the action, assuming it has been redone.
+// These methods may safely assume that no other actions have been performed.
+
+// This is the maximum number of actions that will be stored in the undo list.
+// There's no reason why it needs to be constant; there could be an interface to alter it.
+// (Of course, that'd require making it public first.)
+var MAX_UNDO = 30;
+var undoActions = [];
+// When currentAction == undoActions.length, there are no actions available to redo
+var currentAction = 0;
+
+function undoLastAction() {
+	if(currentAction <= 0) return; // No action to undo!
+	currentAction--;
+	undoActions[currentAction].undo();
+}
+
+function redoLastAction() {
+	if(currentAction >= undoActions.length) return; // No action to redo!
+	undoActions[currentAction].redo();
+	currentAction++;
+}
+
+function addUndoAction(action) {
+	if(!action.hasOwnProperty('redo') || !action.hasOwnProperty('undo')) {
+		console.log("Tried to add invalid action!");
+		return;
+	}
+	if(currentAction < undoActions.length) {
+		// Truncate any actions available to be redone
+		undoActions.length = currentAction;
+	} else if(currentAction >= MAX_UNDO) {
+		// Drop the oldest action
+		currentAction--;
+		undoActions.shift();
+	}
+	undoActions[currentAction] = action;
+	currentAction++;
+	console.log('undo stack: %s', undoActions.length);
+}
+
+wb.history = {
+	add: addUndoAction,
+	undo: undoLastAction,
+	redo: redoLastAction,
+}
 
 // Context Menu
 //
@@ -3434,28 +3603,70 @@ function collapseCommand(key, opt){
 function copyCommand(evt) {
 	console.log("Copying a block!");
 	console.log(this);
-	pasteboard = wb.cloneBlock(this);
+	action = {
+		copied: wb.cloneBlock(this),
+		oldPasteboard: pasteboard,
+		undo: function() {
+			pasteboard = this.oldPasteboard;
+		},
+		redo: function() {
+			pasteboard = this.copied;
+		},
+	}
+	wb.history.add(action);
+	action.redo();
 }
 
 function cutCommand(evt) {
 	console.log("Cutting a block!");
-	Event.trigger(this, 'wb-remove');
-	this.remove();
-	pasteboard = this;
+	action = {
+		removed: this,
+		// Storing parent and next sibling in case removing the node from the DOM clears them
+		parent: this.parentNode,
+		before: this.nextSibling,
+		oldPasteboard: pasteboard,
+		undo: function() {console.log(this);
+			if(wb.matches(this.removed,'.step')) {
+				this.parent.insertBefore(this.removed, this.before);
+			} else {
+				this.parent.appendChild(this.removed);
+			}
+			Event.trigger(this.removed, 'wb-add');
+			pasteboard = this.oldPasteboard;
+		},
+		redo: function() {
+			Event.trigger(this.removed, 'wb-remove');
+			this.removed.remove();
+			pasteboard = this.removed;
+		},
+	}
+	wb.history.add(action);
+	action.redo();
 }
 
 function pasteCommand(evt) {
 	console.log(pasteboard);
-	var paste = wb.cloneBlock(pasteboard);
-	if(wb.matches(pasteboard,'.step')) {
-		console.log("Pasting a step!");
-		cmenu_target.parentNode.insertBefore(paste,cmenu_target.nextSibling);
-		Event.trigger(paste, 'wb-add');
-	} else {
-		console.log("Pasting an expression!");
-		cmenu_target.appendChild(paste);
-		Event.trigger(paste, 'wb-add');
+	action = {
+		pasted: wb.cloneBlock(pasteboard),
+		into: cmenu_target.parentNode,
+		before: cmenu_target.nextSibling,
+		undo: function() {
+			Event.trigger(this.pasted, 'wb-remove');
+			this.pasted.remove();
+		},
+		redo: function() {
+			if(wb.matches(pasteboard,'.step')) {
+				console.log("Pasting a step!");
+				this.into.insertBefore(this.pasted,this.before);
+			} else {
+				console.log("Pasting an expression!");
+				cmenu_target.appendChild(this.pasted);
+			}
+			Event.trigger(this.pasted, 'wb-add');
+		},
 	}
+	wb.history.add(action);
+	action.redo();
 }
 
 function canPaste() {
@@ -3600,104 +3811,35 @@ function enableContextMenu(evt) {
 var block_cmenu = {
 	//expand: {name: 'Expand All', callback: dummyCallback},
 	//collapse: {name: 'Collapse All', callback: dummyCallback},
-	cut: {name: 'Cut', callback: cutCommand},
+	undo: {name: 'Undo', callback: undoLastAction, enabled: function() {return currentAction > 0}},
+	redo: {name: 'Redo', callback: redoLastAction, enabled: function() {return currentAction < undoActions.length}},
+	cut: {name: 'Cut', callback: cutCommand, startGroup: true},
 	copy: {name: 'Copy', callback: copyCommand},
 	//copySubscript: {name: 'Copy Subscript', callback: dummyCallback},
 	paste: {name: 'Paste', callback: pasteCommand, enabled: canPaste},
 	//cancel: {name: 'Cancel', callback: dummyCallback},
 }
 
-// $.contextMenu({
-//     selector: '.scripts_workspace .block',
-//     items: {
-//         //clone: {'name': 'Clone', icon: 'add', callback: cloneCommand},
-//         //edit: {'name': 'Edit', icon: 'edit', callback: editCommand},
-//         //expand: {'name': 'Expand', callback: expandCommand},
-//         //collapse: {'name': 'Collapse', callback: collapseCommand},
-//         cut: {'name': 'Cut block', icon: 'cut', callback: cutBlockCommand},
-//         copy: {'name': 'Copy block', icon: 'copy', callback: copyBlockCommand},
-//         copySubscript: {'name': 'Copy subscript', callback: copySubscriptCommand},
-//         //paste: {'name': 'Paste', icon: 'paste', callback: pasteCommand},
-//         cancel: {'name': 'Cancel', callback: cancelCommand}
-//     }
-// });
-//
-// $.contextMenu({
-//    selector: '.scripts_workspace',
-//    items: {
-//        paste: {'name': 'Paste', icon: 'paste', callback: pasteCommand},
-//        cancel: {'name': 'Cancel', callback: cancelCommand}
-//    }
-// });
-//
-// $.contextMenu({
-//     selector: '.scripts_workspace .value > input',
-//     items: {
-//         paste: {'name': 'Paste', icon: 'paste', callback: pasteExpressionCommand},
-//         cancel: {'name': 'Cancel', callback: cancelCommand}
-//     }
-// });
-//
-// $.contextMenu({
-//     selector: '.scripts_workspace .contained',
-//     items: {
-//         paste: {'name': 'Paste', icon: 'paste', callback: pasteStepCommand},
-//         cancel: {'name': 'Cancel', callback: cancelCommand}
-//     }
-// });
-//
-
-// TODO: add event handler to enable/disable, hide/show items based on state of block
-
-// Handle Context menu for touch devices:
 // Test drawn from modernizr
-
 function is_touch_device() {
   return !!('ontouchstart' in window);
 }
 
 initContextMenus();
-// if (is_touch_device()){
-//     $.tappable({
-//         container: '.blockmenu, .workspace',
-//         selector: '.block',
-//         callback: function(){
-//             console.info('long tap detected');
-//             console.info(this);
-//             this.contextMenu();
-//         },
-//         touchDelay: 150
-//     });
-// }
-
-// var menu_built = false;
-// var saved_menus = [];
 
 // Build the Blocks menu, this is a public method
 wb.menu = function(blockspec){
     var title = blockspec.name.replace(/\W/g, '');
     var specs = blockspec.blocks;
     return edit_menu(title, specs);
-	// switch(wb.view){
-	// 	case 'result': return run_menu(title, specs);
-	// 	case 'blocks': return edit_menu(title, specs);
-	// 	case 'editor': return edit_menu(title, specs);
-	// 	default: return edit_menu(title, specs);
-	// }
 };
-
-if (wb.view === 'result'){
-    console.log('listen for script load');
-    Event.once(document.body, 'wb-script-loaded', null, runCurrentScripts);
-}
-
 
 function edit_menu(title, specs, show){
 	menu_built = true;
     var group = title.toLowerCase().split(/\s+/).join('');
     var submenu = document.querySelector('.' + group + '+ .submenu');
     if (!submenu){
-        var header = wb.elem('h3', {'class': group + ' accordion-header'}, title);
+        var header = wb.elem('h3', {'class': group + ' accordion-header', 'id': 'group_'+group}, title);
         var submenu = wb.elem('div', {'class': 'submenu block-menu accordion-body'});
         var blockmenu = document.querySelector('#block_menu');
         blockmenu.appendChild(header);
@@ -3718,289 +3860,508 @@ function edit_menu(title, specs, show){
 /*begin workspace.js*/
 (function(wb){
 
-var language = location.pathname.match(/\/(.*)\.html/)[1];
+	var language = location.pathname.match(/\/(.*)\.html/)[1];
+	wb.language = language;
 
-function clearScripts(event, force){
-    if (force || confirm('Throw out the current script?')){
-        var workspace = document.querySelector('.workspace > .scripts_workspace')
-        workspace.parentElement.removeChild(workspace);
-        createWorkspace('Workspace');
-		document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
-    }
-}
-Event.on('.clear_scripts', 'click', null, clearScripts);
-Event.on('.edit_script', 'click', null, function(){
-	document.body.className = 'editor';
-	wb.loadCurrentScripts(wb.queryParams);
-});
-
-Event.on('.goto_stage', 'click', null, function(){
-	document.body.className = 'result';
-});
-
-
-
-// Load and Save Section
-
-function saveCurrentScripts(){
-    wb.showWorkspace('block');
-    document.querySelector('#block_menu').scrollIntoView();
-    localStorage['__' + language + '_current_scripts'] = scriptsToString();
-}
-window.onunload = saveCurrentScripts;
-
-// Save script to gist;
-function saveCurrentScriptsToGist(){
-    console.log("Saving to Gist");
-    var title = prompt("Save to an anonymous Gist titled: ");
-
-    ajax.post("https://api.github.com/gists", function(data){
-        //var raw_url = JSON.parse(data).files["script.json"].raw_url;
-        var gistID = JSON.parse(data).url.split("/").pop();
-		prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
-
-        //save gist id to local storage
-        var localGists = localStorage['__' + language + '_recent_gists'];
-        var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
-        gistArray.push(gistID);
-        localStorage['__' + language + '_recent_gists'] = JSON.stringify(gistArray);
-
-    }, JSON.stringify({
-        "description": title,
-        "public": true,
-        "files": {
-            "script.json": {
-                "content": scriptsToString()
-            },
-        }
-    }));
-}
-
-
-function scriptsToString(title, description){
-    if (!title){ title = ''; }
-    if (!description){ description = ''; }
-    var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-    return JSON.stringify({
-        title: title,
-        description: description,
-        date: Date.now(),
-        waterbearVersion: '2.0',
-        blocks: blocks.map(wb.blockDesc)
-    });
-}
-
-
-function createDownloadUrl(evt){
-    var URL = window.webkitURL || window.URL;
-    var file = new Blob([scriptsToString()], {type: 'application/json'});
-    var reader = new FileReader();
-    var a = document.createElement('a');
-    reader.onloadend = function(){
-        a.href = reader.result;
-        a.download = 'script.json';
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-    };
-    reader.readAsDataURL(file);
-    evt.preventDefault();
-}
-
-Event.on('.save_scripts', 'click', null, saveCurrentScriptsToGist);
-Event.on('.download_scripts', 'click', null, createDownloadUrl);
-Event.on('.load_from_gist', 'click', null, loadScriptsFromGistId);
-Event.on('.restore_scripts', 'click', null, loadScriptsFromFilesystem);
-
-
-function loadScriptsFromGistId(){
-	var gistID = prompt("What Gist would you like to load?");
-	ajax.get("https://api.github.com/gists/"+gistID, function(data){
-		loadScriptsFromGist({data:JSON.parse(data)});
+	function clearScripts(event, force){
+		if (event){
+		    event.preventDefault();
+		}
+		if (force || confirm('Throw out the current script?')){
+			var workspace = document.querySelector('.workspace > .scripts_workspace')
+			workspace.parentElement.removeChild(workspace);
+			createWorkspace('Workspace');
+			document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
+		}
+	}
+	Event.on('.clear_scripts', 'click', null, clearScripts);
+	Event.on('.edit-script', 'click', null, function(event){
+	    event.preventDefault();
+		wb.historySwitchState('editor');
 	});
-}
 
-function loadScriptsFromFilesystem(){
-    var input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'application/json');
-    input.addEventListener('change', function(evt){
-        var file = input.files[0];
-        loadScriptsFromFile(file);
-    });
-    input.click();
-}
+	var handleStateChange = function handleStateChange(evt){
+		// hide loading spinner if needed
+		hideLoader();
+		wb.queryParams = wb.urlToQueryParams(location.href);
+		if (wb.queryParams.view === 'result'){
+			document.body.className = 'result';
+			wb.view = 'result';
+		}else{
+			document.body.className = 'editor';
+			wb.view = 'editor';
+		}
+		// handle loading example, gist, currentScript, etc. if needed
+	    wb.loadCurrentScripts(wb.queryParams);
+	    // If we go to the result and can run the result inline, do it
+	    if (wb.view === 'result' && wb.runCurrentScripts){
+	    	wb.runCurrentScripts();
+	    }
+	}
+	Event.on(document.body, 'wb-state-change', null, handleStateChange);
 
-function loadScriptsFromObject(fileObject){
-    // console.info('file format version: %s', fileObject.waterbearVersion);
-    // console.info('restoring to workspace %s', fileObject.workspace);
-	if (!fileObject) return createWorkspace();
-    var blocks = fileObject.blocks.map(wb.Block);
-    if (!blocks.length){
-        return createWorkspace();
-    }
-    if (blocks.length > 1){
-        console.log('not really expecting multiple blocks here right now');
-        console.log(blocks);
-    }
-    blocks.forEach(function(block){
-        wireUpWorkspace(block);
-        Event.trigger(block, 'wb-add');
-    });
-    wb.loaded = true;
-    Event.trigger(document.body, 'wb-script-loaded');
-}
+	var hideLoader = function hideLoader(){
+	    var loader = document.querySelector('#block_menu_load');
+	    if (loader){
+	        loader.parentElement.removeChild(loader);
+	    }		
+	}
 
-function loadScriptsFromGist(gist){
-	var keys = Object.keys(gist.data.files);
-	var file;
-	keys.forEach(function(key){
-		if (/.*\.json/.test(key)){
-			// it's a json file
-			file = gist.data.files[key].content;
+
+	// Load and Save Section
+
+	wb.historySwitchState = function historySwitchState(state, clearFiles){
+		// console.log('historySwitchState(%o, %s)', state, !!clearFiles);
+		var params = wb.urlToQueryParams(location.href);
+		if (state !== 'result'){
+			delete params['view'];
+		}else{
+			params.view = state;
+		}
+		if (clearFiles){
+			delete params['gist'];
+			delete params['example'];
+		}
+		history.pushState(null, '', wb.queryParamsToUrl(params));
+		Event.trigger(document.body, 'wb-state-change');
+	}
+
+	function saveCurrentScripts(){
+		if (!wb.scriptModified){
+			console.log('nothing to save');
+			// nothing to save
+			return;
+		}
+		wb.showWorkspace('block');
+		document.querySelector('#block_menu').scrollIntoView();
+		localStorage['__' + language + '_current_scripts'] = scriptsToString();
+	}
+	window.onunload = saveCurrentScripts;
+
+	// Save script to gist;
+	function saveCurrentScriptsToGist(event){
+	    event.preventDefault();
+		console.log("Saving to Gist");
+		var title = prompt("Save to an anonymous Gist titled: ");
+
+		ajax.post("https://api.github.com/gists", function(data){
+	        //var raw_url = JSON.parse(data).files["script.json"].raw_url;
+	        var gistID = JSON.parse(data).url.split("/").pop();
+	        prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
+
+	        //save gist id to local storage
+	        var localGists = localStorage['__' + language + '_recent_gists'];
+	        var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
+	        gistArray.push(gistID);
+	        localStorage['__' + language + '_recent_gists'] = JSON.stringify(gistArray);
+
+	    }, JSON.stringify({
+	    	"description": title,
+	    	"public": true,
+	    	"files": {
+	    		"script.json": {
+	    			"content": scriptsToString()
+	    		},
+	    	}
+	    }));
+	}
+
+	function loadRecentGists() {
+		var localGists = localStorage['__' + language + '_recent_gists'];
+		var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
+		var gistContainer = document.querySelector("#recent_gists");
+		gistContainer.innerHTML = '';
+		for (var i = 0; i < gistArray.length; i++) {
+			var node = document.createElement("li");
+			var a = document.createElement('a');
+			var linkText = document.createTextNode(gistArray[i]);
+
+			a.appendChild(linkText)
+			//a.href = language + ".html?gist=" + gistArray[i];
+
+			node.appendChild(a);
+			gistContainer.appendChild(node);
+			var gist = gistArray[i];
+			console.log(gist);
+			a.addEventListener('click', function () {
+				loadScriptsFromGistId(parseInt(gist));
+				return false;
+			});
+		};
+	}
+	window.addEventListener('load', loadRecentGists, false);
+
+
+	function scriptsToString(title, description){
+		if (!title){ title = ''; }
+		if (!description){ description = ''; }
+		var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
+		return JSON.stringify({
+			title: title,
+			description: description,
+			date: Date.now(),
+			waterbearVersion: '2.0',
+			blocks: blocks.map(wb.blockDesc)
+		});
+	}
+
+
+	function createDownloadUrl(evt){
+	    evt.preventDefault();
+		var URL = window.webkitURL || window.URL;
+		var file = new Blob([scriptsToString()], {type: 'application/json'});
+		var reader = new FileReader();
+		var a = document.createElement('a');
+		reader.onloadend = function(){
+			a.href = reader.result;
+			a.download = 'script.json';
+			a.target = '_blank';
+			document.body.appendChild(a);
+			a.click();
+		};
+		reader.readAsDataURL(file);
+		evt.preventDefault();
+	}
+
+	Event.on('.save_scripts', 'click', null, saveCurrentScriptsToGist);
+	Event.on('.download_scripts', 'click', null, createDownloadUrl);
+	Event.on('.load_from_gist', 'click', null, loadScriptsFromGistId);
+	Event.on('.restore_scripts', 'click', null, loadScriptsFromFilesystem);
+
+
+	function loadScriptsFromGistId(event){
+	    event.preventDefault();
+		var gistID = prompt("What Gist would you like to load? Please enter the ID of the Gist: ");
+		ajax.get("https://api.github.com/gists/"+gistID, function(data){
+			loadScriptsFromGist({data:JSON.parse(data)});
+		});
+	}
+
+	function loadScriptsFromFilesystem(event){
+	    event.preventDefault();
+		var input = document.createElement('input');
+		input.setAttribute('type', 'file');
+		input.setAttribute('accept', 'application/json');
+		input.addEventListener('change', function(evt){
+			var file = input.files[0];
+			loadScriptsFromFile(file);
+		});
+		input.click();
+	}
+
+	function loadScriptsFromObject(fileObject){
+	    // console.info('file format version: %s', fileObject.waterbearVersion);
+	    // console.info('restoring to workspace %s', fileObject.workspace);
+	    if (!fileObject) return createWorkspace();
+	    var blocks = fileObject.blocks.map(wb.Block);
+	    if (!blocks.length){
+	    	return createWorkspace();
+	    }
+	    if (blocks.length > 1){
+	    	console.log('not really expecting multiple blocks here right now');
+	    	console.log(blocks);
+	    }
+	    blocks.forEach(function(block){
+	    	wireUpWorkspace(block);
+	    	Event.trigger(block, 'wb-add');
+	    });
+	    wb.loaded = true;
+	    Event.trigger(document.body, 'wb-script-loaded');
+	}
+
+	function loadScriptsFromGist(gist){
+		var keys = Object.keys(gist.data.files);
+		var file;
+		keys.forEach(function(key){
+			if (/.*\.json/.test(key)){
+				// it's a json file
+				file = gist.data.files[key].content;
+			}
+		});
+		if (!file){
+			console.log('no json file found in gist: %o', gist);
+			return;
+		}
+		loadScriptsFromObject(JSON.parse(file));
+	}
+
+	function loadScriptsFromExample(name){
+		wb.ajax('examples/' + name + '.json', function(exampleJson){
+			loadScriptsFromObject(JSON.parse(exampleJson));
+		}, function(xhr, status){
+			console.error('Error in wb.ajax: %s', status);
+		});
+	}
+
+
+	wb.loaded = false;
+	wb.loadCurrentScripts = function(queryParsed){
+		// console.log('loadCurrentScripts(%o)', queryParsed);
+		if (wb.loaded) return;
+		if (queryParsed.gist){
+			console.log("Loading gist %s", queryParsed.gist);
+			ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
+				loadScriptsFromGist({data:JSON.parse(data)});
+			});
+		}else if (queryParsed.example){
+			console.log('loading example %s', queryParsed.example);
+			loadScriptsFromExample(queryParsed.example);
+		}else if (localStorage['__' + language + '_current_scripts']){
+			console.log('loading current script from local storage');
+			var fileObject = JSON.parse(localStorage['__' + language + '_current_scripts']);
+			if (fileObject){
+				loadScriptsFromObject(fileObject);
+			}
+		}else{
+			console.log('no script to load, starting a new script');
+			createWorkspace('Workspace');
+		}
+		wb.loaded = true;
+		Event.trigger(document.body, 'wb-loaded');
+	};
+
+
+	// Allow saved scripts to be dropped in
+	function createWorkspace(name){
+	    console.log('createWorkspace');
+		var id = uuid();
+		var workspace = wb.Block({
+			group: 'scripts_workspace',
+			id: id,
+			scriptId: id,
+			scopeId: id,
+			blocktype: 'context',
+			sockets: [
+			{
+				name: name
+			}
+			],
+			script: '[[1]]',
+			isTemplateBlock: false,
+			help: 'Drag your script blocks here'
+		});
+		wireUpWorkspace(workspace);
+	}
+	wb.createWorkspace = createWorkspace;
+
+	function wireUpWorkspace(workspace){
+		workspace.addEventListener('drop', getFiles, false);
+		workspace.addEventListener('dragover', function(evt){evt.preventDefault();}, false);
+		wb.findAll(document, '.scripts_workspace').forEach(function(ws){
+	        ws.parentElement.removeChild(ws); // remove any pre-existing workspaces
+	    });
+		document.querySelector('.workspace').appendChild(workspace);
+		workspace.querySelector('.contained').appendChild(wb.elem('div', {'class': 'dropCursor'}));
+		wb.initializeDragHandlers();
+	}
+
+	function handleDragover(evt){
+	    // Stop Firefox from grabbing the file prematurely
+	    evt.stopPropagation();
+	    evt.preventDefault();
+	    evt.dataTransfer.dropEffect = 'copy';
+	}
+
+	function loadScriptsFromFile(file){
+		fileName = file.name;
+		if (fileName.indexOf('.json', fileName.length - 5) === -1) {
+			console.error("File not a JSON file");
+			return;
+		}
+		var reader = new FileReader();
+		reader.readAsText( file );
+		reader.onload = function (evt){
+			clearScripts(null, true);
+			var saved = JSON.parse(evt.target.result);
+			loadScriptsFromObject(saved);
+			wb.scriptModified = true;	
+		};
+	}
+
+	function getFiles(evt){
+		evt.stopPropagation();
+		evt.preventDefault();
+		var files = evt.dataTransfer.files;
+		if ( files.length > 0 ){
+	        // we only support dropping one file for now
+	        var file = files[0];
+	        loadScriptsFromFile(file);
+	    }
+	}
+
+
+	Event.on('.workspace', 'click', '.disclosure', function(evt){
+		var block = wb.closest(evt.wbTarget, '.block');
+		if (block.dataset.closed){
+			delete block.dataset.closed;
+		}else{
+			block.dataset.closed = true;
 		}
 	});
-	if (!file){
-		console.log('no json file found in gist: %o', gist);
-		return;
-	}
-	loadScriptsFromObject(JSON.parse(file));
-}
-window.fromgist = loadScriptsFromGist;
 
-function loadScriptsFromExample(name){
-    wb.ajax('examples/' + name + '.json', function(exampleJson){
-        loadScriptsFromObject(JSON.parse(exampleJson));
-    }, function(xhr, status){
-        console.error('Error in wb.ajax: %s', status);
-    });
-}
+	Event.on('.workspace', 'dblclick', '.locals .name', wb.changeName);
+	Event.on('.workspace', 'keypress', 'input', wb.resize);
+	Event.on('.workspace', 'change', 'input, select', function(evt){
+		Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'valueChanged'});
 
-function runScriptFromGist(gist){
-	console.log('running script from gist');
-	var keys = Object.keys(gist.data.files);
-	var file;
-	keys.forEach(function(key){
-		if (/.*\.js$/.test(key)){
-			// it's a javascript file
-			console.log('found javascript file: %s', key);
-			file = gist.data.files[key].content;
+	});
+	Event.on(document.body, 'wb-loaded', null, function(evt){console.log('menu loaded');});
+	Event.on(document.body, 'wb-script-loaded', null, function(evt){
+		wb.scriptModified = false;
+		if (wb.view === 'result'){
+			// console.log('run script because we are awesome');
+			window.addEventListener('load', function(){
+				// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
+				wb.runCurrentScripts();
+			}, false);
+		// }else{
+		// 	console.log('do not run script for some odd reason: %s', wb.view);
+		}
+		// clear undo/redo stack
+		wb.scriptLoaded = true;
+		console.log('script loaded');
+	});
+
+	Event.on(document.body, 'wb-modified', null, function(evt){
+		// still need modified events for changing input values
+		if (!wb.scriptLoaded) return;
+		if (!wb.scriptModified){
+			wb.scriptModified = true;
+			wb.historySwitchState(wb.view, true);
 		}
 	});
-	if (!file){
-		console.log('no javascript file found in gist: %o', gist);
-		return;
-	}
-	wb.runScript(file);
-}
 
+	window.addEventListener('popstate', function(evt){
+		Event.trigger(document.body, 'wb-state-change');
+	}, false);
 
-wb.loaded = false;
-wb.loadCurrentScripts = function(queryParsed){
-    if (!wb.loaded){
-    	if (queryParsed.gist){
-    		wb.jsonp(
-    			'https://api.github.com/gists/' + queryParsed.gist,
-    			loadScriptsFromGist
-    		);
-        }else if (queryParsed.example){
-            loadScriptsFromExample(queryParsed.example);
-    	}else if (localStorage['__' + language + '_current_scripts']){
-            var fileObject = JSON.parse(localStorage['__' + language + '_current_scripts']);
-            if (fileObject){
-                loadScriptsFromObject(fileObject);
-            }
-        }else{
-            createWorkspace('Workspace');
-        }
-        wb.loaded = true;
-    }
-    Event.trigger(document.body, 'wb-loaded');
-};
-
-
-// Allow saved scripts to be dropped in
-function createWorkspace(name){
-    var id = uuid();
-    var workspace = wb.Block({
-        group: 'scripts_workspace',
-        id: id,
-        scriptId: id,
-        scopeId: id,
-        blocktype: 'context',
-        sockets: [
-            {
-                name: name
-            }
-        ],
-        script: '[[1]]',
-        isTemplateBlock: false,
-        help: 'Drag your script blocks here'
-    });
-    wireUpWorkspace(workspace);
-}
-wb.createWorkspace = createWorkspace;
-
-function wireUpWorkspace(workspace){
-    workspace.addEventListener('drop', getFiles, false);
-    workspace.addEventListener('dragover', function(evt){evt.preventDefault();}, false);
-    wb.findAll(document, '.scripts_workspace').forEach(function(ws){
-        ws.parentElement.removeChild(ws); // remove any pre-existing workspaces
-    });
-    document.querySelector('.workspace').appendChild(workspace);
-    workspace.querySelector('.contained').appendChild(wb.elem('div', {'class': 'dropCursor'}));
-    wb.initializeDragHandlers();
-}
-
-function handleDragover(evt){
-    // Stop Firefox from grabbing the file prematurely
-    evt.stopPropagation();
-    evt.preventDefault();
-    evt.dataTransfer.dropEffect = 'copy';
-}
-
-function loadScriptsFromFile(file){
-    fileName = file.name;
-    if (fileName.indexOf('.json', fileName.length - 5) === -1) {
-        console.error("File not a JSON file");
-        return;
-    }
-    var reader = new FileReader();
-    reader.readAsText( file );
-    reader.onload = function (evt){
-        clearScripts(null, true);
-        var saved = JSON.parse(evt.target.result);
-        loadScriptsFromObject(saved);
-    };
-}
-
-function getFiles(evt){
-    evt.stopPropagation();
-    evt.preventDefault();
-    var files = evt.dataTransfer.files;
-    if ( files.length > 0 ){
-        // we only support dropping one file for now
-        var file = files[0];
-        loadScriptsFromFile(file);
-    }
-}
-
-Event.on('.workspace', 'click', '.disclosure', function(evt){
-    var block = wb.closest(evt.wbTarget, '.block');
-    if (block.dataset.closed){
-        delete block.dataset.closed;
-    }else{
-        block.dataset.closed = true;
-    }
-});
-
-Event.on('.workspace', 'dblclick', '.locals .name', wb.changeName);
-Event.on('.workspace', 'keypress', 'input', wb.resize);
-Event.on(document.body, 'wb-loaded', null, function(evt){console.log('menu loaded');});
-Event.on(document.body, 'wb-script-loaded', null, function(evt){console.log('script loaded');});
+	// Kick off some initialization work
+	Event.trigger(document.body, 'wb-state-change');
 })(wb);
 
 /*end workspace.js*/
+
+/*begin blockprefs.js*/
+// User block preferences
+//
+// Allows the user to hide groups of blocks within the interface
+// Settings are stored in LocalStorage and retreived each
+// time the page is loaded.
+
+(function(wb){
+
+	//save the state of the settings link
+	var closed = true;
+	var language = location.pathname.match(/\/(.*)\.html/)[1];
+	var settings_link;
+	//add a link to show the show/hide block link
+	function addSettingsLink(callback) {
+		console.log("adding settings link");
+		var block_menu = document.querySelector('#block_menu');
+		var settings_link = document.createElement('a');
+		settings_link.href = '#';
+		settings_link.style.float = 'right';
+		settings_link.appendChild(document.createTextNode('Show/Hide blocks'));
+		settings_link.addEventListener('click', toggleCheckboxDisplay);
+		block_menu.appendChild(settings_link);
+		return settings_link;
+	}
+
+	//create the checkboxes next to the headers
+	function createCheckboxes() {
+		var block_headers = document.querySelectorAll('.accordion-header');
+		[].forEach.call(block_headers, function (el) {
+			var checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.value = '1';
+			checkbox.style.float = 'right';
+			checkbox.style.display = 'none';
+			checkbox.checked = 'true';
+			checkbox.addEventListener('click', hideBlocks);
+			el.appendChild(checkbox);
+		});
+	};
+
+	//settings link has been clicked
+	function toggleCheckboxDisplay() {
+		console.log('toggle checkboxes called');
+		var checkboxes = document.querySelectorAll('.accordion-header input[type="checkbox"]');
+		var block_menu = document.querySelector('#block_menu');
+		var display;
+		block_menu.classList.toggle("settings");
+		if (closed) {
+			closed = false;
+			display = 'inline';
+			settings_link.innerHTML = 'Save';
+		} else {
+			//save was clicked
+			closed = true;
+			display = 'none'
+			settings_link.innerHTML = 'Show/Hide blocks';
+			//save the settings
+			saveSettings();
+		}
+		[].forEach.call(checkboxes, function (el) {
+			el.style.display = display;
+		});
+	};
+
+	//checkbox has been clicked
+	function hideBlocks(e) {
+		var parent = this.parentNode;
+		if (this.checked) {
+			parent.classList.remove('hidden');
+		} else {
+			parent.classList.add('hidden');
+		}
+		//save the settings
+		saveSettings();
+		e.stopPropagation();
+	};
+
+	//save the block preferences to local storage
+	function saveSettings(){
+		var checkboxes = document.querySelectorAll('.accordion-header input[type="checkbox"]');
+		var toSave = {};
+		[].forEach.call(checkboxes,	function (el) {
+			var id = el.parentNode.id;
+			var checked = el.checked;
+			toSave[id] = checked;
+		});
+		console.log("Saving block preferences", toSave);
+		localStorage['__' + language + '_hidden_blocks'] = JSON.stringify(toSave);
+	};
+
+	//load block display from local storage
+	function loadSettings(){
+		var storedData = localStorage['__' + language + '_hidden_blocks'];
+		var hiddenBlocks = storedData == undefined ? [] : JSON.parse(storedData);
+		window.hbl = hiddenBlocks;
+		console.log("Loading block preferences", hiddenBlocks);
+		for (key in hiddenBlocks) {
+			if(!hiddenBlocks[key]){
+				var h3 = document.getElementById(key);
+				if(h3 != null){
+					var check = h3.querySelector('input[type="checkbox"]');
+					check.checked = false;
+					h3.classList.add('hidden');
+				}
+			}
+		}
+	};
+
+	//after initliazation, create the settings and checkboxes
+	function load(){
+		settings_link = addSettingsLink();
+		createCheckboxes();
+		loadSettings();
+	}
+
+	//onload initialize the blockmanager
+	window.onload = load;
+})(wb);
+
+/*end blockprefs.js*/
 
 /*begin languages/minecraftjs/minecraftjs.js*/
 
@@ -4016,7 +4377,7 @@ Event.on(document.body, 'wb-script-loaded', null, function(evt){console.log('scr
 
 /*
 
-$('.runScripts').click(function(){
+$('.run-scripts').click(function(){
      var blocks = $('.workspace:visible .scripts_workspace > .wrapper');
      var code = blocks.prettyScript();
      var query = $.param({'code':code});
@@ -4058,10 +4419,9 @@ wb.wrap = function(script){
 
 function runCurrentScripts(event){
         var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-        wb.runScript( wb.prettyScript(blocks) );
-        
+        wb.runScript( wb.prettyScript(blocks) );        
 }
-Event.on('.runScripts', 'click', null, runCurrentScripts);
+Event.on('.run-scripts', 'click', null, runCurrentScripts);
 
 
 wb.ajax = {
@@ -4127,8 +4487,8 @@ wb.runScript = function(script){
 function clearStage(event){
     document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'reset'}), '*');
 }
-Event.on('.clear_canvas', 'click', null, clearStage);
-Event.on('.editScript', 'click', null, clearStage);
+Event.on('.clear-stage', 'click', null, clearStage);
+Event.on('.edit-script', 'click', null, clearStage);
 
 
 
@@ -5912,28 +6272,3 @@ wb.menu({
 }
 );
 /*end languages/minecraftjs/string.json*/
-
-/*begin launch.js*/
-// Minimal script to run on load
-// Loads stored state from localStorage
-// Detects mode from URL for different embed views
-
-switch(wb.view){
-    case 'editor':
-    case 'blocks':
-    case 'result':
-        switchMode(wb.view);
-        break;
-    default:
-        switchMode('editor');
-        break;
-}
-
-function switchMode(mode){
-    var loader = document.querySelector('#block_menu_load');
-    loader.parentElement.removeChild(loader);
-    document.body.className = mode;
-    wb.loadCurrentScripts(q);
-}
-
-/*end launch.js*/

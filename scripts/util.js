@@ -32,10 +32,11 @@
 
     var svgtext = document.querySelector('svg text');
     wb.resize = function(input){
+        if (!input) return;
         if (input.wbTarget){
             input = input.wbTarget;
         }
-        svgtext.textContent = input.value;
+        svgtext.textContent = input.value || '';
         var textbox = svgtext.getBBox();
         input.style.width = (textbox.width*0.7 + 25) + 'px';
     };
@@ -98,7 +99,7 @@
             idx++;
         }
         return idx;
-    }
+    };
 
     wb.find = function find(elem, selector){
         return elem.querySelector(selector);
@@ -126,7 +127,7 @@
             }
         }
         return null;
-    }
+    };
 
     wb.elem = function elem(name, attributes, children){
         // name can be a jquery object, an element, or a string
@@ -209,7 +210,7 @@
         };
         window[id] = handler;
         document.head.appendChild(wb.elem('script', {src: url + '?callback=' + id, id: id, language: 'text/json'}));
-    }
+    };
 
     /* adapted from code here: http://javascriptexample.net/ajax01.php */
     wb.ajax = function(url, success, failure){
@@ -226,10 +227,10 @@
                     }
                 }
             }
-        }
+        };
         req.open('GET', url, true);
         req.send(null);
-    }
+    };
 
 
 })(this);

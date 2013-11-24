@@ -63,6 +63,7 @@
     var blockMenu = document.querySelector('#block_menu');
     var potentialDropTargets;
     var selectedSocket;
+    var dragAction = {};
 
     var _dropCursor;
 
@@ -74,7 +75,9 @@
     }
 
     function reset(){
+        // console.log('reset dragTarget to null');
         dragTarget = null;
+        dragAction = {undo: undoDrag, redo: redoDrag};
         potentialDropTargets = [];
         dropRects = [];
         dropTarget = null;
@@ -98,6 +101,7 @@
             // console.log('not a drag handle');
             return undefined;
         }
+        // console.log('initDrag');
         var target = wb.closest(eT, '.block');
         if (target){
             if (wb.matches(target, '.scripts_workspace')){
@@ -109,6 +113,7 @@
             if (target.parentElement.classList.contains('block-menu')){
                 target.dataset.isTemplateBlock = 'true';
             }
+        	dragAction.target = target;
             if (target.parentElement.classList.contains('local')){
                 target.dataset.isLocal = 'true';
             }
@@ -141,12 +146,20 @@
         // }
         dragTarget.classList.add("dragIndication");
         currentPosition = {left: event.wbPageX, top: event.wbPageY};
+		// Track source for undo/redo
+		dragAction.target = dragTarget;
+		dragAction.fromParent = startParent;
+		dragAction.fromBefore = startSibling;
         // target = clone target if in menu
         // FIXME: Set different listeners on menu blocks than on the script area
         if (dragTarget.dataset.isTemplateBlock){
             dragTarget.classList.remove('dragIndication');
             var parent = dragTarget.parentElement;
+            // console.log('set drag target to clone of old drag target');
             dragTarget = wb.cloneBlock(dragTarget); // clones dataset and children, yay
+            dragAction.target = dragTarget;
+			// If we're dragging from the menu, there's no source to track for undo/redo
+			dragAction.fromParent = dragAction.fromBefore = null;
             // Event.trigger(dragTarget, 'wb-clone'); // not in document, won't bubble to document.body
             dragTarget.classList.add('dragIndication');
             if (dragTarget.dataset.isLocal){
@@ -242,15 +255,14 @@
            // 2. Remove, if not over a canvas
            // 3. Remove, if dragging a clone
            // 4. Move back to start position if not a clone (maybe not?)
-        dragTarget.classList.remove('dragActive');
-        dragTarget.classList.remove('dragIndication');
-        potentialDropTargets.forEach(function(elem){
-            elem.classList.remove('dropTarget');
-        });
+        resetDragStyles();
         if (wb.overlap(dragTarget, blockMenu)){
             // delete block if dragged back to menu
             Event.trigger(dragTarget, 'wb-delete');
             dragTarget.parentElement.removeChild(dragTarget);
+        	// If we're dragging to the menu, there's no destination to track for undo/redo
+        	dragAction.toParent = dragAction.toBefore = null;
+        	wb.history.add(dragAction);
         }else if (dropTarget){
             dropTarget.classList.remove('dropActive');
             if (wb.matches(dragTarget, '.step')){
@@ -258,6 +270,7 @@
                 // dropTarget.parent().append(dragTarget);
                 if(copyBlock) {
                 	revertDrop();
+                    // console.log('clone dragTarget block to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
                 }
                 dropTarget.insertBefore(dragTarget, dropCursor());
@@ -267,12 +280,20 @@
                 // Insert a value block into a socket
                 if(copyBlock) {
                 	revertDrop();
+                    // console.log('clone dragTarget value to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
                 }
                 dropTarget.appendChild(dragTarget);
                 dragTarget.removeAttribute('style');
                 Event.trigger(dragTarget, 'wb-add');
             }
+            dragAction.toParent = dragTarget.parentNode;
+            dragAction.toBefore = dragTarget.nextElementSibling;
+            if(dragAction.toBefore && !wb.matches(dragAction.toBefore, '.block')) {
+            	// Sometimes the "next sibling" ends up being the cursor
+            	dragAction.toBefore = dragAction.toBefore.nextElementSibling;
+            }
+            wb.history.add(dragAction);
         }else{
             if (cloned){
                 // remove cloned block (from menu)
@@ -281,6 +302,72 @@
             	revertDrop();
             }
         }
+    }
+    
+    /* There's basically four types of drag actions
+- Drag-in – dragging a block from the menu to the workspace
+ 	If fromParent is null, this is the type of drag that occurred.
+ 	- To undo: remove the block from the workspace
+ 	- To redo: re-insert the block into the workspace
+- Drag-around - dragging a block from one position to another in the workspace
+	Indicated by neither of fromParent and toParent being null.
+	- To undo: remove the block from the old position and re-insert it at the new position.
+	- To redo: remove the block from the old position and re-insert it at the new position.
+- Drag-out - dragging a block from the workspace to the menu (thus deleting it)
+	If toParent is null, this is the type of drag that occurred.
+	- To undo: re-insert the block into the workspace.
+	- To redo: remove the block from the workspace.
+- Drag-copy - dragging a block from one position to another in the workspace and duplicating it
+	At the undo/redo level, no distinction from drag-in is required.
+	- To undo: remove the block from the new location.
+	- To redo: re-insert the block at the new location.
+	
+	Note: If toBefore or fromBefore is null, that just means the location refers to the last
+	possible position (ie, the block was added to or removed from the end of a sequence). Thus,
+	we don't check those to determine what action to undo/redo.
+ 	*/
+    
+    function undoDrag() {
+    	if(this.toParent != null) {
+    		// Remove the inserted block
+    		Event.trigger(this.target, 'wb-remove');
+    		this.target.remove();
+    	}
+    	if(this.fromParent != null) {
+    		// Put back the removed block
+    		this.target.removeAttribute('style');
+    		if(wb.matches(this.target,'.step')) {
+    			this.fromParent.insertBefore(this.target, this.fromBefore);
+    		} else {
+    			this.fromParent.appendChild(this.target);
+    		}
+			Event.trigger(this.target, 'wb-add');
+    	}
+    }
+    
+    function redoDrag() {
+    	if(this.toParent != null) {
+    		if(wb.matches(this.target,'.step')) {
+    			this.toParent.insertBefore(this.target, this.toBefore);
+    		} else {
+    			this.toParent.appendChild(this.target);
+    		}
+			Event.trigger(this.target, 'wb-add');
+    	}
+    	if(this.fromParent != null) {
+    		Event.trigger(this.target, 'wb-remove');
+    		this.target.remove();
+    	}
+    }
+
+    function resetDragStyles() {
+        if (dragTarget){
+            dragTarget.classList.remove('dragActive');
+            dragTarget.classList.remove('dragIndication');
+        }
+        potentialDropTargets.forEach(function(elem){
+            elem.classList.remove('dropTarget');
+        });
     }
     
     function revertDrop() {
@@ -434,18 +521,34 @@
         }
         return '.socket[data-type=' + name + '] > .holder';
     }
+    
+    function cancelDrag(event) {
+    	// Cancel if escape key pressed
+        console.log('cancel drag of %o', dragTarget);
+    	if(event.keyCode == 27) {
+    		resetDragStyles();
+	    	revertDrop();
+			clearTimeout(timer);
+			timer = null;
+			reset();
+			return false;
+	    }
+    }
 
     // Initialize event handlers
     wb.initializeDragHandlers = function(){
+        console.log('initializeDragHandlers');
         if (Event.isTouch){
-            Event.on('.scripts_workspace .contained, .block-menu', 'touchstart', '.block', initDrag);
+            Event.on('.content', 'touchstart', '.block', initDrag);
             Event.on('.content', 'touchmove', null, drag);
             Event.on('.content', 'touchend', null, endDrag);
+            // TODO: A way to cancel the drag?
             // Event.on('.scripts_workspace', 'tap', '.socket', selectSocket);
         }else{
-            Event.on('.scripts_workspace .contained, .block-menu', 'mousedown', '.block', initDrag);
+            Event.on('.content', 'mousedown', '.block', initDrag);
             Event.on('.content', 'mousemove', null, drag);
             Event.on('.content', 'mouseup', null, endDrag);
+            Event.on(document.body, 'keyup', null, cancelDrag);
             // Event.on('.scripts_workspace', 'click', '.socket', selectSocket);
         }
     };
