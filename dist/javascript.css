@@ -870,6 +870,8 @@ ul.menu li button, ul.menu li ul.sub-menu li button {
 	display:inline-block;
 	min-width:60px;
 	border: 0;
+	border-top: 1px solid black;
+	margin: 0;
 }
 ul.menu > li > button {
 	text-align:center;
@@ -2455,6 +2457,14 @@ a .icon-flip-vertical:before {
 }
 /*end languages/javascript/voice.css*/
 
+/*begin languages/javascript/sound.css*/
+.sound, .sound .holder{
+    border-color: hsl(225, 65%, 79%);
+    background-color: hsl(225, 62%, 89%);
+}
+
+/*end languages/javascript/sound.css*/
+
 /*begin languages/javascript/array.css*/
 .arrays, .arrays .holder{
     border-color: hsl(195, 65%, 79%);
@@ -2524,6 +2534,18 @@ a .icon-flip-vertical:before {
 
 /*end languages/javascript/math.css*/
 
+/*begin languages/javascript/vector.css*/
+.vectors, .vectors .holder{
+    border-color: hsl(55, 81%, 49%);
+    background-color: hsl(55, 81%, 85%);
+}
+
+.vector, .vector .holder{
+    border-color: hsl(65, 81%, 49%);
+    background-color: hsl(65, 81%, 85%);
+}
+/*end languages/javascript/vector.css*/
+
 /*begin languages/javascript/object.css*/
 .objects, .objects .holder{
     border-color: hsl(75, 90%, 66%);
@@ -2578,6 +2600,14 @@ a .icon-flip-vertical:before {
 
 /*end languages/javascript/sensing.css*/
 
+/*begin languages/javascript/motion.css*/
+.motion, .motion .holder{
+    border-color: hsl(175, 65%, 79%);
+    background-color: hsl(175, 62%, 89%);
+}
+
+/*end languages/javascript/motion.css*/
+
 /*begin languages/javascript/shape.css*/
 .shapes, .shapes .holder{
     border-color: hsl(25, 100%, 63%);
@@ -2585,6 +2615,14 @@ a .icon-flip-vertical:before {
 }
 
 /*end languages/javascript/shape.css*/
+
+/*begin languages/javascript/geolocation.css*/
+.geolocation, .location, .geolocation .holder, .location .holder{
+    border-color: hsl(205, 65%, 79%);
+    background-color: hsl(205, 62%, 89%);
+}
+
+/*end languages/javascript/geolocation.css*/
 
 /*begin languages/javascript/size.css*/
 .sizes, .sizes .holder{

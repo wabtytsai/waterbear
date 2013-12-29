@@ -10,7 +10,8 @@
   "dependencies": {},
   "devDependencies": {
     "uglify-js": "~2.3.6",
-    "clean-css": "~1.0.10"
+    "clean-css": "~1.0.10",
+    "jsonlint": "1.6.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

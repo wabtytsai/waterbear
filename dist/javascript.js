@@ -2056,7 +2056,7 @@ global.ajax = ajax;
                     if (child.nodeName){
                         e.appendChild(child);
                     }else if (Array.isArray(child)){
-                        console.log('DEPRECATED array arg to elem: use sub-elem instead');
+                        console.error('DEPRECATED array arg to elem: use sub-elem instead');
                         e.appendChild(elem(child[0], child[1], child[2]));
                     }else{
                         // assumes child is a string
@@ -2336,6 +2336,7 @@ global.ajax = ajax;
     var potentialDropTargets;
     var selectedSocket;
     var dragAction = {};
+    var templateDrag, localDrag;
 
     var _dropCursor;
 
@@ -2359,6 +2360,8 @@ global.ajax = ajax;
         dragging = false;
         cloned = false;
         scope = null;
+        templateDrag = false;
+        localDrag = false;
     }
     reset();
 
@@ -2384,10 +2387,12 @@ global.ajax = ajax;
             dragTarget = target;
             if (target.parentElement.classList.contains('block-menu')){
                 target.dataset.isTemplateBlock = 'true';
+                templateDrag = true;
             }
         	dragAction.target = target;
-            if (target.parentElement.classList.contains('local')){
+            if (target.parentElement.classList.contains('locals')){
                 target.dataset.isLocal = 'true';
+                localDrag = true;
             }
             //dragTarget.classList.add("dragIndication");
             startPosition = wb.rect(target);
@@ -2434,7 +2439,7 @@ global.ajax = ajax;
 			dragAction.fromParent = dragAction.fromBefore = null;
             // Event.trigger(dragTarget, 'wb-clone'); // not in document, won't bubble to document.body
             dragTarget.classList.add('dragIndication');
-            if (dragTarget.dataset.isLocal){
+            if (localDrag){
                 scope = wb.closest(parent, '.context');
             }else{
                 scope = null;
@@ -2503,7 +2508,7 @@ global.ajax = ajax;
                 container.scrollLeft -= Math.min(container.scrollLeft, offset.left - currPos.left);
             }else if(currPos.right > offset.right){
                 var maxHorizontalScroll = container.scrollWidth - offset.width - container.scrollLeft;
-                console.log('maxHorizontalScroll: %s', maxHorizontalScroll);
+                // console.log('maxHorizontalScroll: %s', maxHorizontalScroll);
                 container.scrollLeft += Math.min(maxHorizontalScroll, currPos.right - offset.right);
             }
         }
@@ -2532,15 +2537,19 @@ global.ajax = ajax;
             // delete block if dragged back to menu
             Event.trigger(dragTarget, 'wb-delete');
             dragTarget.parentElement.removeChild(dragTarget);
-        	// If we're dragging to the menu, there's no destination to track for undo/redo
-        	dragAction.toParent = dragAction.toBefore = null;
-        	wb.history.add(dragAction);
+            // Add history action if the source block was in the workspace
+            if(!templateDrag) {
+	        	// If we're dragging to the menu, there's no destination to track for undo/redo
+    	    	dragAction.toParent = dragAction.toBefore = null;
+        		wb.history.add(dragAction);
+        	}
         }else if (dropTarget){
             dropTarget.classList.remove('dropActive');
             if (wb.matches(dragTarget, '.step')){
                 // Drag a step to snap to a step
                 // dropTarget.parent().append(dragTarget);
-                if(copyBlock) {
+                if(copyBlock && !templateDrag) {
+                    // FIXME: This results in two blocks if you copy-drag back to the starting socket
                 	revertDrop();
                     // console.log('clone dragTarget block to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
@@ -2550,7 +2559,7 @@ global.ajax = ajax;
                 Event.trigger(dragTarget, 'wb-add');
             }else{
                 // Insert a value block into a socket
-                if(copyBlock) {
+                if(copyBlock && !templateDrag) {
                 	revertDrop();
                     // console.log('clone dragTarget value to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
@@ -2796,7 +2805,7 @@ global.ajax = ajax;
     
     function cancelDrag(event) {
     	// Cancel if escape key pressed
-        console.log('cancel drag of %o', dragTarget);
+        // console.log('cancel drag of %o', dragTarget);
     	if(event.keyCode == 27) {
     		resetDragStyles();
 	    	revertDrop();
@@ -2809,7 +2818,7 @@ global.ajax = ajax;
 
     // Initialize event handlers
     wb.initializeDragHandlers = function(){
-        console.log('initializeDragHandlers');
+        // console.log('initializeDragHandlers');
         if (Event.isTouch){
             Event.on('.content', 'touchstart', '.block', initDrag);
             Event.on('.content', 'touchmove', null, drag);
@@ -2836,35 +2845,41 @@ global.ajax = ajax;
 // This returns a Version 4 (random) UUID
 // See: https://en.wikipedia.org/wiki/Universally_unique_identifier for more info
 
-function hex(length){
-  if (length > 8) return hex(8) + hex(length-8); // routine is good for up to 8 digits
-  var myHex = Math.random().toString(16).slice(2,2+length);
-  return pad(myHex, length); // just in case we don't get 8 digits for some reason
-}
+(function(global){
+  function hex(length){
+    if (length > 8) return hex(8) + hex(length-8); // routine is good for up to 8 digits
+    var myHex = Math.random().toString(16).slice(2,2+length);
+    return pad(myHex, length); // just in case we don't get 8 digits for some reason
+  }
 
-function pad(str, length){
-    while(str.length < length){
-        str += '0';
-    }
-    return str;
-}
+  function pad(str, length){
+      while(str.length < length){
+          str += '0';
+      }
+      return str;
+  }
 
-function variant(){
-    return '89ab'[Math.floor(Math.random() * 4)];
-}
+  function variant(){
+      return '89ab'[Math.floor(Math.random() * 4)];
+  }
 
-// Constants
-var UUID_TEST = /[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}/;
+  // Constants
+  var UUID_TEST = /[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{11}[a-zA-Z0-9]?/;
 
-function isUuid(value){
-  return UUID_TEST.test(value);
-}
+  function isUuid(value){
+    if (!value) return false;
+    return UUID_TEST.test(value);
+  }
 
-// Public interface
-function uuid(){
-  return hex(8) + '-' + hex(4) + '-4' + hex(3) + '-' + variant() + hex(3) + '-' + hex(12);
-}
+  // Public interface
+  function uuid(){
+    return hex(8) + '-' + hex(4) + '-4' + hex(3) + '-' + variant() + hex(3) + '-' + hex(12);
+  }
 
+  global.uuid = uuid;
+  global.isUuid = isUuid;
+
+})(this);
 
 /*end uuid.js*/
 
@@ -2901,7 +2916,7 @@ function uuid(){
         // When reifying saved blocks, call this for each block to make sure we start new blocks
         // that do not overlap with old ones.
         if (!seqNum) return;
-        seqNum = Math.max(parseInt(seqNum, 10), _nextSeqNum);
+        _nextSeqNum = Math.max(parseInt(seqNum, 10), _nextSeqNum);
     }
 
     var blockRegistry = {};
@@ -2927,8 +2942,8 @@ function uuid(){
         try{
             return blockRegistry[id].script;
         }catch(e){
-            console.log('Error: could not get script for %o', id);
-            console.log('Hey look: %o', document.getElementById(id));
+            console.error('Error: could not get script for %o', id);
+            console.error('Hey look: %o', document.getElementById(id));
             return '';
         }
     }
@@ -2961,7 +2976,7 @@ function uuid(){
                     var names = ['block', obj.group, obj.blocktype];
                     if(obj.blocktype === "expression"){
                         names.push(obj.type);
-                        names.push(obj.type+'s');
+                        names.push(obj.type+'s'); // FIXME, this is a horrible hack for CSS
                     }else if (obj.blocktype === 'context'){
                         names.push('step');
                     }else if (obj.blocktype === 'eventhandler'){
@@ -3271,12 +3286,18 @@ function uuid(){
         // Clone a template (or other) block
         var blockdesc = blockDesc(block);
         delete blockdesc.id;
-        if (!blockdesc.isLocal){
-            delete blockdesc.seqNum;
+        ////////////////////
+        // Why were we deleting seqNum here?
+        // I think it was from back when menu template blocks had sequence numbers
+        // /////////////////
+        // if (!blockdesc.isLocal){
+        //     delete blockdesc.seqNum;
+        // }
+        if (blockdesc.isTemplateBlock){
+            blockdesc.scriptId = block.id;            
         }
         delete blockdesc.isTemplateBlock;
-        delete blockdesc.isLocal;
-        blockdesc.scriptId = block.id;
+        delete blockdesc.isLocal;        
         return Block(blockdesc);
     }
 
@@ -3364,6 +3385,13 @@ function uuid(){
 
     var codeFromBlock = function(block){
         var scriptTemplate = getScript(block.dataset.scriptId).replace(/##/g, '_' + block.dataset.seqNum);
+        if (!scriptTemplate){
+            // If there is no scriptTemplate, things have gone horribly wrong, probably from 
+            // a block being removed from the language rather than hidden
+            wb.findAll('.block[data-scriptId=' + block.dataset.scriptId).forEach(function(elem){
+                elem.style.backgroundColor = 'red';
+            });
+        }
         var childValues = [];
         var label = wb.findChild(block, '.label');
         var expressionValues = wb.findChildren(label, '.socket')
@@ -3400,35 +3428,48 @@ function uuid(){
     }
 
     function updateName(event){
-        console.log('updateName on %o', event);
+        // console.log('updateName on %o', event);
         var input = event.wbTarget;
         Event.off(input, 'blur', updateName);
         Event.off(input, 'keydown', maybeUpdateName);
         var nameSpan = input.previousSibling;
         var newName = input.value;
+        var oldName = input.parentElement.textContent;
         // if (!input.parentElement) return; // already removed it, not sure why we're getting multiple blurs
         input.parentElement.removeChild(input);
         nameSpan.style.display = 'initial';
-        console.log('now update all instances too');
-        var source = wb.closest(nameSpan, '.block');
-        var instances = wb.findAll(wb.closest(source, '.context'), '[data-local-source="' + source.dataset.localSource + '"]');
-        instances.forEach(function(elem){
-            wb.find(elem, '.name').textContent = newName;
-        });
+        function propagateChange(newName) {
+			// console.log('now update all instances too');
+			var source = wb.closest(nameSpan, '.block');
+			var instances = wb.findAll(wb.closest(source, '.context'), '[data-local-source="' + source.dataset.localSource + '"]');
+			instances.forEach(function(elem){
+				wb.find(elem, '.name').textContent = newName;
+			});
 
-        //Change name of parent
-        var parent = document.getElementById(source.dataset.localSource);
-        var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
-        nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
+			//Change name of parent
+			var parent = document.getElementById(source.dataset.localSource);
+			var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
+			nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
 
-        //Change locals name of parent
-        var parentLocals = JSON.parse(parent.dataset.locals);
-        var localSocket = parentLocals[0].sockets[0];
-        localSocket.name = newName;
-        parent.dataset.locals = JSON.stringify(parentLocals);
+			//Change locals name of parent
+			var parentLocals = JSON.parse(parent.dataset.locals);
+			var localSocket = parentLocals[0].sockets[0];
+			localSocket.name = newName;
+			parent.dataset.locals = JSON.stringify(parentLocals);
 
-        wb.find(parent, '.name').textContent = nameTemplate;
-        Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
+			wb.find(parent, '.name').textContent = nameTemplate;
+    	    Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
+		}
+		var action = {
+			undo: function() {
+				propagateChange(oldName);
+			},
+			redo: function() {
+				propagateChange(newName);
+			},
+		}
+		wb.history.add(action);
+		action.redo();
     }
 
     function cancelUpdateName(event){
@@ -3468,6 +3509,334 @@ function uuid(){
 
 /*end block.js*/
 
+/*begin file.js*/
+// All File-like I/O functions, including:
+//
+// * Loading and saving to Gists
+// * Loading and saving to MakeAPI (not implemented yet)
+// * Loading and saving to Filesystem
+// * Loading and saving to LocalStorage (including currentScript)
+// * Loading examples
+// * etc.
+
+(function(wb){
+
+	wb.saveCurrentScripts = function saveCurrentScripts(){
+		if (!wb.scriptModified){
+			// console.log('nothing to save');
+			// nothing to save
+			return;
+		}
+		wb.showWorkspace('block');
+		document.querySelector('#block_menu').scrollIntoView();
+		localStorage['__' + wb.language + '_current_scripts'] = scriptsToString();
+	};
+
+	// Save script to gist;
+	wb.saveCurrentScriptsToGist = function saveCurrentScriptsToGist(event){
+	    event.preventDefault();
+		// console.log("Saving to Gist");
+		var title = prompt("Save to an anonymous Gist titled: ");
+
+		ajax.post("https://api.github.com/gists", function(data){
+	        //var raw_url = JSON.parse(data).files["script.json"].raw_url;
+	        var gistID = JSON.parse(data).url.split("/").pop();
+	        prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
+
+	        //save gist id to local storage
+	        var localGists = localStorage['__' + wb.language + '_recent_gists'];
+	        var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
+	        gistArray.push(gistID);
+	        localStorage['__' + wb.language + '_recent_gists'] = JSON.stringify(gistArray);
+
+	    }, JSON.stringify({
+	    	"description": title,
+	    	"public": true,
+	    	"files": {
+	    		"script.json": {
+	    			"content": scriptsToString(title)
+	    		},
+	    	}
+	    }));
+	};
+	//populate the gist submenu with recent gists
+	wb.loadRecentGists = function loadRecentGists() {
+		var localGists = localStorage['__' + wb.language + '_recent_gists'];
+		var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
+		var gistContainer = document.querySelector("#recent_gists");
+		gistContainer.innerHTML = '';
+
+		for (var i = 0; i < gistArray.length; i++) {
+			//add a new button to the gist sub-menu
+			var gist = gistArray[i];
+			var node = document.createElement("li");
+			var button = document.createElement('button');
+			var buttonText = document.createTextNode("#" + gist);
+
+			button.appendChild(buttonText);
+			button.classList.add('load-gist');
+			button.dataset.href = wb.language + ".html?gist=" + gist;
+			button.dataset.gist = gist;
+
+			node.appendChild(button);
+			gistContainer.appendChild(node);
+
+			button.addEventListener('click', function(){
+				wb.loadScriptsFromGistId(this.dataset.gist);
+			});
+		}
+	};
+
+
+	function scriptsToString(title, description){
+		if (!title){ title = ''; }
+		if (!description){ description = ''; }
+		var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
+		return JSON.stringify({
+			title: title,
+			description: description,
+			date: Date.now(),
+			waterbearVersion: '2.0',
+			blocks: blocks.map(wb.blockDesc)
+		});
+	}
+
+
+	wb.createDownloadUrl = function createDownloadUrl(evt){
+	    evt.preventDefault();
+	    var title = prompt("Save file as: ");
+		var URL = window.webkitURL || window.URL;
+		var file = new Blob([scriptsToString()], {type: 'application/json'});
+		var reader = new FileReader();
+		var a = document.createElement('a');
+		reader.onloadend = function(){
+			a.href = reader.result;
+			a.download = title + '.json';
+			a.target = '_blank';
+			document.body.appendChild(a);
+			a.click();
+		};
+		reader.readAsDataURL(file);
+		evt.preventDefault();
+	};
+
+	wb.loadScriptsFromGistId = function loadScriptsFromGistId(id){
+		//we may get an event passed to this function so make sure we have a valid id or ask for one
+		var gistID = isNaN(parseInt(id)) ? prompt("What Gist would you like to load? Please enter the ID of the Gist: ")  : id;
+		// console.log("Loading gist " + id);
+		ajax.get("https://api.github.com/gists/"+gistID, function(data){
+			loadScriptsFromGist({data:JSON.parse(data)});
+		});
+	};
+
+	wb.loadScriptsFromFilesystem = function loadScriptsFromFilesystem(event){
+	    event.preventDefault();
+		var input = document.createElement('input');
+		input.setAttribute('type', 'file');
+		input.setAttribute('accept', 'application/json');
+		input.addEventListener('change', function(evt){
+			var file = input.files[0];
+			loadScriptsFromFile(file);
+		});
+		input.click();
+	};
+
+	function loadScriptsFromObject(fileObject){
+	    // console.info('file format version: %s', fileObject.waterbearVersion);
+	    // console.info('restoring to workspace %s', fileObject.workspace);
+	    if (!fileObject) return wb.createWorkspace();
+	    var blocks = fileObject.blocks.map(wb.Block);
+	    if (!blocks.length){
+	    	return wb.createWorkspace();
+	    }
+	    if (blocks.length > 1){
+	    	console.error('not really expecting multiple blocks here right now');
+	    	console.error(blocks);
+	    }
+	    blocks.forEach(function(block){
+	    	wb.wireUpWorkspace(block);
+	    	Event.trigger(block, 'wb-add');
+	    });
+	    wb.loaded = true;
+	    Event.trigger(document.body, 'wb-script-loaded');
+	}
+
+	function loadScriptsFromGist(gist){
+		var keys = Object.keys(gist.data.files);
+		var file;
+		keys.forEach(function(key){
+			if (/.*\.json/.test(key)){
+				// it's a json file
+				file = gist.data.files[key].content;
+			}
+		});
+		if (!file){
+			console.error('no json file found in gist: %o', gist);
+			return;
+		}
+		loadScriptsFromObject(JSON.parse(file));
+	}
+
+	function loadScriptsFromExample(name){
+		wb.ajax('examples/' + wb.language + '/' + name + '.json', function(exampleJson){
+			loadScriptsFromObject(JSON.parse(exampleJson));
+		}, function(xhr, status){
+			console.error('Error in wb.ajax:', status);
+		});
+	}
+
+	wb.loadCurrentScripts = function(queryParsed){
+		// console.log('loadCurrentScripts(%s)', JSON.stringify(queryParsed));
+		if (wb.loaded) return;
+		if (queryParsed.gist){
+			// console.log("Loading gist %s", queryParsed.gist);
+			ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
+				loadScriptsFromGist({data:JSON.parse(data)});
+			});
+		}else if (queryParsed.example){
+			// console.log('loading example %s', queryParsed.example);
+			loadScriptsFromExample(queryParsed.example);
+		}else if (localStorage['__' + wb.language + '_current_scripts']){
+			// console.log('loading current script from local storage');
+			var fileObject = JSON.parse(localStorage['__' + wb.language + '_current_scripts']);
+			if (fileObject){
+				loadScriptsFromObject(fileObject);
+			}
+		}else{
+			// console.log('no script to load, starting a new script');
+			wb.createWorkspace('Workspace');
+		}
+		wb.loaded = true;
+		Event.trigger(document.body, 'wb-loaded');
+	};
+
+	function loadScriptsFromFile(file){
+		fileName = file.name;
+		if (fileName.indexOf('.json', fileName.length - 5) === -1) {
+			console.error("File not a JSON file");
+			return;
+		}
+		var reader = new FileReader();
+		reader.readAsText( file );
+		reader.onload = function (evt){
+			wb.clearScripts(null, true);
+			var saved = JSON.parse(evt.target.result);
+			wb.loaded = true;
+			loadScriptsFromObject(saved);
+			wb.scriptModified = true;
+		};
+	}
+
+	wb.getFiles = function getFiles(evt){
+		evt.stopPropagation();
+		evt.preventDefault();
+		var files = evt.dataTransfer.files;
+		if ( files.length > 0 ){
+	        // we only support dropping one file for now
+	        var file = files[0];
+	        loadScriptsFromFile(file);
+	    }
+	}
+
+
+})(wb);
+
+/*end file.js*/
+
+/*begin undo.js*/
+(function(wb){
+// Undo list
+
+// Undo actions must support two methods:
+// - undo() which reverses the effect of the action
+// - redo() which reapplies the effect of the action, assuming it has been redone.
+// These methods may safely assume that no other actions have been performed.
+
+// This is the maximum number of actions that will be stored in the undo list.
+// There's no reason why it needs to be constant; there could be an interface to alter it.
+// (Of course, that'd require making it public first.)
+var MAX_UNDO = 30;
+var undoActions = [];
+// When currentAction == undoActions.length, there are no actions available to redo
+var currentAction = 0;
+
+function clearUndoStack(){
+	undoActions.length = 0;
+	currentAction = 0;
+	try{
+		document.querySelector('.undoAction').style.display = 'none';
+		document.querySelector('.redoAction').style.display = 'none';
+	}catch(e){
+		// don't worry if undo ui is not available yet
+	}
+}
+
+function undoLastAction() {
+	if(currentAction <= 0) return; // No action to undo!
+	currentAction--;
+	undoActions[currentAction].undo();
+	if(currentAction <= 0) {
+		document.querySelector('.undoAction').style.display = 'none';
+	}
+	document.querySelector('.redoAction').style.display = '';
+}
+
+try{
+	document.querySelector('.undoAction').style.display = 'none';
+}catch(e){
+	// some languages do not yet support undo/redo
+}
+
+function redoLastAction() {
+	if(currentAction >= undoActions.length) return; // No action to redo!
+	undoActions[currentAction].redo();
+	currentAction++;
+	if(currentAction >= undoActions.length) {
+		document.querySelector('.redoAction').style.display = 'none';
+	}
+	document.querySelector('.undoAction').style.display = '';
+}
+
+try{
+	document.querySelector('.redoAction').style.display = 'none';
+}catch(e){
+	// some languages do not yet support undo/redo
+}
+
+function addUndoAction(action) {
+	if(!action.hasOwnProperty('redo') || !action.hasOwnProperty('undo')) {
+		console.error("Tried to add invalid action!");
+		return;
+	}
+	if(currentAction < undoActions.length) {
+		// Truncate any actions available to be redone
+		undoActions.length = currentAction;
+	} else if(currentAction >= MAX_UNDO) {
+		// Drop the oldest action
+		currentAction--;
+		undoActions.shift();
+	}
+	undoActions[currentAction] = action;
+	currentAction++;
+	document.querySelector('.undoAction').style.display = '';
+	document.querySelector('.redoAction').style.display = 'none';
+	// console.log('undo stack: %s', undoActions.length);
+}
+
+wb.history = {
+	add: addUndoAction,
+	undo: undoLastAction,
+	redo: redoLastAction,
+	clear: clearUndoStack
+}
+
+Event.on('.undoAction', 'click', null, undoLastAction);
+Event.on('.redoAction', 'click', null, redoLastAction);
+Event.on(document.body, 'wb-script-loaded', null, clearUndoStack);
+
+})(wb);
+/*end undo.js*/
+
 /*begin ui.js*/
 (function(wb){
 
@@ -3485,7 +3854,6 @@ function tabSelect(event){
         updateScriptsView();
     }
 }
-Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 function accordion(event){
     event.preventDefault();
@@ -3497,10 +3865,9 @@ function accordion(event){
     event.wbTarget.nextSibling.classList.add('open');
 }
 
-Event.on('#block_menu', 'click', '.accordion-header', accordion);
 
 function showWorkspace(mode){
-    console.log('showWorkspace');
+    // console.log('showWorkspace');
     var workspace = document.querySelector('.workspace');
     var scriptsWorkspace = document.querySelector('.scripts_workspace');
     if (!scriptsWorkspace) return;
@@ -3527,56 +3894,54 @@ function updateScriptsView(){
 }
 window.updateScriptsView = updateScriptsView;
 
-// Undo list
 
-// Undo actions must support two methods:
-// - undo() which reverses the effect of the action
-// - redo() which reapplies the effect of the action, assuming it has been redone.
-// These methods may safely assume that no other actions have been performed.
-
-// This is the maximum number of actions that will be stored in the undo list.
-// There's no reason why it needs to be constant; there could be an interface to alter it.
-// (Of course, that'd require making it public first.)
-var MAX_UNDO = 30;
-var undoActions = [];
-// When currentAction == undoActions.length, there are no actions available to redo
-var currentAction = 0;
-
-function undoLastAction() {
-	if(currentAction <= 0) return; // No action to undo!
-	currentAction--;
-	undoActions[currentAction].undo();
-}
-
-function redoLastAction() {
-	if(currentAction >= undoActions.length) return; // No action to redo!
-	undoActions[currentAction].redo();
-	currentAction++;
-}
-
-function addUndoAction(action) {
-	if(!action.hasOwnProperty('redo') || !action.hasOwnProperty('undo')) {
-		console.log("Tried to add invalid action!");
-		return;
+function changeSocket(event) {
+	// console.log("Changed a socket!");
+	var oldValue = event.target.getAttribute('data-oldvalue');
+	var newValue = event.target.value;
+	if(oldValue == undefined) oldValue = event.target.defaultValue;
+	// console.log("New value:", newValue);
+	// console.log("Old value:", oldValue);
+	event.target.setAttribute('data-oldvalue', newValue);
+	var action = {
+		undo: function() {
+			event.target.value = oldValue;
+			event.target.setAttribute('data-oldvalue', oldValue);
+		},
+		redo: function() {
+			event.target.value = newValue;
+			event.target.setAttribute('data-oldvalue', newValue);
+		}
 	}
-	if(currentAction < undoActions.length) {
-		// Truncate any actions available to be redone
-		undoActions.length = currentAction;
-	} else if(currentAction >= MAX_UNDO) {
-		// Drop the oldest action
-		currentAction--;
-		undoActions.shift();
-	}
-	undoActions[currentAction] = action;
-	currentAction++;
-	console.log('undo stack: %s', undoActions.length);
+	wb.history.add(action);
 }
 
-wb.history = {
-	add: addUndoAction,
-	undo: undoLastAction,
-	redo: redoLastAction,
-}
+
+/* TODO list of undoable actions:
+ -  Moving a step from position A to position B
+ -  Adding a new block at position X
+ -  Moving an expression from slot A to slot B
+ -  Adding a new expression to slot X
+ -  Editing the value in slot X (eg, using the colour picker, typing in a string, etc)
+ -  Renaming a local expression/variable
+ -  Deleting a step from position X
+ -  Deleting an expression from slot X
+ Break them down:
+1. Replacing the block in the clipboard with a new block
+2. Editing the literal value in slot X
+3. Inserting a step at position X
+4. Removing a step at position X
+5. Inserting an expression into slot X
+6. Removing an expression from slot X
+ More detail:
+ - Copy is 1
+ - Cut is 1 and 4 or 1 and 6
+ - Paste is 3 or 5
+ - Drag-in is 3 or 5
+ - Drag-around is 4 and 3 or 6 and 5
+ - Drag-out is 4 or 6
+ - Drag-copy is 3 or 5
+*/
 
 // Context Menu
 //
@@ -3601,10 +3966,10 @@ function collapseCommand(key, opt){
 }
 
 function copyCommand(evt) {
-	console.log("Copying a block!");
-	console.log(this);
+	// console.log("Copying a block in ui.js!");
+	// console.log(this);
 	action = {
-		copied: wb.cloneBlock(this),
+		copied: this,
 		oldPasteboard: pasteboard,
 		undo: function() {
 			pasteboard = this.oldPasteboard;
@@ -3618,14 +3983,15 @@ function copyCommand(evt) {
 }
 
 function cutCommand(evt) {
-	console.log("Cutting a block!");
+	// console.log("Cutting a block!");
 	action = {
 		removed: this,
 		// Storing parent and next sibling in case removing the node from the DOM clears them
 		parent: this.parentNode,
 		before: this.nextSibling,
 		oldPasteboard: pasteboard,
-		undo: function() {console.log(this);
+		undo: function() {
+			// console.log(this);
 			if(wb.matches(this.removed,'.step')) {
 				this.parent.insertBefore(this.removed, this.before);
 			} else {
@@ -3645,7 +4011,7 @@ function cutCommand(evt) {
 }
 
 function pasteCommand(evt) {
-	console.log(pasteboard);
+	// console.log(pasteboard);
 	action = {
 		pasted: wb.cloneBlock(pasteboard),
 		into: cmenu_target.parentNode,
@@ -3656,10 +4022,10 @@ function pasteCommand(evt) {
 		},
 		redo: function() {
 			if(wb.matches(pasteboard,'.step')) {
-				console.log("Pasting a step!");
+				// console.log("Pasting a step!");
 				this.into.insertBefore(this.pasted,this.before);
 			} else {
-				console.log("Pasting an expression!");
+				// console.log("Pasting an expression!");
 				cmenu_target.appendChild(this.pasted);
 			}
 			Event.trigger(this.pasted, 'wb-add');
@@ -3695,16 +4061,10 @@ function cmenuitem_enabled(menuitem) {
 	return true;
 }
 
-function initContextMenus() {
-	Event.on(document.body, 'contextmenu', null, handleContextMenu);
-	Event.on(document.body, 'mouseup', null, closeContextMenu);
-	Event.on('.cmenuEnable', 'click', null, enableContextMenu);
-	document.querySelector('.cmenuEnable').style.display = 'none';
-}
 
 function buildContextMenu(options) {
-	console.log('building context menu');
-	console.log(options);
+	// console.log('building context menu');
+	// console.log(options);
 	var contextDiv = document.getElementById('context_menu');
 	contextDiv.innerHTML = '';
 	var menu = document.createElement('ul');
@@ -3737,7 +4097,7 @@ function stackTrace() {
 	var e = new Error('stack trace');
 	var stack = e.stack.replace(/@.*\//gm, '@')
 		.split('\n');
-	console.log(stack);
+	// console.log(stack);
 }
 
 function closeContextMenu(evt) {
@@ -3748,12 +4108,12 @@ function closeContextMenu(evt) {
 }
 
 function handleContextMenu(evt) {
-	console.log('handling context menu');
+	// console.log('handling context menu');
 	stackTrace();
 	//if(!show_context) return;
-	console.log(evt.clientX, evt.clientY);
-	console.log(evt.wbTarget);
-	if(cmenu_disabled || wb.matches(evt.wbTarget, '#block_menu *')) return;
+	// console.log(evt.clientX, evt.clientY);
+	// console.log(evt.wbTarget);
+	if(cmenu_disabled || wb.matches(evt.wbTarget, '.block-menu *')) return;
 	else if(false);
 	else if(wb.matches(evt.wbTarget, '.block:not(.scripts_workspace) *')) {
 		setContextMenuTarget(evt.wbTarget);
@@ -3766,7 +4126,7 @@ function handleContextMenu(evt) {
 function setContextMenuTarget(target) {
 	cmenu_target = target;
 	while(!wb.matches(cmenu_target, '.block') && !wb.matches(cmenu_target, '.holder')) {
-		console.log(cmenu_target);
+		// console.log(cmenu_target);
 		cmenu_target = cmenu_target.parentNode;
 		if(cmenu_target.tagName == 'BODY') {
 			console.error("Something went wrong with determining the context menu target!");
@@ -3777,7 +4137,7 @@ function setContextMenuTarget(target) {
 }
 
 function showContextMenu(atX, atY) {
-	console.log('showing context menu');
+	// console.log('showing context menu');
 	var contextDiv = document.getElementById('context_menu');
 	contextDiv.style.display = 'block';
 	contextDiv.style.left = atX + 'px';
@@ -3786,7 +4146,7 @@ function showContextMenu(atX, atY) {
 
 function cmenuCallback(fcn) {
 	return function(evt) {
-		console.log(cmenu_target);
+		// console.log(cmenu_target);
 		fcn.call(cmenu_target,evt);
 		var contextDiv = document.getElementById('context_menu');
 		contextDiv.style.display = 'none';
@@ -3811,9 +4171,7 @@ function enableContextMenu(evt) {
 var block_cmenu = {
 	//expand: {name: 'Expand All', callback: dummyCallback},
 	//collapse: {name: 'Collapse All', callback: dummyCallback},
-	undo: {name: 'Undo', callback: undoLastAction, enabled: function() {return currentAction > 0}},
-	redo: {name: 'Redo', callback: redoLastAction, enabled: function() {return currentAction < undoActions.length}},
-	cut: {name: 'Cut', callback: cutCommand, startGroup: true},
+	cut: {name: 'Cut', callback: cutCommand},
 	copy: {name: 'Copy', callback: copyCommand},
 	//copySubscript: {name: 'Copy Subscript', callback: dummyCallback},
 	paste: {name: 'Paste', callback: pasteCommand, enabled: canPaste},
@@ -3852,6 +4210,19 @@ function edit_menu(title, specs, show){
     });
 }
 
+function initContextMenus() {
+	Event.on(document.body, 'contextmenu', null, handleContextMenu);
+	Event.on(document.body, 'mouseup', null, closeContextMenu);
+	Event.on('.cmenuEnable', 'click', null, enableContextMenu);
+	document.querySelector('.cmenuEnable').style.display = 'none';
+}
+
+
+Event.on(document.body, 'change', 'input', changeSocket);
+Event.on('#block_menu', 'click', '.accordion-header', accordion);
+Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
+
+
 })(wb);
 
 
@@ -3860,24 +4231,41 @@ function edit_menu(title, specs, show){
 /*begin workspace.js*/
 (function(wb){
 
-	var language = location.pathname.match(/\/(.*)\.html/)[1];
-	wb.language = language;
+	wb.language = location.pathname.match(/\/([^/.]*)\.html/)[1];
 
-	function clearScripts(event, force){
-		if (event){
-		    event.preventDefault();
-		}
+	wb.clearScripts = function clearScripts(event, force){
 		if (force || confirm('Throw out the current script?')){
 			var workspace = document.querySelector('.workspace > .scripts_workspace')
 			workspace.parentElement.removeChild(workspace);
+			wb.scriptModified = false;
+			wb.loaded = false;
 			createWorkspace('Workspace');
 			document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
+			wb.history.clear();
+			delete localStorage['__' + wb.language + '_current_scripts'];
 		}
 	}
-	Event.on('.clear_scripts', 'click', null, clearScripts);
+	Event.on('.clear_scripts', 'click', null, wb.clearScripts);
 	Event.on('.edit-script', 'click', null, function(event){
-	    event.preventDefault();
 		wb.historySwitchState('editor');
+	});
+
+	Event.on('.content', 'click', '.load-example', function(evt){
+		var path = location.href.split('?')[0];
+		path += "?example=" + evt.target.dataset.example;
+		if (wb.scriptModified){
+			if (confirm('Throw out the current script?')){
+				wb.scriptModified = false;
+				wb.loaded = false;
+				history.pushState(null, '', path);
+				Event.trigger(document.body, 'wb-state-change');
+			}
+		}else{
+			wb.scriptModified = false;
+			wb.loaded = false;
+			history.pushState(null, '', path);
+			Event.trigger(document.body, 'wb-state-change');
+		}
 	});
 
 	var handleStateChange = function handleStateChange(evt){
@@ -3895,7 +4283,14 @@ function edit_menu(title, specs, show){
 	    wb.loadCurrentScripts(wb.queryParams);
 	    // If we go to the result and can run the result inline, do it
 	    if (wb.view === 'result' && wb.runCurrentScripts){
+	    	// console.log('running current scripts');
 	    	wb.runCurrentScripts();
+	    }else{
+	    	if (wb.view === 'result'){
+		    	// console.log('we want to run current scripts, but cannot');
+		    }else{
+		    	// console.log('we do not care about current scripts, so there');
+		    }
 	    }
 	}
 	Event.on(document.body, 'wb-state-change', null, handleStateChange);
@@ -3926,204 +4321,21 @@ function edit_menu(title, specs, show){
 		Event.trigger(document.body, 'wb-state-change');
 	}
 
-	function saveCurrentScripts(){
-		if (!wb.scriptModified){
-			console.log('nothing to save');
-			// nothing to save
-			return;
-		}
-		wb.showWorkspace('block');
-		document.querySelector('#block_menu').scrollIntoView();
-		localStorage['__' + language + '_current_scripts'] = scriptsToString();
-	}
-	window.onunload = saveCurrentScripts;
+	window.addEventListener('unload', wb.saveCurrentScripts, false);
+	window.addEventListener('load', wb.loadRecentGists, false);
 
-	// Save script to gist;
-	function saveCurrentScriptsToGist(event){
-	    event.preventDefault();
-		console.log("Saving to Gist");
-		var title = prompt("Save to an anonymous Gist titled: ");
-
-		ajax.post("https://api.github.com/gists", function(data){
-	        //var raw_url = JSON.parse(data).files["script.json"].raw_url;
-	        var gistID = JSON.parse(data).url.split("/").pop();
-	        prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
-
-	        //save gist id to local storage
-	        var localGists = localStorage['__' + language + '_recent_gists'];
-	        var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
-	        gistArray.push(gistID);
-	        localStorage['__' + language + '_recent_gists'] = JSON.stringify(gistArray);
-
-	    }, JSON.stringify({
-	    	"description": title,
-	    	"public": true,
-	    	"files": {
-	    		"script.json": {
-	    			"content": scriptsToString()
-	    		},
-	    	}
-	    }));
-	}
-
-	function loadRecentGists() {
-		var localGists = localStorage['__' + language + '_recent_gists'];
-		var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
-		var gistContainer = document.querySelector("#recent_gists");
-		gistContainer.innerHTML = '';
-		for (var i = 0; i < gistArray.length; i++) {
-			var node = document.createElement("li");
-			var a = document.createElement('a');
-			var linkText = document.createTextNode(gistArray[i]);
-
-			a.appendChild(linkText)
-			//a.href = language + ".html?gist=" + gistArray[i];
-
-			node.appendChild(a);
-			gistContainer.appendChild(node);
-			var gist = gistArray[i];
-			console.log(gist);
-			a.addEventListener('click', function () {
-				loadScriptsFromGistId(parseInt(gist));
-				return false;
-			});
-		};
-	}
-	window.addEventListener('load', loadRecentGists, false);
-
-
-	function scriptsToString(title, description){
-		if (!title){ title = ''; }
-		if (!description){ description = ''; }
-		var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-		return JSON.stringify({
-			title: title,
-			description: description,
-			date: Date.now(),
-			waterbearVersion: '2.0',
-			blocks: blocks.map(wb.blockDesc)
-		});
-	}
-
-
-	function createDownloadUrl(evt){
-	    evt.preventDefault();
-		var URL = window.webkitURL || window.URL;
-		var file = new Blob([scriptsToString()], {type: 'application/json'});
-		var reader = new FileReader();
-		var a = document.createElement('a');
-		reader.onloadend = function(){
-			a.href = reader.result;
-			a.download = 'script.json';
-			a.target = '_blank';
-			document.body.appendChild(a);
-			a.click();
-		};
-		reader.readAsDataURL(file);
-		evt.preventDefault();
-	}
-
-	Event.on('.save_scripts', 'click', null, saveCurrentScriptsToGist);
-	Event.on('.download_scripts', 'click', null, createDownloadUrl);
-	Event.on('.load_from_gist', 'click', null, loadScriptsFromGistId);
-	Event.on('.restore_scripts', 'click', null, loadScriptsFromFilesystem);
-
-
-	function loadScriptsFromGistId(event){
-	    event.preventDefault();
-		var gistID = prompt("What Gist would you like to load? Please enter the ID of the Gist: ");
-		ajax.get("https://api.github.com/gists/"+gistID, function(data){
-			loadScriptsFromGist({data:JSON.parse(data)});
-		});
-	}
-
-	function loadScriptsFromFilesystem(event){
-	    event.preventDefault();
-		var input = document.createElement('input');
-		input.setAttribute('type', 'file');
-		input.setAttribute('accept', 'application/json');
-		input.addEventListener('change', function(evt){
-			var file = input.files[0];
-			loadScriptsFromFile(file);
-		});
-		input.click();
-	}
-
-	function loadScriptsFromObject(fileObject){
-	    // console.info('file format version: %s', fileObject.waterbearVersion);
-	    // console.info('restoring to workspace %s', fileObject.workspace);
-	    if (!fileObject) return createWorkspace();
-	    var blocks = fileObject.blocks.map(wb.Block);
-	    if (!blocks.length){
-	    	return createWorkspace();
-	    }
-	    if (blocks.length > 1){
-	    	console.log('not really expecting multiple blocks here right now');
-	    	console.log(blocks);
-	    }
-	    blocks.forEach(function(block){
-	    	wireUpWorkspace(block);
-	    	Event.trigger(block, 'wb-add');
-	    });
-	    wb.loaded = true;
-	    Event.trigger(document.body, 'wb-script-loaded');
-	}
-
-	function loadScriptsFromGist(gist){
-		var keys = Object.keys(gist.data.files);
-		var file;
-		keys.forEach(function(key){
-			if (/.*\.json/.test(key)){
-				// it's a json file
-				file = gist.data.files[key].content;
-			}
-		});
-		if (!file){
-			console.log('no json file found in gist: %o', gist);
-			return;
-		}
-		loadScriptsFromObject(JSON.parse(file));
-	}
-
-	function loadScriptsFromExample(name){
-		wb.ajax('examples/' + name + '.json', function(exampleJson){
-			loadScriptsFromObject(JSON.parse(exampleJson));
-		}, function(xhr, status){
-			console.error('Error in wb.ajax: %s', status);
-		});
-	}
+	Event.on('.save_scripts', 'click', null, wb.saveCurrentScriptsToGist);
+	Event.on('.download_scripts', 'click', null, wb.createDownloadUrl);
+	Event.on('.load_from_gist', 'click', null, wb.loadScriptsFromGistId);
+	Event.on('.restore_scripts', 'click', null, wb.loadScriptsFromFilesystem);
 
 
 	wb.loaded = false;
-	wb.loadCurrentScripts = function(queryParsed){
-		// console.log('loadCurrentScripts(%o)', queryParsed);
-		if (wb.loaded) return;
-		if (queryParsed.gist){
-			console.log("Loading gist %s", queryParsed.gist);
-			ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
-				loadScriptsFromGist({data:JSON.parse(data)});
-			});
-		}else if (queryParsed.example){
-			console.log('loading example %s', queryParsed.example);
-			loadScriptsFromExample(queryParsed.example);
-		}else if (localStorage['__' + language + '_current_scripts']){
-			console.log('loading current script from local storage');
-			var fileObject = JSON.parse(localStorage['__' + language + '_current_scripts']);
-			if (fileObject){
-				loadScriptsFromObject(fileObject);
-			}
-		}else{
-			console.log('no script to load, starting a new script');
-			createWorkspace('Workspace');
-		}
-		wb.loaded = true;
-		Event.trigger(document.body, 'wb-loaded');
-	};
 
 
 	// Allow saved scripts to be dropped in
 	function createWorkspace(name){
-	    console.log('createWorkspace');
+	    // console.log('createWorkspace');
 		var id = uuid();
 		var workspace = wb.Block({
 			group: 'scripts_workspace',
@@ -4140,12 +4352,12 @@ function edit_menu(title, specs, show){
 			isTemplateBlock: false,
 			help: 'Drag your script blocks here'
 		});
-		wireUpWorkspace(workspace);
+		wb.wireUpWorkspace(workspace);
 	}
 	wb.createWorkspace = createWorkspace;
 
-	function wireUpWorkspace(workspace){
-		workspace.addEventListener('drop', getFiles, false);
+	wb.wireUpWorkspace = function wireUpWorkspace(workspace){
+		workspace.addEventListener('drop', wb.getFiles, false);
 		workspace.addEventListener('dragover', function(evt){evt.preventDefault();}, false);
 		wb.findAll(document, '.scripts_workspace').forEach(function(ws){
 	        ws.parentElement.removeChild(ws); // remove any pre-existing workspaces
@@ -4153,7 +4365,7 @@ function edit_menu(title, specs, show){
 		document.querySelector('.workspace').appendChild(workspace);
 		workspace.querySelector('.contained').appendChild(wb.elem('div', {'class': 'dropCursor'}));
 		wb.initializeDragHandlers();
-	}
+	};
 
 	function handleDragover(evt){
 	    // Stop Firefox from grabbing the file prematurely
@@ -4162,32 +4374,6 @@ function edit_menu(title, specs, show){
 	    evt.dataTransfer.dropEffect = 'copy';
 	}
 
-	function loadScriptsFromFile(file){
-		fileName = file.name;
-		if (fileName.indexOf('.json', fileName.length - 5) === -1) {
-			console.error("File not a JSON file");
-			return;
-		}
-		var reader = new FileReader();
-		reader.readAsText( file );
-		reader.onload = function (evt){
-			clearScripts(null, true);
-			var saved = JSON.parse(evt.target.result);
-			loadScriptsFromObject(saved);
-			wb.scriptModified = true;	
-		};
-	}
-
-	function getFiles(evt){
-		evt.stopPropagation();
-		evt.preventDefault();
-		var files = evt.dataTransfer.files;
-		if ( files.length > 0 ){
-	        // we only support dropping one file for now
-	        var file = files[0];
-	        loadScriptsFromFile(file);
-	    }
-	}
 
 
 	Event.on('.workspace', 'click', '.disclosure', function(evt){
@@ -4205,21 +4391,23 @@ function edit_menu(title, specs, show){
 		Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'valueChanged'});
 
 	});
-	Event.on(document.body, 'wb-loaded', null, function(evt){console.log('menu loaded');});
+	// Event.on(document.body, 'wb-loaded', null, function(evt){
+	// 	console.log('menu loaded');
+	// });
 	Event.on(document.body, 'wb-script-loaded', null, function(evt){
 		wb.scriptModified = false;
 		if (wb.view === 'result'){
 			// console.log('run script because we are awesome');
-			window.addEventListener('load', function(){
-				// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
-				wb.runCurrentScripts();
-			}, false);
+			// window.addEventListener('load', function(){
+			// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
+			// 	wb.runCurrentScripts();
+			// }, false);
 		// }else{
 		// 	console.log('do not run script for some odd reason: %s', wb.view);
 		}
 		// clear undo/redo stack
 		wb.scriptLoaded = true;
-		console.log('script loaded');
+		// console.log('script loaded');
 	});
 
 	Event.on(document.body, 'wb-modified', null, function(evt){
@@ -4232,11 +4420,15 @@ function edit_menu(title, specs, show){
 	});
 
 	window.addEventListener('popstate', function(evt){
+		// console.log('popstate event');
 		Event.trigger(document.body, 'wb-state-change');
 	}, false);
 
 	// Kick off some initialization work
-	Event.trigger(document.body, 'wb-state-change');
+	window.addEventListener('load', function(){
+		// console.log('window loaded');
+		Event.trigger(document.body, 'wb-state-change');
+	}, false);
 })(wb);
 
 /*end workspace.js*/
@@ -4252,11 +4444,11 @@ function edit_menu(title, specs, show){
 
 	//save the state of the settings link
 	var closed = true;
-	var language = location.pathname.match(/\/(.*)\.html/)[1];
+	var language = wb.language;
 	var settings_link;
 	//add a link to show the show/hide block link
 	function addSettingsLink(callback) {
-		console.log("adding settings link");
+		// console.log("adding settings link");
 		var block_menu = document.querySelector('#block_menu');
 		var settings_link = document.createElement('a');
 		settings_link.href = '#';
@@ -4284,7 +4476,7 @@ function edit_menu(title, specs, show){
 
 	//settings link has been clicked
 	function toggleCheckboxDisplay() {
-		console.log('toggle checkboxes called');
+		// console.log('toggle checkboxes called');
 		var checkboxes = document.querySelectorAll('.accordion-header input[type="checkbox"]');
 		var block_menu = document.querySelector('#block_menu');
 		var display;
@@ -4328,7 +4520,7 @@ function edit_menu(title, specs, show){
 			var checked = el.checked;
 			toSave[id] = checked;
 		});
-		console.log("Saving block preferences", toSave);
+		// console.log("Saving block preferences", toSave);
 		localStorage['__' + language + '_hidden_blocks'] = JSON.stringify(toSave);
 	};
 
@@ -4337,7 +4529,7 @@ function edit_menu(title, specs, show){
 		var storedData = localStorage['__' + language + '_hidden_blocks'];
 		var hiddenBlocks = storedData == undefined ? [] : JSON.parse(storedData);
 		window.hbl = hiddenBlocks;
-		console.log("Loading block preferences", hiddenBlocks);
+		// console.log("Loading block preferences", hiddenBlocks);
 		for (key in hiddenBlocks) {
 			if(!hiddenBlocks[key]){
 				var h3 = document.getElementById(key);
@@ -4370,129 +4562,132 @@ function edit_menu(title, specs, show){
  *    Support for writing Javascript using Waterbear
  *
  */
-
-// Add some utilities
-wb.wrap = function(script){
-    return [
-        'var global = new Global();',
-        '(function(){', 
-            'var local = new Local();', 
-            // 'try{',
-                'local.canvas = document.createElement("canvas");',
-                'local.canvas.setAttribute("width", global.stage_width);',
-                'local.canvas.setAttribute("height", global.stage_height);',
-                'global.stage.appendChild(local.canvas);',
-                'local.canvas.focus()',
-                'local.ctx = local.canvas.getContext("2d");',
-                'local.ctx.textAlign = "center";',
-                'var main = function(){',
-                    script,
-                '}',
-                'global.preloadAssets(' + assetUrls() + ', main);',
-            // '}catch(e){',
-                // 'alert(e);',
-            // '}',
-        '})()'
-    ].join('\n');
-}
-
-function assetUrls(){
-    return '[' + wb.findAll(document.body, '.workspace .block-menu .asset').map(function(asset){
-        // tricky and a bit hacky, since asset URLs aren't defined on asset blocks
-        var source = document.getElementById(asset.dataset.localSource);
-        return wb.getSocketValue(wb.getSockets(source)[0]);
-    }).join(',') + ']';
-}
-
-function runCurrentScripts(){
-    // console.log('runCurrentScripts');
-    var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-    wb.runScript( wb.prettyScript(blocks) );
-}
-wb.runCurrentScripts = runCurrentScripts;
-
-Event.on('.run-scripts', 'click', null, function(){
-    event.preventDefault();
-    wb.historySwitchState('result');
-});
-
-window.addEventListener('load', function(event){
-    console.log('iframe ready, waiting: %s', !!wb.iframewaiting);
-    wb.iframeready = true;
-    if (wb.iframewaiting){
-        wb.iframewaiting();
+(function(wb,Event){
+    // Add some utilities
+    wb.wrap = function(script){
+        return [
+            '(function(){', 
+                // 'try{',
+                    'local.canvas = document.createElement("canvas");',
+                    'local.canvas.setAttribute("width", global.stage_width);',
+                    'local.canvas.setAttribute("height", global.stage_height);',
+                    'global.stage.appendChild(local.canvas);',
+                    'local.canvas.focus()',
+                    'local.ctx = local.canvas.getContext("2d");',
+                    'local.ctx.textAlign = "center";',
+                    'var main = function(){',
+                        script,
+                    '}',
+                    'global.preloadAssets(' + assetUrls() + ', main);',
+                // '}catch(e){',
+                    // 'alert(e);',
+                // '}',
+            '})()'
+        ].join('\n');
     }
-    wb.iframewaiting = null;
-}, false);
 
-wb.runScript = function(script){
-    // console.log('script: %s', script);
-    var run = function(){
-        wb.script = script;
-        var path = location.pathname.slice(0,location.pathname.lastIndexOf('/'));
-        var runtimeUrl = location.protocol + '//' + location.host + path + '/dist/javascript_runtime.js';
-        // console.log('trying to load library %s', runtimeUrl);
-        document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: runtimeUrl, script: wb.wrap(script)}), '*');
-        document.querySelector('.stageframe').focus();
+    function assetUrls(){
+        return '[' + wb.findAll(document.body, '.workspace .block-menu .asset').map(function(asset){
+            // tricky and a bit hacky, since asset URLs aren't defined on asset blocks
+            var source = document.getElementById(asset.dataset.localSource);
+            return wb.getSocketValue(wb.getSockets(source)[0]);
+        }).join(',') + ']';
+    }
+
+    function runCurrentScripts(){
+        // console.log('runCurrentScripts');
+        if (!wb.scriptLoaded){
+            Event.on(document.body, 'wb-script-loaded', null, wb.runCurrentScripts);
+            return;
+        }
+        var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
+        wb.runScript( wb.prettyScript(blocks) );
+    }
+    wb.runCurrentScripts = runCurrentScripts;
+
+    Event.on('.run-scripts', 'click', null, function(){
+        wb.historySwitchState('result');
+    });
+
+    document.querySelector('.stageframe').addEventListener('load', function(event){
+        console.log('iframe ready, waiting: %s', !!wb.iframewaiting);
+        wb.iframeready = true;
+        if (wb.iframewaiting){
+            wb.iframewaiting();
+        }
+        wb.iframewaiting = null;
+    }, false);
+
+    wb.runScript = function(script){
+        // console.log('script: %s', script);
+        var run = function(){
+            wb.script = script;
+            var path = location.pathname.slice(0,location.pathname.lastIndexOf('/'));
+            var runtimeUrl = location.protocol + '//' + location.host + path + '/dist/javascript_runtime.js';
+            // console.log('trying to load library %s', runtimeUrl);
+            document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: runtimeUrl, script: wb.wrap(script)}), '*');
+            document.querySelector('.stageframe').focus();
+        };
+        if (wb.iframeready){
+            run();
+        }else{
+            wb.iframewaiting = run;
+        }
+    }
+
+    function clearStage(event){
+        document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'reset'}), '*');
+    }
+    Event.on('.clear-stage', 'click', null, clearStage);
+    Event.on('.edit-script', 'click', null, clearStage);
+
+
+
+    wb.prettyScript = function(elements){
+        return js_beautify(elements.map(function(elem){
+            return wb.codeFromBlock(elem);
+        }).join(''));
     };
-    if (wb.iframeready){
-        run();
-    }else{
-        wb.iframewaiting = run;
-    }
-}
 
-function clearStage(event){
-    document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'reset'}), '*');
-}
-Event.on('.clear-stage', 'click', null, clearStage);
-Event.on('.edit-script', 'click', null, clearStage);
+    wb.writeScript = function(elements, view){
+        view.innerHTML = '<pre class="language-javascript">' + wb.prettyScript(elements) + '</pre>';
+        hljs.highlightBlock(view.firstChild);
+    };
 
+    // End UI section
 
+    // expose these globally so the Block/Label methods can find them
+    wb.choiceLists = {
+        boolean: ['true', 'false'],
+        keys: 'abcdefghijklmnopqrstuvwxyz0123456789*+-./'
+            .split('').concat(['up', 'down', 'left', 'right',
+            'backspace', 'tab', 'return', 'shift', 'ctrl', 'alt',
+            'pause', 'capslock', 'esc', 'space', 'pageup', 'pagedown',
+            'end', 'home', 'insert', 'del', 'numlock', 'scroll', 'meta']),
+        blocktypes: ['step', 'expression', 'context', 'eventhandler', 'asset'],
+        types: ['string', 'number', 'boolean', 'array', 'object', 'function', 'any'],
+        rettypes: ['none', 'string', 'number', 'boolean', 'array', 'object', 'function', 'any']
+    };
 
-wb.prettyScript = function(elements){
-    return js_beautify(elements.map(function(elem){
-        return wb.codeFromBlock(elem);
-    }).join(''));
-};
+    // Hints for building blocks
+    //
+    //
+    // Expression blocks can nest, so don't end their scripts with semi-colons (i.e., if there is a "type" specified).
+    //
+    //
 
-wb.writeScript = function(elements, view){
-    view.innerHTML = '<pre class="language-javascript">' + wb.prettyScript(elements) + '</pre>';
-    hljs.highlightBlock(view.firstChild);
-};
-
-// End UI section
-
-// expose these globally so the Block/Label methods can find them
-wb.choiceLists = {
-    boolean: ['true', 'false'],
-    keys: 'abcdefghijklmnopqrstuvwxyz0123456789*+-./'
-        .split('').concat(['up', 'down', 'left', 'right',
-        'backspace', 'tab', 'return', 'shift', 'ctrl', 'alt',
-        'pause', 'capslock', 'esc', 'space', 'pageup', 'pagedown',
-        'end', 'home', 'insert', 'del', 'numlock', 'scroll', 'meta']),
-    blocktypes: ['step', 'expression', 'context', 'eventhandler', 'asset'],
-    types: ['string', 'number', 'boolean', 'array', 'object', 'function', 'any'],
-    rettypes: ['none', 'string', 'number', 'boolean', 'array', 'object', 'function', 'any']
-};
-
-// Hints for building blocks
-//
-//
-// Expression blocks can nest, so don't end their scripts with semi-colons (i.e., if there is a "type" specified).
-//
-//
-
-// Temporarily disable these until I can get time to implement them properly
-// wb.menu('Recent Blocks', []);
-// wb.menu('Favourite Blocks', []);
+    // Temporarily disable these until I can get time to implement them properly
+    // wb.menu('Recent Blocks', []);
+    // wb.menu('Favourite Blocks', []);
 
 
 
-Event.on('.socket input', 'click', null, function(event){
-    event.wbTarget.focus();
-    event.wbTarget.select();
-});
+    Event.on('.socket input', 'click', null, function(event){
+        event.wbTarget.focus();
+        event.wbTarget.select();
+    });
+
+})(wb, Event);
 
 
 /*end languages/javascript/javascript.js*/
@@ -4528,12 +4723,48 @@ wb.choiceLists.rettypes.push('sprite');
  *
  */
 
-
+// Based on an 88-key piano
+wb.choiceLists.notes = [
+	// Octave 0
+	'A0','A♯0/B♭0','B0',
+	// Octave 1
+	'C1','C♯1/D♭1','D1','D♯1/E♭1','E1',
+	'F1','F♯1/G♭1','G1','G♯1/A♭1','A1','A♯1/B♭1','B1',
+	// Octave 2
+	'C2','C♯2/D♭2','D2','D♯2/E♭2','E2',
+	'F2','F♯2/G♭2','G2','G♯2/A♭2','A2','A♯2/B♭2','B2',
+	// Octave 3
+	'C3','C♯3/D♭3','D3','D♯3/E♭3','E3',
+	'F3','F♯3/G♭3','G3','G♯3/A♭3','A3','A♯3/B♭3','B3',
+	// Octave 4
+	'C4 (Middle C)','C♯4/D♭4','D4','D♯4/E♭4','E4',
+	'F4','F♯4/G♭4','G4','G♯4/A♭4','A4','A♯4/B♭4','B4',
+	// Octave 5
+	'C5','C♯5/D♭5','D5','D♯5/E♭5','E5',
+	'F5','F♯5/G♭5','G5','G♯5/A♭5','A5','A♯5/B♭5','B5',
+	// Octave 6
+	'C6','C♯6/D♭6','D6','D♯6/E♭6','E6',
+	'F6','F♯6/G♭6','G6','G♯6/A♭6','A6','A♯6/B♭6','B6',
+	// Octave 7
+	'C7','C♯7/D♭7','D7','D♯7/E♭7','E7',
+	'F7','F♯7/G♭7','G7','G♯7/A♭7','A7','A♯7/B♭7','B7',
+	// Octave 8
+	'C8'
+];
+wb.choiceLists.durations = [
+	'double whole note', 'whole note', 'half note', 'quarter note', 'eighth note',
+	'sixteenth note', 'thirty-second note', 'sixty-fourth note'
+];
 wb.choiceLists.types.push('voice');
 wb.choiceLists.rettypes.push('voice');
 
 
 /*end languages/javascript/voice.js*/
+
+/*begin languages/javascript/sound.js*/
+wb.choiceLists.types.push('sound');
+wb.choiceLists.rettypes.push('sound');
+/*end languages/javascript/sound.js*/
 
 /*begin languages/javascript/array.js*/
 
@@ -4581,6 +4812,21 @@ wb.choiceLists.rettypes = wb.choiceLists.rettypes.concat(['color', 'image', 'sha
 
 /*end languages/javascript/math.js*/
 
+/*begin languages/javascript/vector.js*/
+/*
+ *    Vector Plugin
+ *
+ *    Support for vector math in Waterbear
+ *
+ */
+
+
+wb.choiceLists.types.push('vector');
+wb.choiceLists.rettypes.push('vector');
+
+
+/*end languages/javascript/vector.js*/
+
 /*begin languages/javascript/object.js*/
 
 /*end languages/javascript/object.js*/
@@ -4605,9 +4851,20 @@ wb.choiceLists.rettypes = wb.choiceLists.rettypes.concat(['color', 'image', 'sha
 
 /*end languages/javascript/sensing.js*/
 
+/*begin languages/javascript/motion.js*/
+// set up choices
+wb.choiceLists.directions = ["upright", "downright", "downleft", "upleft", "up", "down", "right", "left"];
+wb.choiceLists.types.push('motion');
+wb.choiceLists.rettypes.push('motion');
+/*end languages/javascript/motion.js*/
+
 /*begin languages/javascript/shape.js*/
 
 /*end languages/javascript/shape.js*/
+
+/*begin languages/javascript/geolocation.js*/
+
+/*end languages/javascript/geolocation.js*/
 
 /*begin languages/javascript/size.js*/
 
@@ -4668,16 +4925,11 @@ wb.menu({
                     "type": "number"
                 }
             ],
-            "script": "(function(){local.count##=0;setInterval(function(){local.count##++;[[1]]},1000/{{1}})})();",
+            "script": "(function(){local.count##=0;requestAnimationFrame(function eachFrame(){local.count##++;[[1]];requestAnimationFrame(eachFrame);})})();",
             "help": "this trigger will run the attached blocks periodically",
             "sockets": [
                 {
-                    "name": "repeat",
-                    "type": "number",
-                    "value": "30"
-                },
-                {
-                    "name": "times a second"
+                    "name": "each frame"
                 }
             ]
         },
@@ -4981,7 +5233,7 @@ wb.menu({
         {
             "blocktype": "step",
             "id": "eb889480-c381-4cfa-a6ee-7c6928c08817",
-            "script": "local.sprite## = new RectSprite({{1}}, {{2}}, {{3}});",
+            "script": "local.sprite## = createRectSprite({{1}}, {{2}}, {{3}});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -5220,6 +5472,22 @@ wb.menu({
         },
         {
             "blocktype": "step",
+            "id": "30d3103b-6657-4233-bd57-47bd5050704b",
+            "help": "set the movement vector of a sprite (speed and steer)",
+            "script": "{{1}}.movementDirection = {{2}};",
+            "sockets": [
+                {
+                    "name": "set sprite",
+                    "type": "sprite"
+                },
+                {
+                    "name": "movement vector",
+                    "type": "vector"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
             "id": "a110b9d4-34bc-4d3f-a7b1-dbc7885eb977",
             "help": "bounce in the x and/or y direction if the stage is exceeded",
             "script": "{{1}}.stageBounce(global.stage_width, global.stage_height);",
@@ -5314,8 +5582,8 @@ wb.menu({
         {
             "blocktype": "expression",
             "id": "36DD3165-1168-4345-9198-E9B230FF84A3",
-            "script": "{{1}}.movementDirection",
-            "type": "number",
+            "script": "{{1}}.facingDirection",
+            "type": "vector",
             "sockets": [
                 {
                     "name": "sprite",
@@ -5331,7 +5599,7 @@ wb.menu({
             "blocktype": "expression",
             "id": "495336f3-68ed-4bc7-a145-11756803876b",
             "script": "{{1}}.movementDirection",
-            "type": "number",
+            "type": "vector",
             "sockets": [
                 {
                     "name": "sprite",
@@ -5501,7 +5769,7 @@ wb.menu({
             "help": "create a simple voice to play tones",
             "sockets": [
                 {
-                    "name": "voice##",
+                    "name": "voice##"
                 }
             ]
         },
@@ -5513,19 +5781,37 @@ wb.menu({
             "sockets": [
                 {
                     "name": "set voice",
-                    "type": "voice",
+                    "type": "voice"
                 },
                 {
                     "name": "tone",
                     "type": "number",
-                    "value": 400
+                    "value": 440
                 },
                 {
                     "name": "Hz"
                 }
             ]
         },
+        {
+            "blocktype": "step",
+            "id": "60984C26-0854-4075-994B-9573B3F48E95",
+            "help": "set the note of the voice",
+            "script": "(function(voice, note){voice.setNote(note); voice.updateTone();})({{1}}, {{2}});",
+            "sockets": [
                 {
+                    "name": "set voice",
+                    "type": "voice"
+                },
+                {
+                    "name": "note",
+                    "type": "choice",
+                    "options": "notes",
+                    "value": "A4"
+                }
+            ]
+        },
+        {
             "blocktype": "step",
             "id": "a133f0ad-27e6-444c-898a-66410c447a07",
             "help": "set the volume of the voice",
@@ -5533,12 +5819,32 @@ wb.menu({
             "sockets": [
                 {
                     "name": "set voice",
-                    "type": "voice",
+                    "type": "voice"
                 },
                 {
                     "name": "volume",
                     "type": "number",
                     "value": 1
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "A64A4BC7-4E93-47B4-910B-F185BC42E366",
+            "help": "set the tempo of the voice, for determining the length of a quarter note",
+            "script": "(function(voice, tempo){voice.tempo = tempo; voice.updateTone();})({{1}}, {{2}});",
+            "sockets": [
+                {
+                    "name": "set voice",
+                    "type": "voice"
+                },
+                {
+                    "name": "tempo quarter note =",
+                    "type": "number",
+                    "value": 120
+                },
+                {
+                	"name": "beats per minute"
                 }
             ]
         },
@@ -5610,6 +5916,73 @@ wb.menu({
             ]
         },
         {
+            "blocktype": "step",
+            "id": "1F98BD7B-8E13-4334-854B-6B9C1B31C99D",
+            "script": "(function(voice, note, len, dots){voice.push(note,len,dots);})({{1}},{{2}},{{3}},{{4}});",
+            "help": "schedule a note to be played as part of a song",
+            "sockets": [
+                {
+                    "name": "schedule voice",
+                    "type": "voice"
+                },
+                {
+                    "name": "to play note",
+                    "type": "choice",
+                    "options": "notes",
+                    "value": "A4"
+                },
+                {
+                    "name": "as ",
+                    "type": "choice",
+                    "options": "durations",
+                    "value": "quarter note"
+                },
+                {
+                    "name": "dotted",
+                    "type": "number",
+                    "value": 0
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "24875971-7CB4-46A6-8A53-D966424A3E70",
+            "script": "(function(voice, note, len, dots){voice.push(note,len,dots);})({{1}},'none',{{2}},{{3}});",
+            "help": "schedule a note to be played as part of a song",
+            "sockets": [
+                {
+                    "name": "schedule voice",
+                    "type": "voice"
+                },
+                {
+                    "name": "to rest for a ",
+                    "type": "choice",
+                    "options": "durations",
+                    "value": "quarter note"
+                },
+                {
+                    "name": "dotted",
+                    "type": "number",
+                    "value": 0
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "34788069-BF4F-46DB-88DC-FC437F484A80",
+            "script": "(function(voice){voice.play();})({{1}});",
+            "help": "play the scheduled song",
+            "sockets": [
+                {
+                    "name": "play voice",
+                    "type": "voice"
+                },
+                {
+                    "name": "stored song"
+                }
+            ]
+        },
+        {
             "blocktype": "expression",
             "id": "112ffdd3-7832-43df-85a5-85587e951295",
             "script": "{{1}}.on",
@@ -5629,6 +6002,79 @@ wb.menu({
     ]
 });
 /*end languages/javascript/voice.json*/
+
+/*begin languages/javascript/sound.json*/
+wb.menu({
+    "name": "Sound",
+    "blocks": [
+        {
+            "blocktype": "step",
+            "id": "59f338b4-0f2f-489a-b4bd-b458fcb48e37",
+            "script": "global.preloadAudio('##', {{1}});",
+            "sockets": [
+                {
+                    "name": "load audio## from url",
+                    "type": "string",
+                    "value": null
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "asset",
+                    "sockets": [
+                        {
+                            "name": "audio ##"
+                        }
+                    ],
+                    "script": "global.audio[\"##\"]",
+                    "type": "sound"
+                }
+            ],
+            "help": "Load a sound for playback"
+        },
+        {
+        	"blocktype": "step",
+        	"id": "4deb2817-6dfc-44e9-a885-7f4b350cc81f",
+        	"script": "{{1}}.currentTime=0;{{1}}.play();",
+        	"sockets": [
+        		{
+        			"name": "play sound",
+        			"type": "sound"
+        		}
+        	],
+        	"help": "play a sound"
+        },
+        {
+        	"blocktype": "step",
+        	"id": "eb715a54-c1f2-4677-819a-9427537bad72",
+        	"script": "{{1}}.pause();",
+        	"sockets": [
+        		{
+        			"name": "pause sound",
+        			"type": "sound"
+        		}
+        	]
+        },
+        {
+        	"blocktype": "step",
+        	"id": "79f14360-3a3b-48de-83ae-240977cf343b",
+        	"script": "{{1}}.loop={{2}};",
+        	"sockets": [
+        		{
+        			"name": "set sound",
+        			"type": "sound"
+        		},
+        		{
+        			"name": "looping to",
+        			"type": "boolean"
+        		}
+
+        	]
+        }
+    ]
+}
+);
+/*end languages/javascript/sound.json*/
 
 /*begin languages/javascript/array.json*/
 wb.menu({
@@ -6221,7 +6667,7 @@ wb.menu({
         {
             "blocktype": "expression",
             "id": "271c8b4c-b045-4ff9-8ad5-9608ea204b09",
-            "script": "\"rgb({{1}},{{2}},{{3}})\"",
+            "script": "\"rgb(\" + {{1}} + \",\" + {{2}} + \",\" + {{3}} + \")\"",
             "type": "color",
             "help": "returns a color",
             "sockets": [
@@ -6245,7 +6691,7 @@ wb.menu({
         {
             "blocktype": "expression",
             "id": "13236aef-cccd-42b3-a041-e26528174323",
-            "script": "\"rgba({{1}},{{2}},{{3}},{{4}})\"",
+            "script": "\"rgba(\" + {{1}} + \",\" + {{2}} + \",\" + {{3}} + \",\" + {{4}} + \")\"",
             "type": "color",
             "help": "returns a semi-opaque color",
             "sockets": [
@@ -6719,7 +7165,6 @@ wb.menu({
             "blocktype": "step",
             "id": "7fa79655-4c85-45b3-be9e-a19aa038feae",
             "script": "global.preloadImage('##', {{1}});",
-            "type": "image",
             "sockets": [
                 {
                     "name": "create ImageData image## from url",
@@ -7178,6 +7623,158 @@ wb.menu({
 }
 );
 /*end languages/javascript/math.json*/
+
+/*begin languages/javascript/vector.json*/
+wb.menu({
+    "name": "Vectors",
+    "blocks": [
+        {
+            "blocktype": "step",
+            "id": "874f1097-2aa2-4056-8a8f-de88f73f39e2",
+            "script": "local.vector## = new SAT.Vector({{1}}, {{2}});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "vector##"
+                        }
+                    ],
+                    "script": "local.vector##",
+                    "type": "vector"
+                }
+            ],
+            "help": "create a vector",
+            "sockets": [
+                {
+                    "name": "vector##",
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "name": "x, ",
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "name": "y"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "61d265c9-7314-45c9-89cd-16e5ae26b258",
+            "script": "{{1}}.add({{2}});",
+            "help": "Add a second vector to this vector",
+            "sockets": [
+                {
+                    "name": "Vector",
+                    "type": "vector"
+                },
+                {
+                    "name": "add vector",
+                    "type": "vector"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "e82c5f05-ba59-4267-b817-f1e44b4d31c4",
+            "script": "{{1}}.sub({{2}});",
+            "help": "Subtract a second vector from this vector",
+            "sockets": [
+                {
+                    "name": "Vector",
+                    "type": "vector"
+                },
+                {
+                    "name": "subtract vector",
+                    "type": "vector"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "c6edb126-6306-44e4-a5f9-44728ae1cbb4",
+            "script": "{{1}}.dot({{2}})",
+            "type": "number",
+            "help": "Get the dot product of two vectors",
+            "sockets": [
+                {
+                    "name": "Dot product of vector",
+                    "type": "vector"
+                },
+                {
+                    "name": "and vector",
+                    "type": "vector"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "d6204ed1-3b28-41af-8574-fac393df75f1",
+            "script": "{{1}}.reverse();",
+            "help": "Reverse the vector",
+            "sockets": [
+                {
+                    "name": "Reverse vector",
+                    "type": "vector"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "D7374103-3C03-40E8-A215-45BEFF97F0BC",
+            "script": "{{1}}.normalize();",
+            "help": "Normalize the vector",
+            "sockets": [
+                {
+                    "name": "Normalize vector",
+                    "type": "vector"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "612C4569-9715-48E6-ADA0-C978386D9922",
+            "script": "{{1}}.scale({{2}},{{3}});",
+            "help": "Scale the vector by the x and y",
+            "sockets": [
+                {
+                    "name": "Scale vector",
+                    "type": "vector"
+                },
+                {
+                    "name": "by x",
+                    "type": "number",
+                    "value": 1
+                },
+                {
+                    "name": "and y",
+                    "type": "number",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "f7937709-f449-4480-927d-3bcfe33d2f65",
+            "script": "{{2}}.project({{1}});",
+            "help": "Project the first vector onto the second",
+            "sockets": [
+                {
+                    "name": "Vector",
+                    "type": "vector"
+                },
+                {
+                    "name": "project onto vector",
+                    "type": "vector"
+                }
+            ]
+        }
+    ]
+});
+/*end languages/javascript/vector.json*/
 
 /*begin languages/javascript/object.json*/
 wb.menu({
@@ -7994,7 +8591,7 @@ wb.menu({
     "name": "Sensing",
     "blocks": [
         {
-            "blocktype": "expression",
+            "blocktype": "step",
             "id": "916c79df-40f1-4280-a093-6d9dfe54d87e",
             "script": "prompt({{1}})",
             "locals": [
@@ -8175,6 +8772,41 @@ wb.menu({
 );
 /*end languages/javascript/sensing.json*/
 
+/*begin languages/javascript/motion.json*/
+wb.menu({
+    "name": "Motion",
+    "blocks": [
+    	{
+    		"blocktype": "expression",
+    		"id": "f1a792df-9508-4ad5-90f8-aa9cd60d46bc",
+    		"type": "string",
+    		"script": "global.accelerometer.direction",
+    		"help": "which way is the device moving?",
+    		"sockets": [
+    			{
+	    			"name": "tilt direction"
+	    		}
+    		]
+    	},
+    	{
+    		"blocktype": "eventhandler",
+    		"id": "74f8f7c0-f2f9-4ea4-9888-49110785b26d",
+    		"script": "(function() { var id = setInterval( function(){ if(global.accelerometer.direction.indexOf( {{1}} ) != -1 ){ [[1]] } }, 1000); global.accelerometer._tasks.push( id ); })();",
+    		"help": "handler for accelerometer events",
+    		"sockets": [
+    			{
+    				"name": "when device turned",
+    				"type": "choice",
+    				"options": "directions"
+    			}
+    		]
+    	}
+    ]
+}
+
+);
+/*end languages/javascript/motion.json*/
+
 /*begin languages/javascript/shape.json*/
 wb.menu({
     "name": "Shapes",
@@ -8228,7 +8860,6 @@ wb.menu({
                 {
                     "name": "and color",
                     "type": "color",
-                    "value": "#000000",
                     "block": "da9a266b-8ec0-4b97-bd79-b18dc7d4596f"
                 }
             ]
@@ -8354,7 +8985,7 @@ wb.menu({
         {
             "blocktype": "step",
             "id": "ebe1b968-f117-468d-91cb-1e67c5776030",
-            "script": "var local.ctx.fillRect({{1}},{{2}},{{3}},{{4}});local.ctx.strokeRect({{1}},{{2}},{{3}},{{4}});",
+            "script": "local.ctx.fillRect({{1}},{{2}},{{3}},{{4}});local.ctx.strokeRect({{1}},{{2}},{{3}},{{4}});",
             "help": "fill and stroke...",
             "sockets": [
                 {
@@ -8383,6 +9014,140 @@ wb.menu({
 }
 );
 /*end languages/javascript/shape.json*/
+
+/*begin languages/javascript/geolocation.json*/
+wb.menu({
+    "name": "Geolocation",
+    "blocks": [
+        {
+            "blocktype": "eventhandler",
+            "id": "0da815af-6010-48b6-838d-f7dd0999b07d",
+            "script": "global.location.watchPosition(function(){[[1]]});",
+            "help": "called every time current location is updated",
+            "sockets": [
+                {
+                    "name": "track my location"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "type": "location",
+                    "script": "global.location.currentLocation",
+                    "help": "current location",
+                    "sockets": [
+                        {
+                            "name": "my location"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "blocktype": "eventhandler",
+            "id": "a7b25224-a030-4cf5-8f30-026a379d958b",
+            "script": "global.location.whenWithinXOf({{1}},{{2}},function(){[[1]]});",
+            "help": "script to call when the distance from a position is less than specified distance",
+            "sockets": [
+                {
+                    "name": "when within",
+                    "type": "number",
+                    "value": 1
+                },
+                {
+                    "name": "km of",
+                    "type": "location"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "e3bcf430-979b-4fff-a856-d10071c63708",
+            "script": "global.location.distance({{1}},{{2}})",
+            "type": "number",
+            "help": "return distance in kilometers between two locations",
+            "sockets": [
+                {
+                    "name": "distance between",
+                    "type": "location"
+                },
+                {
+                    "name": "and",
+                    "type": "location"
+                },
+                {
+                    "name": "in km"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "84583276-c54c-4db0-b703-e0a7bdc81e71",
+            "script": "{{1}}.latitude",
+            "type": "number",
+            "help": "returns the latitude of a location",
+            "sockets": [
+                {
+                    "name": "latitude",
+                    "type": "location"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "0afffda9-ef4f-40dc-8ac7-96354417030e",
+            "script": "{{1}}.longitude",
+            "type": "number",
+            "help": "returns the longitude of a location",
+            "sockets": [
+                {
+                    "name": "longitude",
+                    "type": "location"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "36d3af40-e1ae-4e72-9d7e-26c64938c6ba",
+            "script": "{{1}}.altitude",
+            "type": "number",
+            "help": "returns the altitude of a location, or null if not available",
+            "sockets": [
+                {
+                    "name": "altitude (m)",
+                    "type": "location"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "86c429bf-2d8d-45fc-8869-7d93f3821032",
+            "script": "{{1}}.heading",
+            "type": "number",
+            "help": "returns the heading of a location update, if moving",
+            "sockets": [
+                {
+                    "name": "heading (degrees from north)",
+                    "type": "location"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "5454a36d-ed35-4c7e-880a-31849d6bbe98",
+            "script": "{{1}}.speed",
+            "type": "number",
+            "help": "returns the speed of a location update, if moving",
+            "sockets": [
+                {
+                    "name": "speed (m/s)",
+                    "type": "location"
+                }
+            ]
+        }
+    ]
+});
+/*end languages/javascript/geolocation.json*/
 
 /*begin languages/javascript/size.json*/
 wb.menu({
@@ -8657,7 +9422,6 @@ wb.menu({
     "blocks": [
         {
             "blocktype": "step",
-            "id": "0f9e96f3-52d3-4ace-afdf-c598c1bd31ed",
             "script": "if ({{1}}.length !== 6){alert(\"Array must have 6 numbers\"); return false;}local.ctx.transform.apply(local.ctx, {{1}});",
             "help": "transform by an arbitrary matrix [a,b,c,d,e,f]",
             "sockets": [
@@ -8666,11 +9430,12 @@ wb.menu({
                     "type": "array",
                     "value": null
                 }
-            ]
+            ],
+            "id": "b65e02c5-b990-4ceb-ab18-2593337103d9"
         },
         {
             "blocktype": "step",
-            "id": "64e785e8-147a-4a9f-8439-cdba5f148ea1",
+            "id": "e4787583-77ce-4d45-a863-50dcb4e87af0",
             "script": "if ({{1}}.length !== 6){alert(\"Array must have 6 numbers\"); return false;}local.ctx.setTransform.apply(local.ctx, {{1}});",
             "help": "set transform to an arbitrary array [a,b,c,d,e,f]",
             "sockets": [
@@ -8682,6 +9447,5 @@ wb.menu({
             ]
         }
     ]
-}
-);
+});
 /*end languages/javascript/matrix.json*/

@@ -14,7 +14,6 @@ function tabSelect(event){
         updateScriptsView();
     }
 }
-Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 function accordion(event){
     event.preventDefault();
@@ -26,10 +25,9 @@ function accordion(event){
     event.wbTarget.nextSibling.classList.add('open');
 }
 
-Event.on('#block_menu', 'click', '.accordion-header', accordion);
 
 function showWorkspace(mode){
-    console.log('showWorkspace');
+    // console.log('showWorkspace');
     var workspace = document.querySelector('.workspace');
     var scriptsWorkspace = document.querySelector('.scripts_workspace');
     if (!scriptsWorkspace) return;
@@ -56,56 +54,54 @@ function updateScriptsView(){
 }
 window.updateScriptsView = updateScriptsView;
 
-// Undo list
 
-// Undo actions must support two methods:
-// - undo() which reverses the effect of the action
-// - redo() which reapplies the effect of the action, assuming it has been redone.
-// These methods may safely assume that no other actions have been performed.
-
-// This is the maximum number of actions that will be stored in the undo list.
-// There's no reason why it needs to be constant; there could be an interface to alter it.
-// (Of course, that'd require making it public first.)
-var MAX_UNDO = 30;
-var undoActions = [];
-// When currentAction == undoActions.length, there are no actions available to redo
-var currentAction = 0;
-
-function undoLastAction() {
-	if(currentAction <= 0) return; // No action to undo!
-	currentAction--;
-	undoActions[currentAction].undo();
-}
-
-function redoLastAction() {
-	if(currentAction >= undoActions.length) return; // No action to redo!
-	undoActions[currentAction].redo();
-	currentAction++;
-}
-
-function addUndoAction(action) {
-	if(!action.hasOwnProperty('redo') || !action.hasOwnProperty('undo')) {
-		console.log("Tried to add invalid action!");
-		return;
+function changeSocket(event) {
+	// console.log("Changed a socket!");
+	var oldValue = event.target.getAttribute('data-oldvalue');
+	var newValue = event.target.value;
+	if(oldValue == undefined) oldValue = event.target.defaultValue;
+	// console.log("New value:", newValue);
+	// console.log("Old value:", oldValue);
+	event.target.setAttribute('data-oldvalue', newValue);
+	var action = {
+		undo: function() {
+			event.target.value = oldValue;
+			event.target.setAttribute('data-oldvalue', oldValue);
+		},
+		redo: function() {
+			event.target.value = newValue;
+			event.target.setAttribute('data-oldvalue', newValue);
+		}
 	}
-	if(currentAction < undoActions.length) {
-		// Truncate any actions available to be redone
-		undoActions.length = currentAction;
-	} else if(currentAction >= MAX_UNDO) {
-		// Drop the oldest action
-		currentAction--;
-		undoActions.shift();
-	}
-	undoActions[currentAction] = action;
-	currentAction++;
-	console.log('undo stack: %s', undoActions.length);
+	wb.history.add(action);
 }
 
-wb.history = {
-	add: addUndoAction,
-	undo: undoLastAction,
-	redo: redoLastAction,
-}
+
+/* TODO list of undoable actions:
+ -  Moving a step from position A to position B
+ -  Adding a new block at position X
+ -  Moving an expression from slot A to slot B
+ -  Adding a new expression to slot X
+ -  Editing the value in slot X (eg, using the colour picker, typing in a string, etc)
+ -  Renaming a local expression/variable
+ -  Deleting a step from position X
+ -  Deleting an expression from slot X
+ Break them down:
+1. Replacing the block in the clipboard with a new block
+2. Editing the literal value in slot X
+3. Inserting a step at position X
+4. Removing a step at position X
+5. Inserting an expression into slot X
+6. Removing an expression from slot X
+ More detail:
+ - Copy is 1
+ - Cut is 1 and 4 or 1 and 6
+ - Paste is 3 or 5
+ - Drag-in is 3 or 5
+ - Drag-around is 4 and 3 or 6 and 5
+ - Drag-out is 4 or 6
+ - Drag-copy is 3 or 5
+*/
 
 // Context Menu
 //
@@ -130,10 +126,10 @@ function collapseCommand(key, opt){
 }
 
 function copyCommand(evt) {
-	console.log("Copying a block!");
-	console.log(this);
+	// console.log("Copying a block in ui.js!");
+	// console.log(this);
 	action = {
-		copied: wb.cloneBlock(this),
+		copied: this,
 		oldPasteboard: pasteboard,
 		undo: function() {
 			pasteboard = this.oldPasteboard;
@@ -147,14 +143,15 @@ function copyCommand(evt) {
 }
 
 function cutCommand(evt) {
-	console.log("Cutting a block!");
+	// console.log("Cutting a block!");
 	action = {
 		removed: this,
 		// Storing parent and next sibling in case removing the node from the DOM clears them
 		parent: this.parentNode,
 		before: this.nextSibling,
 		oldPasteboard: pasteboard,
-		undo: function() {console.log(this);
+		undo: function() {
+			// console.log(this);
 			if(wb.matches(this.removed,'.step')) {
 				this.parent.insertBefore(this.removed, this.before);
 			} else {
@@ -174,7 +171,7 @@ function cutCommand(evt) {
 }
 
 function pasteCommand(evt) {
-	console.log(pasteboard);
+	// console.log(pasteboard);
 	action = {
 		pasted: wb.cloneBlock(pasteboard),
 		into: cmenu_target.parentNode,
@@ -185,10 +182,10 @@ function pasteCommand(evt) {
 		},
 		redo: function() {
 			if(wb.matches(pasteboard,'.step')) {
-				console.log("Pasting a step!");
+				// console.log("Pasting a step!");
 				this.into.insertBefore(this.pasted,this.before);
 			} else {
-				console.log("Pasting an expression!");
+				// console.log("Pasting an expression!");
 				cmenu_target.appendChild(this.pasted);
 			}
 			Event.trigger(this.pasted, 'wb-add');
@@ -224,16 +221,10 @@ function cmenuitem_enabled(menuitem) {
 	return true;
 }
 
-function initContextMenus() {
-	Event.on(document.body, 'contextmenu', null, handleContextMenu);
-	Event.on(document.body, 'mouseup', null, closeContextMenu);
-	Event.on('.cmenuEnable', 'click', null, enableContextMenu);
-	document.querySelector('.cmenuEnable').style.display = 'none';
-}
 
 function buildContextMenu(options) {
-	console.log('building context menu');
-	console.log(options);
+	// console.log('building context menu');
+	// console.log(options);
 	var contextDiv = document.getElementById('context_menu');
 	contextDiv.innerHTML = '';
 	var menu = document.createElement('ul');
@@ -266,7 +257,7 @@ function stackTrace() {
 	var e = new Error('stack trace');
 	var stack = e.stack.replace(/@.*\//gm, '@')
 		.split('\n');
-	console.log(stack);
+	// console.log(stack);
 }
 
 function closeContextMenu(evt) {
@@ -277,12 +268,12 @@ function closeContextMenu(evt) {
 }
 
 function handleContextMenu(evt) {
-	console.log('handling context menu');
+	// console.log('handling context menu');
 	stackTrace();
 	//if(!show_context) return;
-	console.log(evt.clientX, evt.clientY);
-	console.log(evt.wbTarget);
-	if(cmenu_disabled || wb.matches(evt.wbTarget, '#block_menu *')) return;
+	// console.log(evt.clientX, evt.clientY);
+	// console.log(evt.wbTarget);
+	if(cmenu_disabled || wb.matches(evt.wbTarget, '.block-menu *')) return;
 	else if(false);
 	else if(wb.matches(evt.wbTarget, '.block:not(.scripts_workspace) *')) {
 		setContextMenuTarget(evt.wbTarget);
@@ -295,7 +286,7 @@ function handleContextMenu(evt) {
 function setContextMenuTarget(target) {
 	cmenu_target = target;
 	while(!wb.matches(cmenu_target, '.block') && !wb.matches(cmenu_target, '.holder')) {
-		console.log(cmenu_target);
+		// console.log(cmenu_target);
 		cmenu_target = cmenu_target.parentNode;
 		if(cmenu_target.tagName == 'BODY') {
 			console.error("Something went wrong with determining the context menu target!");
@@ -306,7 +297,7 @@ function setContextMenuTarget(target) {
 }
 
 function showContextMenu(atX, atY) {
-	console.log('showing context menu');
+	// console.log('showing context menu');
 	var contextDiv = document.getElementById('context_menu');
 	contextDiv.style.display = 'block';
 	contextDiv.style.left = atX + 'px';
@@ -315,7 +306,7 @@ function showContextMenu(atX, atY) {
 
 function cmenuCallback(fcn) {
 	return function(evt) {
-		console.log(cmenu_target);
+		// console.log(cmenu_target);
 		fcn.call(cmenu_target,evt);
 		var contextDiv = document.getElementById('context_menu');
 		contextDiv.style.display = 'none';
@@ -340,9 +331,7 @@ function enableContextMenu(evt) {
 var block_cmenu = {
 	//expand: {name: 'Expand All', callback: dummyCallback},
 	//collapse: {name: 'Collapse All', callback: dummyCallback},
-	undo: {name: 'Undo', callback: undoLastAction, enabled: function() {return currentAction > 0}},
-	redo: {name: 'Redo', callback: redoLastAction, enabled: function() {return currentAction < undoActions.length}},
-	cut: {name: 'Cut', callback: cutCommand, startGroup: true},
+	cut: {name: 'Cut', callback: cutCommand},
 	copy: {name: 'Copy', callback: copyCommand},
 	//copySubscript: {name: 'Copy Subscript', callback: dummyCallback},
 	paste: {name: 'Paste', callback: pasteCommand, enabled: canPaste},
@@ -380,6 +369,19 @@ function edit_menu(title, specs, show){
         submenu.appendChild(wb.Block(spec));
     });
 }
+
+function initContextMenus() {
+	Event.on(document.body, 'contextmenu', null, handleContextMenu);
+	Event.on(document.body, 'mouseup', null, closeContextMenu);
+	Event.on('.cmenuEnable', 'click', null, enableContextMenu);
+	document.querySelector('.cmenuEnable').style.display = 'none';
+}
+
+
+Event.on(document.body, 'change', 'input', changeSocket);
+Event.on('#block_menu', 'click', '.accordion-header', accordion);
+Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
+
 
 })(wb);
 

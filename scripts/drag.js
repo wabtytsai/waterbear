@@ -64,6 +64,7 @@
     var potentialDropTargets;
     var selectedSocket;
     var dragAction = {};
+    var templateDrag, localDrag;
 
     var _dropCursor;
 
@@ -87,6 +88,8 @@
         dragging = false;
         cloned = false;
         scope = null;
+        templateDrag = false;
+        localDrag = false;
     }
     reset();
 
@@ -112,10 +115,12 @@
             dragTarget = target;
             if (target.parentElement.classList.contains('block-menu')){
                 target.dataset.isTemplateBlock = 'true';
+                templateDrag = true;
             }
         	dragAction.target = target;
-            if (target.parentElement.classList.contains('local')){
+            if (target.parentElement.classList.contains('locals')){
                 target.dataset.isLocal = 'true';
+                localDrag = true;
             }
             //dragTarget.classList.add("dragIndication");
             startPosition = wb.rect(target);
@@ -162,7 +167,7 @@
 			dragAction.fromParent = dragAction.fromBefore = null;
             // Event.trigger(dragTarget, 'wb-clone'); // not in document, won't bubble to document.body
             dragTarget.classList.add('dragIndication');
-            if (dragTarget.dataset.isLocal){
+            if (localDrag){
                 scope = wb.closest(parent, '.context');
             }else{
                 scope = null;
@@ -231,7 +236,7 @@
                 container.scrollLeft -= Math.min(container.scrollLeft, offset.left - currPos.left);
             }else if(currPos.right > offset.right){
                 var maxHorizontalScroll = container.scrollWidth - offset.width - container.scrollLeft;
-                console.log('maxHorizontalScroll: %s', maxHorizontalScroll);
+                // console.log('maxHorizontalScroll: %s', maxHorizontalScroll);
                 container.scrollLeft += Math.min(maxHorizontalScroll, currPos.right - offset.right);
             }
         }
@@ -260,15 +265,19 @@
             // delete block if dragged back to menu
             Event.trigger(dragTarget, 'wb-delete');
             dragTarget.parentElement.removeChild(dragTarget);
-        	// If we're dragging to the menu, there's no destination to track for undo/redo
-        	dragAction.toParent = dragAction.toBefore = null;
-        	wb.history.add(dragAction);
+            // Add history action if the source block was in the workspace
+            if(!templateDrag) {
+	        	// If we're dragging to the menu, there's no destination to track for undo/redo
+    	    	dragAction.toParent = dragAction.toBefore = null;
+        		wb.history.add(dragAction);
+        	}
         }else if (dropTarget){
             dropTarget.classList.remove('dropActive');
             if (wb.matches(dragTarget, '.step')){
                 // Drag a step to snap to a step
                 // dropTarget.parent().append(dragTarget);
-                if(copyBlock) {
+                if(copyBlock && !templateDrag) {
+                    // FIXME: This results in two blocks if you copy-drag back to the starting socket
                 	revertDrop();
                     // console.log('clone dragTarget block to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
@@ -278,7 +287,7 @@
                 Event.trigger(dragTarget, 'wb-add');
             }else{
                 // Insert a value block into a socket
-                if(copyBlock) {
+                if(copyBlock && !templateDrag) {
                 	revertDrop();
                     // console.log('clone dragTarget value to dragTarget');
                 	dragTarget = wb.cloneBlock(dragTarget);
@@ -524,7 +533,7 @@
     
     function cancelDrag(event) {
     	// Cancel if escape key pressed
-        console.log('cancel drag of %o', dragTarget);
+        // console.log('cancel drag of %o', dragTarget);
     	if(event.keyCode == 27) {
     		resetDragStyles();
 	    	revertDrop();
@@ -537,7 +546,7 @@
 
     // Initialize event handlers
     wb.initializeDragHandlers = function(){
-        console.log('initializeDragHandlers');
+        // console.log('initializeDragHandlers');
         if (Event.isTouch){
             Event.on('.content', 'touchstart', '.block', initDrag);
             Event.on('.content', 'touchmove', null, drag);

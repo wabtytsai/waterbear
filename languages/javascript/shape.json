@@ -50,7 +50,6 @@
                 {
                     "name": "and color",
                     "type": "color",
-                    "value": "#000000",
                     "block": "da9a266b-8ec0-4b97-bd79-b18dc7d4596f"
                 }
             ]
@@ -176,7 +175,7 @@
         {
             "blocktype": "step",
             "id": "ebe1b968-f117-468d-91cb-1e67c5776030",
-            "script": "var local.ctx.fillRect({{1}},{{2}},{{3}},{{4}});local.ctx.strokeRect({{1}},{{2}},{{3}},{{4}});",
+            "script": "local.ctx.fillRect({{1}},{{2}},{{3}},{{4}});local.ctx.strokeRect({{1}},{{2}},{{3}},{{4}});",
             "help": "fill and stroke...",
             "sockets": [
                 {
