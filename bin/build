@@ -8,7 +8,7 @@ var validateJson = require('./validate').validateJson;
 // var UglifyJS = require('uglify-js');
 
 var plugins = {
-    arduino: ['arduino', 'control', 'input' ],//boolean', , 'digitalio', 'math', 'serialio', 'timing', 'variables'.'input'],
+    arduino: ['browserdetect', 'arduino', 'control', 'input' ],//boolean', , 'digitalio', 'math', 'serialio', 'timing', 'variables'.'input'],
     javascript: ['javascript', 'asset', 'control', 'sprite', 'voice', 'sound', 'array', 'boolean', 'canvas', 'color',  'image', 'math', 'vector', 'object', 'string', 'path', 'point', 'rect', 'sensing', 'motion', 'shape', 'geolocation', 'size', /*'social',*/ /*'fb'*/, 'text', 'matrix'],
     minecraftjs: ['minecraftjs', 'control', 'game', 'player', 'position', 'blocks',  'camera', 'array', 'boolean', 'math', 'string'],
     demo: ['javascript', 'demo'],
