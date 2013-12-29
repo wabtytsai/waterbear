@@ -3051,7 +3051,7 @@ wb.menu({
                     "value": "10"
                 },
                 {
-                    "name": "times",
+                    "name": "times"
                 }
             ]
         },
@@ -3135,12 +3135,11 @@ wb.menu({
                     "options": "analoginputpins",
                     "value": "choice"
                     
-                },
+                }
             ],
             "locals": [
                 {
                     "blocktype": "expression",
-                    "id": "6b2e3c87-4b26-4fc5-9e9a-9300a26c6fd1",
                     "type": "int", 
                     "script": "analogRead(analog_input##_pin)",
                     "help": "Value of Input (0-1023)",
