@@ -18,7 +18,7 @@ wb.wrap = function(script){
 function runCurrentScripts(event){
     var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
     //document.body.className = 'result';
-    window.files = [wb.prettyScript(blocks)]
+    window.files = [wb.prettyScript(blocks)];
     usbflash();
 }
 
@@ -51,11 +51,13 @@ wb.runScript = function(script){
 
 
 wb.prettyScript = function(elements){
-    //return js_beautify(
-      return elements.map(function(elem){
+    return neatenCStyle(elements.map(function(elem){
         return wb.codeFromBlock(elem);
-    }).join('');
-    //);
+    }).join(''));
+  
+    return elements.map(function(elem){
+      return wb.codeFromBlock(elem);
+    }).join("");
 };
 
 wb.writeScript = function(elements, view){
