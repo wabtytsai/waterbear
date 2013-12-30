@@ -457,14 +457,30 @@
                 obj.options = 'boolean';
             case 'choice':
                 var choice = elem('select');
-                wb.choiceLists[obj.options].forEach(function(opt){
-                    var option = elem('option', {}, opt);
-                    var value = obj.uValue || obj.value;
-                    if (value && value === opt){
-                        option.setAttribute('selected', 'selected');
+                if(Array.isArray(wb.choiceLists[obj.options]))
+                {
+                    wb.choiceLists[obj.options].forEach(function(opt){
+                        var option = elem('option', {}, opt);
+                        var value = obj.uValue || obj.value;
+                        if (value && value === opt){
+                            option.setAttribute('selected', 'selected');
+                        }
+                        choice.appendChild(option);
+                    });
+                }
+                else
+                {
+                    for (var key in wb.choiceLists[obj.options])
+                    {
+                        var option = elem('option', {"value":key}, wb.choiceLists[obj.options][key]);
+                        
+                        var value = obj.uValue || obj.value;
+                        if (value && value === key){
+                            option.setAttribute('selected', 'selected');
+                        }
+                        choice.appendChild(option);
                     }
-                    choice.appendChild(option);
-                });
+                }
                 return choice;
             default:
                 value = obj.uValue || obj.value || '';
