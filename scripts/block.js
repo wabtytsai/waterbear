@@ -504,10 +504,17 @@
             var value = wb.findChild(holder, 'input, select').value;
             var type = holder.parentElement.dataset.type;
             if (type === 'string' || type === 'choice' || type === 'color'){
-                if (value[0] === '"'){value = value.slice(1);}
-                if (value[value.length-1] === '"'){value = value.slice(0,-1);}
-                value = value.replace(/"/g, '\\"');
-                value = '"' + value + '"';
+                if(value.slice(0,3) === "$$$")
+                {
+                   value = value.slice(3);
+                }
+                else
+                {  
+                  if (value[0] === '"'){value = value.slice(1);}
+                  if (value[value.length-1] === '"'){value = value.slice(0,-1);}
+                  value = value.replace(/"/g, '\\"');
+                  value = '"' + value + '"';
+                }
             }
             return value;
         }
