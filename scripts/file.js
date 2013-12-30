@@ -118,7 +118,6 @@
 	};
 
 	wb.loadScriptsFromFilesystem = function loadScriptsFromFilesystem(event){
-	    event.preventDefault();
 		var input = document.createElement('input');
 		input.setAttribute('type', 'file');
 		input.setAttribute('accept', 'application/json');

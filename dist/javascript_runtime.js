@@ -1625,8 +1625,11 @@ function Vector(x,y) {
 /*begin languages/javascript/motion_runtime.js*/
 (function(global){
 
-var accelerometer = {};
-accelerometer.direction = "";
+var accelerometer = {
+    direction: ""
+};
+
+var turnListeners = {};
 
 if(window.DeviceOrientationEvent) {
     // always follow direction changes
@@ -1635,8 +1638,15 @@ if(window.DeviceOrientationEvent) {
     console.warn("Detection of acceleration is not supported");
 }
 
+accelerometer.whenTurned = function whenTurned(direction, cb){
+    if (Array.isArray(turnListeners[direction])){
+        turnListeners[direction].push(cb);
+    }else{
+        turnListeners[direction] = [cb];
+    }
+}
+
 function processData(event) {
-    console.log('caught device orientation event');
     var left_right = event.gamma;
     var front_back = event.beta;
 
@@ -1659,6 +1669,13 @@ function processData(event) {
         accelerometer.direction = "down";
     } else if(left_right < -limit) {
         accelerometer.direction = "left";
+    }
+
+    // Call any callbacks set in whenTurned()
+    if (turnListeners[accelerometer.direction]){
+        turnListeners[accelerometer.direction].forEach(function(cb){
+            cb();
+        })
     }
 };
 

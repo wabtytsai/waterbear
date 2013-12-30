@@ -2212,12 +2212,8 @@ global.ajax = ajax;
 
     // Are touch events supported?
     var isTouch = ('ontouchstart' in global);
-    var isPointerEvent = function(event){
+    var isMouseEvent = function isMouseEvent(event){
         switch(event.type){
-            case 'touchstart':
-            case 'touchmove':
-            case 'touchend':
-            case 'tap':
             case 'mousedown':
             case 'mousemove':
             case 'mouseup':
@@ -2226,16 +2222,35 @@ global.ajax = ajax;
             default:
                 return false;
         }
-    }
+    };
+    var isTouchEvent = function isTouchEvent(event){
+        switch(event.type){
+            case 'touchstart':
+            case 'touchmove':
+            case 'touchend':
+            case 'tap':
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    var isPointerEvent = function isPointerEvent(event){
+        return isTouchEvent(event) || isMouseEvent(event);
+    };
 
     // Treat mouse events and single-finger touch events similarly
     var blend = function(event){
         if (isPointerEvent(event)){
-            if (isTouch){
-                if (event.touches.length > 1){
+            if (isTouchEvent(event)){
+                var touch = null;
+                if (event.touches.length === 1){
+                    touch = event.touches[0];
+                }else if (event.changedTouches.length === 1){
+                    touch = event.changedTouches[0];
+                }else{
                     return event;
                 }
-                var touch = event.touches[0];
                 event.wbTarget = touch.target;
                 event.wbPageX = touch.pageX;
                 event.wbPageY = touch.pageY;
@@ -3630,7 +3645,6 @@ global.ajax = ajax;
 	};
 
 	wb.loadScriptsFromFilesystem = function loadScriptsFromFilesystem(event){
-	    event.preventDefault();
 		var input = document.createElement('input');
 		input.setAttribute('type', 'file');
 		input.setAttribute('accept', 'application/json');
@@ -8791,7 +8805,7 @@ wb.menu({
     	{
     		"blocktype": "eventhandler",
     		"id": "74f8f7c0-f2f9-4ea4-9888-49110785b26d",
-    		"script": "(function() { var id = setInterval( function(){ if(global.accelerometer.direction.indexOf( {{1}} ) != -1 ){ [[1]] } }, 1000); global.accelerometer._tasks.push( id ); })();",
+    		"script": "global.accelerometer.whenTurned({{1}}, function(){[[1]]});",
     		"help": "handler for accelerometer events",
     		"sockets": [
     			{
