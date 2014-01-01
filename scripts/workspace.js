@@ -12,6 +12,9 @@
 			document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
 			wb.history.clear();
 			delete localStorage['__' + wb.language + '_current_scripts'];
+			// FIXME: I'm not sure why clearing the script breaks dropping into the workspace
+			// For now will resort to the horrible hack of refreshing the page
+			location.reload();
 		}
 	}
 	Event.on('.clear_scripts', 'click', null, wb.clearScripts);
@@ -39,6 +42,7 @@
 
 	var handleStateChange = function handleStateChange(evt){
 		// hide loading spinner if needed
+		console.log('handleStateChange');
 		hideLoader();
 		wb.queryParams = wb.urlToQueryParams(location.href);
 		if (wb.queryParams.view === 'result'){
@@ -165,18 +169,24 @@
 	// });
 	Event.on(document.body, 'wb-script-loaded', null, function(evt){
 		wb.scriptModified = false;
+		wb.scriptLoaded = true;
 		if (wb.view === 'result'){
 			// console.log('run script because we are awesome');
-			// window.addEventListener('load', function(){
-			// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
-			// 	wb.runCurrentScripts();
-			// }, false);
+			if (wb.windowLoaded){
+				// console.log('run scripts directly');
+				wb.runCurrentScripts();
+			}else{
+				// console.log('run scripts when the iframe is ready');
+				window.addEventListener('load', function(){
+				// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
+				 	wb.runCurrentScripts();
+				 }, false);
+			}
 		// }else{
 		// 	console.log('do not run script for some odd reason: %s', wb.view);
 		}
 		// clear undo/redo stack
-		wb.scriptLoaded = true;
-		// console.log('script loaded');
+		console.log('script loaded');
 	});
 
 	Event.on(document.body, 'wb-modified', null, function(evt){
@@ -195,7 +205,8 @@
 
 	// Kick off some initialization work
 	window.addEventListener('load', function(){
-		// console.log('window loaded');
+		console.log('window loaded');
+		wb.windowLoaded = true;
 		Event.trigger(document.body, 'wb-state-change');
 	}, false);
 })(wb);

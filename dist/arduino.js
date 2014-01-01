@@ -21,9 +21,6 @@ global.ajax = ajax;
 // Sets up wb namespace (wb === waterbear)
 // Extracts parameters from URL, used to switch embed modes, load from gist, etc.
 (function(global){
-	var wb = {
-		scriptModified: true
-	};
 
 	// Source: http://stackoverflow.com/a/13984429
 	wb.urlToQueryParams = function(url){
@@ -583,6 +580,7 @@ global.ajax = ajax;
             }
         	dragAction.target = target;
             if (target.parentElement.classList.contains('locals')){
+                // console.log('target parent: %o', target.parentElement);
                 target.dataset.isLocal = 'true';
                 localDrag = true;
             }
@@ -601,7 +599,7 @@ global.ajax = ajax;
                 startIndex = wb.indexOf(target);
             }
         }else{
-            console.log('not a valid drag target');
+            console.warn('not a valid drag target');
             dragTarget = null;
         }
         return false;
@@ -713,6 +711,7 @@ global.ajax = ajax;
         timer = null;
         if (!dragging) {return undefined;}
         handleDrop(end.altKey || end.ctrlKey);
+        console.log('resetting');
         reset();
         return false;
     }
@@ -2434,6 +2433,9 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 			document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
 			wb.history.clear();
 			delete localStorage['__' + wb.language + '_current_scripts'];
+			// FIXME: I'm not sure why clearing the script breaks dropping into the workspace
+			// For now will resort to the horrible hack of refreshing the page
+			location.reload();
 		}
 	}
 	Event.on('.clear_scripts', 'click', null, wb.clearScripts);
@@ -2461,6 +2463,7 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 	var handleStateChange = function handleStateChange(evt){
 		// hide loading spinner if needed
+		console.log('handleStateChange');
 		hideLoader();
 		wb.queryParams = wb.urlToQueryParams(location.href);
 		if (wb.queryParams.view === 'result'){
@@ -2587,18 +2590,24 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 	// });
 	Event.on(document.body, 'wb-script-loaded', null, function(evt){
 		wb.scriptModified = false;
+		wb.scriptLoaded = true;
 		if (wb.view === 'result'){
 			// console.log('run script because we are awesome');
-			// window.addEventListener('load', function(){
-			// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
-			// 	wb.runCurrentScripts();
-			// }, false);
+			if (wb.windowLoaded){
+				// console.log('run scripts directly');
+				wb.runCurrentScripts();
+			}else{
+				// console.log('run scripts when the iframe is ready');
+				window.addEventListener('load', function(){
+				// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
+				 	wb.runCurrentScripts();
+				 }, false);
+			}
 		// }else{
 		// 	console.log('do not run script for some odd reason: %s', wb.view);
 		}
 		// clear undo/redo stack
-		wb.scriptLoaded = true;
-		// console.log('script loaded');
+		console.log('script loaded');
 	});
 
 	Event.on(document.body, 'wb-modified', null, function(evt){
@@ -2617,7 +2626,8 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 	// Kick off some initialization work
 	window.addEventListener('load', function(){
-		// console.log('window loaded');
+		console.log('window loaded');
+		wb.windowLoaded = true;
 		Event.trigger(document.body, 'wb-state-change');
 	}, false);
 })(wb);

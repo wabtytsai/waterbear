@@ -1844,9 +1844,6 @@ global.ajax = ajax;
 // Sets up wb namespace (wb === waterbear)
 // Extracts parameters from URL, used to switch embed modes, load from gist, etc.
 (function(global){
-	var wb = {
-		scriptModified: true
-	};
 
 	// Source: http://stackoverflow.com/a/13984429
 	wb.urlToQueryParams = function(url){
@@ -2406,6 +2403,7 @@ global.ajax = ajax;
             }
         	dragAction.target = target;
             if (target.parentElement.classList.contains('locals')){
+                // console.log('target parent: %o', target.parentElement);
                 target.dataset.isLocal = 'true';
                 localDrag = true;
             }
@@ -2424,7 +2422,7 @@ global.ajax = ajax;
                 startIndex = wb.indexOf(target);
             }
         }else{
-            console.log('not a valid drag target');
+            console.warn('not a valid drag target');
             dragTarget = null;
         }
         return false;
@@ -2536,6 +2534,7 @@ global.ajax = ajax;
         timer = null;
         if (!dragging) {return undefined;}
         handleDrop(end.altKey || end.ctrlKey);
+        console.log('resetting');
         reset();
         return false;
     }
@@ -4257,6 +4256,9 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 			document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
 			wb.history.clear();
 			delete localStorage['__' + wb.language + '_current_scripts'];
+			// FIXME: I'm not sure why clearing the script breaks dropping into the workspace
+			// For now will resort to the horrible hack of refreshing the page
+			location.reload();
 		}
 	}
 	Event.on('.clear_scripts', 'click', null, wb.clearScripts);
@@ -4284,6 +4286,7 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 	var handleStateChange = function handleStateChange(evt){
 		// hide loading spinner if needed
+		console.log('handleStateChange');
 		hideLoader();
 		wb.queryParams = wb.urlToQueryParams(location.href);
 		if (wb.queryParams.view === 'result'){
@@ -4410,18 +4413,24 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 	// });
 	Event.on(document.body, 'wb-script-loaded', null, function(evt){
 		wb.scriptModified = false;
+		wb.scriptLoaded = true;
 		if (wb.view === 'result'){
 			// console.log('run script because we are awesome');
-			// window.addEventListener('load', function(){
-			// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
-			// 	wb.runCurrentScripts();
-			// }, false);
+			if (wb.windowLoaded){
+				// console.log('run scripts directly');
+				wb.runCurrentScripts();
+			}else{
+				// console.log('run scripts when the iframe is ready');
+				window.addEventListener('load', function(){
+				// 	// console.log('in window load, starting script: %s', !!wb.runCurrentScripts);
+				 	wb.runCurrentScripts();
+				 }, false);
+			}
 		// }else{
 		// 	console.log('do not run script for some odd reason: %s', wb.view);
 		}
 		// clear undo/redo stack
-		wb.scriptLoaded = true;
-		// console.log('script loaded');
+		console.log('script loaded');
 	});
 
 	Event.on(document.body, 'wb-modified', null, function(evt){
@@ -4440,7 +4449,8 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 	// Kick off some initialization work
 	window.addEventListener('load', function(){
-		// console.log('window loaded');
+		console.log('window loaded');
+		wb.windowLoaded = true;
 		Event.trigger(document.body, 'wb-state-change');
 	}, false);
 })(wb);
@@ -4611,8 +4621,11 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
     function runCurrentScripts(){
         // console.log('runCurrentScripts');
         if (!wb.scriptLoaded){
+            console.log('not ready to run script yet, waiting');
             Event.on(document.body, 'wb-script-loaded', null, wb.runCurrentScripts);
             return;
+        }else{
+            console.log('ready to run script, let us proceed to the running of said script');
         }
         var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
         wb.runScript( wb.prettyScript(blocks) );
@@ -4623,14 +4636,15 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
         wb.historySwitchState('result');
     });
 
-    document.querySelector('.stageframe').addEventListener('load', function(event){
-        console.log('iframe ready, waiting: %s', !!wb.iframewaiting);
-        wb.iframeready = true;
-        if (wb.iframewaiting){
-            wb.iframewaiting();
-        }
-        wb.iframewaiting = null;
-    }, false);
+    if (!wb.iframeReady){
+        document.querySelector('.stageframe').addEventListener('load', function(event){
+            console.log('iframe ready, waiting: %s', !!wb.iframewaiting);
+            if (wb.iframewaiting){
+                wb.iframewaiting();
+            }
+            wb.iframewaiting = null;
+        }, false);
+    }
 
     wb.runScript = function(script){
         // console.log('script: %s', script);
@@ -4642,7 +4656,7 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
             document.querySelector('.stageframe').contentWindow.postMessage(JSON.stringify({command: 'loadlibrary', library: runtimeUrl, script: wb.wrap(script)}), '*');
             document.querySelector('.stageframe').focus();
         };
-        if (wb.iframeready){
+        if (wb.iframeReady){
             run();
         }else{
             wb.iframewaiting = run;
@@ -6184,7 +6198,7 @@ wb.menu({
             "blocktype": "step",
             "id": "3fab2b88-430a-401e-88b2-2703d614780a",
             "script": "{{1}}.push({{2}});",
-            "help": "add any object to an array",
+            "help": "add any object to the end of an array",
             "sockets": [
                 {
                     "name": "array",
@@ -6193,6 +6207,24 @@ wb.menu({
                 },
                 {
                     "name": "append",
+                    "type": "any",
+                    "value": null
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "77edf0e9-e5df-4294-81ef-bfa363cda3ee",
+            "script": "{{1}}.unshift({{2}});",
+            "help": "add any object to the beginning of an array",
+            "sockets": [
+                {
+                    "name": "array",
+                    "type": "array",
+                    "value": null
+                },
+                {
+                    "name": "prepend",
                     "type": "any",
                     "value": null
                 }
@@ -6423,7 +6455,42 @@ wb.menu({
                     "value": null
                 }
             ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "de9f5ebd-2408-4c72-9705-786b1eec2b14",
+            "type": "boolean",
+            "script": "!({{1}}%2)",
+            "help": "true when the parameter is even",
+            "sockets": [
+                {
+                    "name": "",
+                    "type": "number",
+                    "value": 2
+                },
+                {
+                    "name": "is even"
+                }
+            ]
+        },
+        {
+            "blocktype": "expression",
+            "id": "0ac50ac9-2af6-4073-83cf-4f79b4bde163",
+            "type": "boolean",
+            "script": "!!({{1}}%2)",
+            "help": "true when the parameter is odd",
+            "sockets": [
+                {
+                    "name": "",
+                    "type": "number",
+                    "value": 1
+                },
+                {
+                    "name": "is odd"
+                }
+            ]
         }
+
     ]
 }
 );
