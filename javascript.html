@@ -11,6 +11,7 @@
 	<!--link rel="apple-touch-icon-precomposed" href="icon.png"--><!-- 57x57 icon -->
 	<!--link rel="apple-touch-startup-image" href="default.png"--><!-- 320x460 image -->
 	<!--script src="/lib/modernizr-1.6.min.js"></script-->
+	<script src="https://login.persona.org/include.js"></script>
 	<script>
 		var wb = {
 			scriptModified: true,
@@ -47,19 +48,17 @@
 				<li>
 					<button class="show-examples">Examples</button>
 					<ul class="sub-menu">
-						<li><button class="load-example" data-example="blacklight_worms">Blacklight Worms</button></li>
-						<li><button class="load-example" data-example="breakout">Breakout</button></li>
-						<li><button class="load-example" data-example="pong">Pong</button></li>
-						<li><button class="load-example" data-example="random_circles">Random Circles</button></li>
-						<li><button class="load-example" data-example="londonderry">Music</button></li>
-						<li><button class="load-example" data-example="rotating_boxes">Rotating Boxes</button></li>
-						<li><button class="load-example" data-example="dance">Dance</button></li>
 
 					</ul>
 				</li>
 				<li>
 					<button class="run-scripts">Run</button>
 				</li>
+				
+                <li>
+                    <button class="stop-scripts">Stop</button>
+                </li>
+                
 				<li>
 					<button class="undoAction">Undo</button>
 				</li>
@@ -68,6 +67,12 @@
 				</li>
 				<li>
 					<button class="cmenuEnable"><i class="icon-list-alt"></i>Enable Context Menus</button>
+				</li>
+				<li>
+					<button id="signin">Sign In</button>
+				</li>
+				<li>
+					<button id="signout">Sign Out</button>
 				</li>
 			</ul>
 		</nav>

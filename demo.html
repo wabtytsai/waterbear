@@ -11,6 +11,7 @@
 	<!--link rel="apple-touch-icon-precomposed" href="icon.png"--><!-- 57x57 icon -->
 	<!--link rel="apple-touch-startup-image" href="default.png"--><!-- 320x460 image -->
 	<!--script src="/lib/modernizr-1.6.min.js"></script-->
+	<script src="https://login.persona.org/include.js"></script>
 	<script>
 		var wb = {
 			scriptModified: true,
@@ -53,6 +54,11 @@
 				<li>
 					<button class="run-scripts">Run</button>
 				</li>
+				
+                <li>
+                    <button class="stop-scripts">Stop</button>
+                </li>
+                
 				<li>
 					<button class="undoAction">Undo</button>
 				</li>
@@ -61,6 +67,12 @@
 				</li>
 				<li>
 					<button class="cmenuEnable"><i class="icon-list-alt"></i>Enable Context Menus</button>
+				</li>
+				<li>
+					<button id="signin">Sign In</button>
+				</li>
+				<li>
+					<button id="signout">Sign Out</button>
 				</li>
 			</ul>
 		</nav>

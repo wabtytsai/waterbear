@@ -34,7 +34,7 @@ var styles = {
     processingjs: ['stylesheets/workspace.css', 'stylesheets/blocks.css', 'lib/highlight-github.css', 'stylesheets/menu.css', 'stylesheets/fonts/fontawesome.css']
 }
 
-var scripts = ['ajax', 'queryparams', 'util', 'event', 'drag', 'uuid', 'block', 'file', 'undo', 'ui', 'workspace', 'blockprefs'];
+var scripts = ['ajax', 'auth', 'queryparams', 'util', 'event', 'drag', 'uuid', 'block', 'file', 'undo', 'ui', 'workspace', 'blockprefs'];
 
 var libs = {
     arduino: [],
@@ -130,7 +130,7 @@ function build(){
         }
 
         // Build HTML file
-        var tplExamplePath = 'template/' + lang + '.examples';
+        var tplExamplePath = '../template/' + lang + '.examples';
         var examples = "";
         if (fs.existsSync(tplExamplePath))
         {
@@ -138,7 +138,7 @@ function build(){
             examples = fs.readFileSync(tplExamplePath);
         }
 
-        var tplStagePath = 'template/' + lang + '.stage';
+        var tplStagePath = '../template/' + lang + '.stage';
         var stage = fs.readFileSync('template/' + "javascript" + '.stage');
         if (fs.existsSync(tplStagePath))
         {
