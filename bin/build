@@ -134,7 +134,7 @@ function build(){
         }
 
         // Build HTML file
-        var tplExamplePath = '../template/' + lang + '.examples';
+        var tplExamplePath = 'template/' + lang + '.examples';
         var examples = "";
         if (fs.existsSync(tplExamplePath)) {
             examples = fs.readFileSync(tplExamplePath);
@@ -143,7 +143,7 @@ function build(){
             console.warn("Example template file for %s located at %s is missing. Defaulting to ''.", lang, tplExamplePath);
         }
 
-        var tplStagePath = '../template/' + lang + '.stage';
+        var tplStagePath = 'template/' + lang + '.stage';
         var stage = fs.readFileSync('template/' + "javascript" + '.stage');
         if (fs.existsSync(tplStagePath)) {
             stage = fs.readFileSync(tplStagePath);
