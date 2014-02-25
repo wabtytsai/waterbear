@@ -1822,22 +1822,119 @@ hljs.LANGUAGES.javascript = {
 
 /*end highlight-javascript.js*/
 
-/*begin ajax.js*/
-(function(global){
-function $(e){if(typeof e=='string')e=document.getElementById(e);return e};
-function collect(a,f){var n=[];for(var i=0;i<a.length;i++){var v=f(a[i]);if(v!=null)n.push(v)}return n};
+/*begin events.min.js*/
+/*
+|------------------------------------------------
+| Events.js
+|------------------------------------------------
+|
+| A super-awesome JavaScript event handler library.
+|
+| @author     James Brumond
+| @version    0.2.3-beta
+| @copyright  Copyright 2011 James Brumond
+| @license    Dual licensed under MIT and GPL
+|
+*/
+var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=document.readyState==="complete";if(!a){function b(){a=!0}window.addEventListener?window.addEventListener("load",b,!1):window.attachEvent&&window.attachEvent("onload",b)}return function(){return a}}(),e={mouseenter:{attachesTo:"mouseover",eventTest:function(a){return!withinElement(a,a.originalTarget(),"fromElement")}},mouseleave:{attachesTo:"mouseout",eventTest:function(a){return!withinElement(a,a.originalTarget(),"toElement")}},hashchange:{bind:function(a,b){f.addEventListener(b)},unbind:function(a,b){f.removeEventListener(b)},invoke:function(a){f.dispatchEvent()}},keystroke:{attachesTo:"keydown",eventTest:function(a){return g.runTest(a,a.getNamespace().split(".")[0])}}},f=new function(){var b=this,c=25,d=[],e=function(){var a=(location+"").match(/^[^#]*(#.+)$/);return a?a[1]:""},f=function(a){a[0]!=="#"&&(a="#"+a),location.hash=a},g=function(){var a=!1;return function(b){typeof b=="boolean"&&(a=b);return a}}(),h=function(b,c){return a.buildEventObject("hashchange",{},merge({oldURL:b,newURL:location+""},c||{}))},i=function(a){var b;for(var c=0,e=d.length;c<e;c++)b=d[c].call(window,a);a.returnValue!=null&&(b=a.returnValue);return b},j=function(){var a=e(),d=location+"",f=!1,h=null;return{start:function(){f||(f=!0,h=window.setInterval(function(){var c=e();c!==a&&(a=c,g()||b.dispatchEvent(d),d=location+"")},c))},stop:function(){f&&(f=!1,window.clearInterval(h))}}}(),k=function(a){var a=a||window.event,b=a._isEmulated||!1;!g()&&!b&&(g(!0),j.stop());return i(a)};b.init=function(){attachListener(window,"hashchange",k),g()||j.start()},b.addEventListener=function(a){d.push(a)},b.removeEventListener=function(a){var b=[];for(var c=0,e=d.length;c<e;c++)d[c]!==a&&b.push(d[c]);d=b},b.dispatchEvent=function(a){return i(h(location+"",a))}},g=function(){var a={type:"keydown",propagate:!1,disable_in_input:!0,target:document,keycode:!1},b={"`":"~",1:"!",2:"@",3:"#",4:"$",5:"%",6:"^",7:"&",8:"*",9:"(",0:")","-":"_","=":"+",";":":","'":'"',",":"<",".":">","/":"?","\\":"|"},c={esc:27,escape:27,tab:9,space:32,"return":13,enter:13,backspace:8,scrolllock:145,scroll_lock:145,scroll:145,capslock:20,caps_lock:20,caps:20,numlock:144,num_lock:144,num:144,pause:19,"break":19,insert:45,home:36,"delete":46,end:35,pageup:33,page_up:33,pu:33,pagedown:34,page_down:34,pd:34,left:37,up:38,right:39,down:40,f1:112,f2:113,f3:114,f4:115,f5:116,f6:117,f7:118,f8:119,f9:120,f10:121,f11:122,f12:123},d=function(){return{shift:{wanted:!1,pressed:!1},ctrl:{wanted:!1,pressed:!1},alt:{wanted:!1,pressed:!1},meta:{wanted:!1,pressed:!1}}},e=function(a,e,f){var g,h,i,j,k,l;if(f.disable_in_input){i=a.currentTarget;if(i&&i.tagName&&(i.tagName.toLowerCase()==="input"||i.tagName.toLowerCase()==="textarea")&&i!==f.target)return}a.keyCode?k=a.keyCode:a.which&&(k=a.which),j=String.fromCharCode(k).toLowerCase(),k===188&&(j=","),k===190&&(j="."),g=e.split("+"),h=0,l=d(),a.ctrlKey&&(l.ctrl.pressed=!0),a.shiftKey&&(l.shift.pressed=!0),a.altKey&&(l.alt.pressed=!0),a.metaKey&&(l.meta.pressed=!0);for(var m=0;m<g.length;m++){var n=g[m];n==="ctrl"||n==="control"?(h++,l.ctrl.wanted=!0):n==="shift"?(h++,l.shift.wanted=!0):n==="alt"?(h++,l.alt.wanted=!0):n==="meta"?(h++,l.meta.wanted=!0):n.length>1?c[n]===k&&h++:f.keycode?f.keycode===k&&h++:j===n?h++:b[j]&&a.shiftKey&&(j=b[j],j===n&&h++)}return h===g.length&&l.ctrl.pressed===l.ctrl.wanted&&l.shift.pressed===l.shift.wanted&&l.alt.pressed===l.alt.wanted&&l.meta.pressed===l.meta.wanted};return{runTest:function(b,c,d){var d=d||{};for(var f in a)a.hasOwnProperty(f)&&d[f]===undefined&&(d[f]=a[f]);return e(b,c.toLowerCase(),d)},defaults:a}}(),h=function(){var a=function(a){if(typeof this=="undefined"||typeof a=="undefined"||typeof this[a]=="undefined")return!1;return this[a]!==this.constructor.prototype[a]};return function(b){try{b.prototype.hasOwnProperty=a;if(typeof b.hasOwnProperty!="function")throw 0}catch(c){b.hasOwnProperty=a}}}();EventController=function(a,b){var c=this,d=!1,a=a,b=b,e=null;typeof a.hasOwnProperty!="function"&&h(a),c.target=c.srcElement=b;for(var f in a)a.hasOwnProperty(f)&&typeof a[f]!="function"&&(c[f]=a[f]);c.getNamespace=function(){return e},c._setNamespace=function(a){e=a},c.mousePosition=function(){var b=0,c=0;if(a.pageX||a.pageY)b=a.pageX,c=a.pageY;else if(a.clientX||a.clientY)b=a.clientX+document.body.scrollLeft+document.documentElement.scrollLeft,c=a.clientY+document.body.scrollTop+document.documentElement.scrollTop;return{x:b,y:c}},c.eventObject=function(){return a},c.originalTarget=function(){return b},c.stopPropagation=function(){typeof a.stopPropagation=="function"&&a.stopPropagation(),a.cancelBubble=!0},c.cancelDefault=function(){d||(d=!0,typeof a.preventDefault=="function"&&a.preventDefault(),a.returnValue=!1)},c.isDefaultCanceled=function(){return d}},EventFunction=function(a,b){var c=this,b=b;a=a||undefined;if(typeof a!="function")return undefined;c.call=function(b,c){return a.call(b,c)}},EventWrapper=function(a,b){var c=this,a=a||null,b=b||null,d={},f=!1,g=!1,h=function(a){var b=d;for(var c=0,e=a.length;c<e;c++){var f=a[c];typeof b[f]!="object"&&(b[f]={}),b=b[f]}typeof b["."]!="object"&&(b["."]=[]);return b};c.registerFunction=function(a,b){var d=h(b);d["."].push(new EventFunction(a,c))},c.removeNamespace=function(a){if(a&&a.length){var b=a.pop(),c=h(a);c[b]={}}else d={}},c.run=function(c,f){var f=f||new EventController(c,a),g=[],h=b in e&&e[b].eventTest?e[b].eventTest:function(){return!0},i=function(b){var c=null;for(var d in b)if(b.hasOwnProperty(d)){f._setNamespace(g.join("."));if(d==="."){if(h(f))for(var e=0,j=b[d].length;e<j;e++)c=b[d][e].call(a,f),c===!1&&f.cancelDefault()}else g.push(d),c=i(b[d]),g.pop()}return c},j=i(d);return f.isDefaultCanceled()?!1:j};if(b in e){var i=e[b],j=!!i.bind&&!!i.unbind,k=function(a){return c.run(a||window.event)};c.bindEvent=function(){g||(g=!0,j?i.bind(a,k):attachListener(a,i.attachesTo,k))},c.unbindEvent=function(){g&&(g=!1,j?i.unbind(a,k):detachListener(a,i.attachesTo,k))}}else{var k=function(a){return c.run(a||window.event)};c.bindEvent=function(){g||(g=!0,attachListener(a,b,k))},c.unbindEvent=function(){g&&(g=!1,detachListener(a,b,k))}}c.bindEvent()},EventHandler=function(a){var c=this,a=a||null,d={};b.push(c),c.getTarget=function(){return a},c.registerEvent=function(b,c){if(typeof b!="string"||typeof c!="function")return!1;var e=b.split("."),f;b=e.shift(),f=e,startsWithOn.test(b)&&(b=b.substring(2)),d[b]===undefined&&(d[b]=new EventWrapper(a,b)),d[b].registerFunction(c,f)},c.removeEvent=function(a){var a=a||!1,b;if(typeof a!="string")return!1;if(a==="*"){for(var c in d)d.hasOwnProperty(c)&&d[c].removeNamespace(!1);return!0}b=a.split("."),a=b.shift(),d[a].removeNamespace(b)}},startsWithOn=/^on/,startsWithDOM=/^DOM/,attachListener=function(a,b,c){if(a.addEventListener)startsWithOn.test(b)&&(b=b.substring(2)),a.addEventListener(b,c,!1);else if(a.attachEvent)!startsWithDOM.test(b)&&!startsWithOn.test(b)&&(b="on"+b),a.attachEvent(b,c);else throw new YourBrowserFailsError("Could not attach event listener")},detachListener=function(a,b,c){if(a.removeEventListener)startsWithOn.test(b)&&(b=b.substring(2)),a.removeEventListener(b,c,!1);else if(a.detachEvent)!startsWithDOM.test(b)&&!startsWithOn.test(b)&&(b="on"+b),a.detachEvent(b,c);else throw new YourBrowserFailsError("Could not detach event listener")},invokeListener=function(b,c,d){var e;if(b.dispatchEvent)startsWithOn.test(c)&&(c=c.substring(2)),e=a.buildEventObject(b,c,d),b.dispatchEvent(e);else if(b.fireEvent)!startsWithDOM.test(c)&&!startsWithOn.test(c)&&(c="on"+c),e=a.buildEventObject(b,c,d),b.fireEvent(c,e);else throw new YourBrowserFailsError("Could not invoke event listener")},getEventTarget=function(a,b){var c=!1;a.target?c=a.target:a.srcElement&&(c=a.srcElement),!c&&a.srcElement===null&&(c=b||window),c.nodeType==3&&(c=c.parentNode);return c},withinElement=function(a,b,c){var d=a.relatedTarget,e;d==null&&(d=a[c]||null);try{while(d&&d!==b)d=d.parentNode;e=d===b}catch(f){e=!1}return e},getHandlerByTarget=function(a){for(var c=0;c<b.length;c++)if(b[c].getTarget()===a)return b[c];return!1},getEventHandler=function(a){var b=getHandlerByTarget(a);return b?b:new EventHandler(a)},merge=function(){var a=Array.prototype.slice.call(arguments,0),b={};for(var c=0,d=a.length;c<d;c++)for(var e in a[c])a[c].hasOwnProperty(e)&&(b[e]=a[c][e]);return b},contains=function(a,b){for(var c=0,d=b.length;c<d;c++)if(b[c]===a)return!0;return!1},a.version=function(){return c},a.ready=function(){var a=[],b=!1;return function(c){d()?c():(a.push(c),b||Events.bind(window,"load",function(){for(var b=0,c=a.length;b<c;b++)a[b]()}))}}(),a.log=function(){var a=null,b=function(){a==null&&(typeof window.console!="undefined"?typeof window.console.log.apply=="function"?a=function(){window.console.log.apply(window.console,arguments)}:a=function(){window.console.log(arguments)}:typeof console!="undefined"?a=function(){console.log.apply(console,arguments)}:a=function(){});return a};return function(){var a=Array.prototype.slice.call(arguments,0);typeof a[0]=="string"&&(a[0]="["+Date()+"] - "+a[0]),b().apply(this,a)}}(),a.bind=function(a,b,c){var d=getEventHandler(a);return d.registerEvent(b,c)},a.unbind=function(a,b){var c=getEventHandler(a);return c.removeEvent(b)},a.specialEvents={exists:function(a){return e[a]!=null},add:function(a,b){e[a]==null&&(e[a]=b)},edit:function(a,b){if(e[a]!=null)for(var c in b)b.hasOwnProperty(c)&&(e[a][c]=b[c])},del:function(a){e[a]!=null&&(e[a]=null)}},a.invoke=function(a,b,c){return invokeListener(a,b,c)},a.buildEventObject=function(){var a={HTMLEvents:["abort","blur","change","error","focus","load","reset","resize","scroll","select","submit","unload","hashchange"],UIEvents:["DOMActivate","DOMFocusIn","DOMFocusOut"],KeyEvents:["keydown","keypress","keyup"],MouseEvents:["click","mousedown","mousemove","mouseout","mouseover","mouseup"],MutationEvents:["DOMAttrModified","DOMNodeInserted","DOMNodeRemoved","DOMCharacterDataModified","DOMNodeInsertedIntoDocument","DOMNodeRemovedFromDocument","DOMSubtreeModified"]},b=function(b){var c="Events";for(var d in a)if(a.hasOwnProperty(d)&&contains(b,a[d])){d==="KeyEvents"&&!window.KeyEvent&&(d="UIEvents");if(document.implementation.hasFeature(d,"2.0")||window[d.substring(0,d.length-1)])d="Events";c=d;break}return c},c={useDefaults:!1,bubbles:!0,cancelable:!1},d={winObj:window,detail:1},e={winObj:window,ctrlKey:!1,altKey:!1,shiftKey:!1,metaKey:!1,keyCode:0,charCode:0},f={winObj:window,ctrlKey:!1,altKey:!1,shiftKey:!1,metaKey:!1,button:0,relatedTarget:null},g={relatedNode:null,prevValue:null,newValue:null,attrName:null,attrChange:null};return document.createEvent?function(a,h,i){var j=b(event),k=document.createEvent(j),l=h,h=h||{};if(typeof l!="object"||h.useDefaults)j="Events";switch(j){case"Events":case"HTMLEvents":h=merge(c,h),k.initEvent(a,h.bubbles,h.cancelable);break;case"UIEvents":h=merge(c,d,h),k.initUIEvent(a,h.bubbles,h.cancelable,h.winObj,h.detail);break;case"KeyEvents":h=merge(c,e,h),k.initKeyEvent(a,h.bubbles,h.cancelable,h.winObj,h.ctrlKey,h.altKey,h.shiftKey,h.metaKey,h.keyCode,h.charCode);break;case"MouseEvents":h=merge(c,f,h),k.initMouseEvent(a,h.bubbles,h.cancelable,h.winObj,h.screenX,h.screenY,h.clientX,h.clientY,h.ctrlKey,h.altKey,h.shiftKey,h.metaKey,h.button,h.relatedTarget);break;case"MutationEvents":h=merge(c,g,h),k.initMutationEvent(a,h.bubbles,h.cancelable,h.relatedNode,h.prevValue,h.newValue,h.attrName,h.attrChange)}for(var m in i)i.hasOwnProperty(m)&&(k[m]=i[m]);return k}:document.createEventObject?function(a,b,d){var e=document.createEventObject(),b=merge(c,b||{},d);for(var f in b)b.hasOwnProperty(f)&&(e[f]=b[f]);return e}:function(a,b,d){return merge({type:a,timeStamp:(new Date).getTime(),target:target,srcElement:target,currentTarget:target,defaultPrevented:!1},c,b||{},d||{},{bubbles:!1})}}(),f.init()};typeof window.YourBrowserFailsError=="undefined"&&(window.YourBrowserFailsError=function(a){if(!this instanceof YourBrowserFailsError)return new YourBrowserFailsError(a);var b=function(){var a;try{(0)()}catch(b){a=b}return a}();this.name="YourBrowserFailsError",this.message=a,this.stack=b.stack||b.stacktrace||"Could not get a stack. MORE FAILS!!"});
+/*end events.min.js*/
 
-ajax={};
-ajax.x=function(){try{return new ActiveXObject('Msxml2.XMLHTTP')}catch(e){try{return new ActiveXObject('Microsoft.XMLHTTP')}catch(e){return new XMLHttpRequest()}}};
-ajax.serialize=function(f){var g=function(n){return f.getElementsByTagName(n)};var nv=function(e){if(e.name)return encodeURIComponent(e.name)+'='+encodeURIComponent(e.value);else return ''};var i=collect(g('input'),function(i){if((i.type!='radio'&&i.type!='checkbox')||i.checked)return nv(i)});var s=collect(g('select'),nv);var t=collect(g('textarea'),nv);return i.concat(s).concat(t).join('&');};
-ajax.send=function(u,f,m,a){var x=ajax.x();x.open(m,u,true);x.onreadystatechange=function(){if(x.readyState==4)f(x.responseText)};if(m=='POST')x.setRequestHeader('Content-type','application/x-www-form-urlencoded');x.send(a)};
-ajax.get=function(url,func){ajax.send(url,func,'GET')};
-ajax.gets=function(url){var x=ajax.x();x.open('GET',url,false);x.send(null);return x.responseText};
-ajax.post=function(url,func,args){ajax.send(url,func,'POST',args)};
-ajax.update=function(url,elm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.get(url,f)};
-ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.post(url,f,ajax.serialize(frm))};
-global.ajax = ajax;
+/*begin ajax.js*/
+(function (global) {
+    function $(e) {
+        if (typeof e == 'string') e = document.getElementById(e);
+        return e
+    };
+
+    function collect(a, f) {
+        var n = [];
+        for (var i = 0; i < a.length; i++) {
+            var v = f(a[i]);
+            if (v != null) n.push(v)
+        }
+        return n
+    };
+
+    ajax = {};
+    ajax.x = function () {
+        try {
+            return new ActiveXObject('Msxml2.XMLHTTP')
+        } catch (e) {
+            try {
+                return new ActiveXObject('Microsoft.XMLHTTP')
+            } catch (e) {
+                return new XMLHttpRequest()
+            }
+        }
+    };
+    ajax.serialize = function (f) {
+        var g = function (n) {
+            return f.getElementsByTagName(n)
+        };
+        var nv = function (e) {
+            if (e.name) return encodeURIComponent(e.name) + '=' + encodeURIComponent(e.value);
+            else return ''
+        };
+        var i = collect(g('input'), function (i) {
+            if ((i.type != 'radio' && i.type != 'checkbox') || i.checked) return nv(i)
+        });
+        var s = collect(g('select'), nv);
+        var t = collect(g('textarea'), nv);
+        return i.concat(s).concat(t).join('&');
+    };
+
+    ajax.send = function (u, f, m, a, e) {
+        var x = ajax.x();
+        x.open(m, u, true);
+        x.onreadystatechange = function () {
+            if (x.readyState == 4 && x.status < 400) {
+                cType = x.getResponseHeader("Content-Type");
+                f(x.responseText, cType);
+            } else if (x.readyState == 4) {
+                if (e == undefined) {
+                    console.log(x.status + " (" + x.statusText + ") ");
+                } else {
+                    e(x.status, x);
+                }
+            }
+        };
+        if (m == 'POST')
+            x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        x.send(a);
+    };
+
+    ajax.get = function (url, func, err) {
+        ajax.send(url, func, 'GET', {}, err)
+    };
+
+    ajax.gets = function (url) {
+        var x = ajax.x();
+        x.open('GET', url, false);
+        x.send(null);
+        return x.responseText
+    };
+
+    ajax.post = function (url, func, args, err) {
+        ajax.send(url, func, 'POST', args, err)
+    };
+
+    ajax.update = function (url, elm) {
+        var e = $(elm);
+        var f = function (r) {
+            e.innerHTML = r
+        };
+        ajax.get(url, f)
+    };
+    ajax.submit = function (url, elm, frm) {
+        var e = $(elm);
+        var f = function (r) {
+            e.innerHTML = r
+        };
+        ajax.post(url, f, ajax.serialize(frm))
+    };
+    global.ajax = ajax;
 })(this);
+
 /*end ajax.js*/
 
 /*begin auth.js*/
@@ -1899,12 +1996,14 @@ global.ajax = ajax;
 /*end auth.js*/
 
 /*begin queryparams.js*/
-// Sets up wb namespace (wb === waterbear)
+// Sets up wb namespace (wb === waterbear). Global variable wb
+// is initialized in the HTML before any javascript files are
+// loaded (in template/template.html).
 // Extracts parameters from URL, used to switch embed modes, load from gist, etc.
 (function(global){
 
 	// Source: http://stackoverflow.com/a/13984429
-	wb.urlToQueryParams = function(url){
+	function urlToQueryParams(url){
 	    var qparams = {},
 	        parts = (url||'').split('?'),
 	        qparts, qpart,
@@ -1924,7 +2023,7 @@ global.ajax = ajax;
 	    return qparams;
 	};
 
-	wb.queryParamsToUrl = function(params){
+	function queryParamsToUrl(params){
 		var base = location.href.split('?')[0];
 		var keys = Object.keys(params);
 		var parts = [];
@@ -1942,12 +2041,17 @@ global.ajax = ajax;
 		}
 		return base + '?' + parts.join('&');
 	}
+
+	wb.urlToQueryParams = urlToQueryParams;
+	wb.queryParamsToUrl = queryParamsToUrl;
 	global.wb = wb;
 })(this);
 
 /*end queryparams.js*/
 
 /*begin util.js*/
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(global){
     //
     //
@@ -1959,35 +2063,33 @@ global.ajax = ajax;
     // TODO
     // Make these methods on HTMLDocument, HTMLElement, NodeList prototypes
 
-    wb.makeArray = function makeArray(arrayLike){
+    function makeArray(arrayLike){
         return Array.prototype.slice.call(arrayLike);
     };
 
-    wb.reposition = function reposition(elem, position){
+    function reposition(elem, position){
         // put an absolutely positioned element in the right place
         // May need to take into account offsets of container
         elem.style.top = position.top + 'px';
         elem.style.left = position.left + 'px';
     };
 
-    wb.hide = function(elem){
-        elem.dataset.display = elem.style.display;
-        elem.style.display = 'none';
+    function hide(elem){
+        elem.classList.add('hidden');
     };
 
-    wb.show = function(elem){
-        elem.style.display = elem.dataset.display || 'block';
-        delete elem.dataset.display;
+    function show(elem){
+        elem.classList.remove('hidden');
     };
 
-    var svgtext = document.querySelector('svg text');
-    wb.resize = function(input){
+    var svgText = document.querySelector('.resize-tester');
+    function resize(input){
         if (!input) return;
         if (input.wbTarget){
             input = input.wbTarget;
         }
-        svgtext.textContent = input.value || '';
-        var textbox = svgtext.getBBox();
+        svgText.textContent = input.value || '';
+        var textbox = svgText.getBBox();
         input.style.width = (textbox.width + 25) + 'px';
     };
 
@@ -1995,12 +2097,12 @@ global.ajax = ajax;
     //     return Math.sqrt(Math.pow(p1.left - p2.left, 2) + Math.pow(p1.top - p2.top, 2));
     // };
 
-    wb.dist = function dist(p1, p2, m1, m2){
+    function dist(p1, p2, m1, m2){
         return Math.sqrt(Math.pow(p1 - m1, 2) + Math.pow(p2 - m2, 2));
     };
 
 
-    wb.overlapRect = function overlapRect(r1, r2){ // determine area of overlap between two rects
+    function overlapRect(r1, r2){ // determine area of overlap between two rects
         if (r1.left > r2.right){ return 0; }
         if (r1.right < r2.left){ return 0; }
         if (r1.top > r2.bottom){ return 0; }
@@ -2009,24 +2111,24 @@ global.ajax = ajax;
         return (max(r1.left, r2.left) - min(r1.right, r2.right)) * (max(r1.top, r2.top) - min(r1.bottom, r2.bottom));
     };
 
-    wb.rect = function rect(elem){
+    function rect(elem){
         return elem.getBoundingClientRect();
     };
 
-    wb.overlap = function overlap(elem1, elem2){
+    function overlap(elem1, elem2){
         return wb.overlapRect(wb.rect(elem1), wb.rect(elem2));
     };
 
-    wb.area = function area(elem){
+    function area(elem){
         return elem.clientWidth * elem.clientHeight;
     };
 
-    wb.containedBy = function containedBy(target, container){
+    function containedBy(target, container){
         var targetArea = Math.min(wb.area(target), wb.area(container) * 0.90);
         return target.overlap(container) >= targetArea;
     };
 
-    wb.closest = function closest(elem, selector){
+    function closest(elem, selector){
         if (elem.jquery){
             elem = elem[0];
         }
@@ -2036,13 +2138,14 @@ global.ajax = ajax;
             }
             if (!elem.parentElement){
                 throw new Error('Element has no parent, is it in the tree? %o', elem);
+                //return null;
             }
             elem = elem.parentElement;
         }
         return null;
     };
 
-    wb.indexOf = function indexOf(elem){
+    function indexOf(elem){
         var idx = 0;
         while(elem.previousSiblingElement){
             elem = elem.previousSiblingElement;
@@ -2051,21 +2154,29 @@ global.ajax = ajax;
         return idx;
     };
 
-    wb.find = function find(elem, selector){
+    function find(elem, selector){
+        if (typeof(elem) === 'string'){
+            selector = elem;
+            elem = document.body;
+        }
         return elem.querySelector(selector);
     };
 
-    wb.findAll = function findAll(elem, selector){
+    function findAll(elem, selector){
+        if (typeof(elem) === 'string'){
+            selector = elem;
+            elem = document.body;
+        }
         return wb.makeArray(elem.querySelectorAll(selector));
     };
 
-    wb.findChildren = function findChildren(elem, selector){
+    function findChildren(elem, selector){
         return wb.makeArray(elem.children).filter(function(item){
             return wb.matches(item, selector);
         });
     };
 
-    wb.findChild = function(elem, selector){
+    function findChild(elem, selector){
         if (arguments.length !== 2){
             throw new Exception('This is the culprit');
         }
@@ -2079,7 +2190,7 @@ global.ajax = ajax;
         return null;
     };
 
-    wb.elem = function elem(name, attributes, children){
+   function elem(name, attributes, children){
         // name can be a jquery object, an element, or a string
         // attributes can be null or undefined, or an object of key/values to set
         // children can be text or an array. If an array, can contain strings or arrays of [name, attributes, children]
@@ -2145,43 +2256,24 @@ global.ajax = ajax;
         wb.matches = function matches(elem, selector){ return wb.elem(elem).oMatchesSelector(selector); };
     }
 
-    // AJAX utilities
-
-    var jsonpHandlers = {};
-    wb.jsonp = function(url, callback){
-        var id = 'handler' + Math.floor(Math.random() * 0xFFFF);
-        var handler = function(data){
-            // remove jsonp 
-            var script = document.getElementById(id);
-            script.parentElement.removeChild(script);
-            // remove self
-            delete window[id];
-            callback(data);
-        };
-        window[id] = handler;
-        document.head.appendChild(wb.elem('script', {src: url + '?callback=' + id, id: id, language: 'text/json'}));
-    };
-
-    /* adapted from code here: http://javascriptexample.net/ajax01.php */
-    wb.ajax = function(url, success, failure){
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function() {
-            var cType;
-            if (req.readyState === 4) {
-                if (req.status === 200) {
-                    cType = this.getResponseHeader("Content-Type");
-                    success(this.responseText, cType);
-                }else{
-                    if (failure){
-                        failure(this.status, this);
-                    }
-                }
-            }
-        };
-        req.open('GET', url, true);
-        req.send(null);
-    };
-
+    wb.makeArray = makeArray;
+    wb.reposition = reposition;
+    wb.hide = hide;
+    wb.show = show;
+    wb.resize = resize;
+    wb.dist = dist;
+    wb.overlapRect = overlapRect;
+    wb.rect = rect;
+    wb.overlap = overlap;
+    wb.area = area;
+    wb.containedBy = containedBy;
+    wb.closest = closest;
+    wb.indexOf = indexOf;
+    wb.find = find;
+    wb.findAll = findAll;
+    wb.findChildren = findChildren;
+    wb.findChild = findChild;
+    wb.elem = elem;
 
 })(this);
 
@@ -2193,33 +2285,45 @@ global.ajax = ajax;
 // Minimal support for non-DOM (custom) events
 // Normalized between mouse and touch events
 // Waterbear specific: events have wb-target which is always a block element
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 
 (function(global){
     "use strict";
 
-    var on = function on(elem, eventname, selector, handler){
+    function isDomObject(e){
+        if (e === window) return true;
+        if (e === document) return true;
+        if (e.tagName) return true;
+        return false;
+    }
+
+    function on(elem, eventname, selector, handler, onceOnly){
         if (typeof elem === 'string'){
             return wb.makeArray(document.querySelectorAll(elem)).map(function(e){
                 return on(e, eventname, selector, handler);
             });
         }
-        if (!elem.tagName){ 
-            console.error('first argument must be element: %o', elem); 
-            debugger;
+        if (!isDomObject(elem)){ 
+            console.error('first argument must be element, document, or window: %o', elem);
+            throw new Error('first argument must be element');
         }
         if (typeof eventname !== 'string'){ console.error('second argument must be eventname'); }
         if (selector && typeof selector !== 'string'){ console.log('third argument must be selector or null'); }
         if (typeof handler !== 'function'){ console.log('fourth argument must be handler'); }
         var listener;
         if (selector){
-            listener = function(event){
+            listener = function listener(event){
                 blend(event); // normalize between touch and mouse events
                 // if (eventname === 'mousedown'){
                 //     console.log(event);
                 // }
                 if (!event.wbValid){
-                    // console.log('event %s is not valid', eventname);
+                    // console.log('event is not valid');
                     return;
+                }
+                if (onceOnly){
+                    Event.off(elem, eventname, listener);
                 }
                 if (wb.matches(event.wbTarget, selector)){
                     handler(event);
@@ -2229,10 +2333,13 @@ global.ajax = ajax;
                 }
             };
         }else{
-            listener = function(event){
+            listener = function listener(event){
                 blend(event);
                 if (!event.wbValid){
                     return;
+                }
+                if (onceOnly){
+                    Event.off(elem, eventname, listener);
                 }
                 handler(event);
             };
@@ -2241,19 +2348,15 @@ global.ajax = ajax;
         return listener;
     };
 
-    var off = function(elem, eventname, handler){
+    function off(elem, eventname, handler){
         elem.removeEventListener(eventname, handler);
     }
 
     var once = function(elem, eventname, selector, handler){
-        var listener = function listener(event){
-            handler(event);
-            Event.off(elem, eventname, listener);
-        };
-        return Event.on(elem, eventname, selector, listener);
+        return Event.on(elem, eventname, selector, handler, true);
     }
 
-    var trigger = function(elemOrSelector, eventname, data){
+    function trigger(elemOrSelector, eventname, data){
         var elem;
         if (elemOrSelector.nodeName){
             elem = elemOrSelector;
@@ -2261,13 +2364,13 @@ global.ajax = ajax;
             elem = document.querySelector(elem);
         }
         var evt = new CustomEvent(eventname, {bubbles: true, cancelable: true, detail: data});
-        // console.log('dispatching %s for %o', eventname, elem);
+        //console.log('dispatching %s for %o', eventname, elem);
         elem.dispatchEvent(evt);
     };
 
     // Are touch events supported?
     var isTouch = ('ontouchstart' in global);
-    var isMouseEvent = function isMouseEvent(event){
+    function isMouseEvent(event){
         switch(event.type){
             case 'mousedown':
             case 'mousemove':
@@ -2278,7 +2381,7 @@ global.ajax = ajax;
                 return false;
         }
     };
-    var isTouchEvent = function isTouchEvent(event){
+    function isTouchEvent(event){
         switch(event.type){
             case 'touchstart':
             case 'touchmove':
@@ -2290,12 +2393,12 @@ global.ajax = ajax;
         }
     };
 
-    var isPointerEvent = function isPointerEvent(event){
+    function isPointerEvent(event){
         return isTouchEvent(event) || isMouseEvent(event);
     };
 
     // Treat mouse events and single-finger touch events similarly
-    var blend = function(event){
+    function blend(event){
         if (isPointerEvent(event)){
             if (isTouchEvent(event)){
                 var touch = null;
@@ -2340,6 +2443,9 @@ global.ajax = ajax;
 /*end event.js*/
 
 /*begin drag.js*/
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
+
 (function(global){
 
     // After trying to find a decent drag-and-drop library which could handle
@@ -2349,47 +2455,46 @@ global.ajax = ajax;
     // Waterbear which does what we need. The last piece makes it waterbear-specific
     // but could potentially be factored out if another library supported all of the
     // rest (and didn't introduce new dependencies such as jQuery)
-
+    
     // FIXME: Remove references to waterbear
     // FIXME: Include mousetouch in garden
-
-
-// Goals:
-//
-// Drag any block from block menu to script canvas: clone and add to script canvas
-// Drag any block from anywhere besides menu to menu: delete block and contained blocks
-// Drag any attached block to canvas: detach and add to script canvas
-// Drag any block (from block menu, canvas, or attached) to a matching, open attachment point: add to that script at that point
-//    Triggers have no flap, so no attachment point
-//    Steps can only be attached to flap -> slot
-//    Values can only be attached to sockets of a compatible type
-// Drag any block to anywhere that is not the block menu or on a canvas: undo the drag
-
-// Drag Pseudocode
-//
-// Mouse Dragging:
-//
-// 1. On mousedown, test for potential drag target
-// 2. On mousemove, if mousedown and target, start dragging
-//     a) test for potential drop targets, remember them for hit testing
-//     b) hit test periodically (not on mouse move)
-//     c) clone element (if necessary)
-//     d) if dragging out of a socket, replace with input of proper type
-//     e) move drag target
-// 3. On mouseup, if dragging, stop
-//     a) test for drop, handle if necessary
-//     b) clean up temporary elements, remove or move back if not dropping
-//
-//
-// Touch dragging
-//
-// 1. On touchmove, test for potential drag target, start dragging
-//     a..d as above
-// 2. On touchend, if dragging, stop
-//    a..b as above
-
-// Key to touch is the timer function for handling movement and hit testing
-
+    
+    // Goals:
+    //
+    // Drag any block from block menu to script canvas: clone and add to script canvas
+    // Drag any block from anywhere besides menu to menu: delete block and contained blocks
+    // Drag any attached block to canvas: detach and add to script canvas
+    // Drag any block (from block menu, canvas, or attached) to a matching, open attachment point: add to that script at that point
+    //    Triggers have no flap, so no attachment point
+    //    Steps can only be attached to flap -> slot
+    //    Values can only be attached to sockets of a compatible type
+    // Drag any block to anywhere that is not the block menu or on a canvas: undo the drag
+    
+    // Drag Pseudocode
+    //
+    // Mouse Dragging:
+    //
+    // 1. On mousedown, test for potential drag target
+    // 2. On mousemove, if mousedown and target, start dragging
+    //     a) test for potential drop targets, remember them for hit testing
+    //     b) hit test periodically (not on mouse move)
+    //     c) clone element (if necessary)
+    //     d) if dragging out of a socket, replace with input of proper type
+    //     e) move drag target
+    // 3. On mouseup, if dragging, stop
+    //     a) test for drop, handle if necessary
+    //     b) clean up temporary elements, remove or move back if not dropping
+    //
+    //
+    // Touch dragging
+    //
+    // 1. On touchmove, test for potential drag target, start dragging
+    //     a..d as above
+    // 2. On touchend, if dragging, stop
+    //    a..b as above
+    
+    // Key to touch is the timer function for handling movement and hit testing
+    
     var dragTimeout = 20;
     var snapDist = 25; //In pixels
     var startParent;
@@ -2400,23 +2505,25 @@ global.ajax = ajax;
     var dragging;
     var currentPosition;
     var scope;
-    var workspace; // <- WB
+    var workspace; // <- WB. The Workspace block is created with the function
+           // createWorkspace() in the workspace.js file.
     var blockMenu = document.querySelector('#block_menu'); // <- WB
+    var scratchpad= document.querySelector('.scratchpad'); // <- WB
     var potentialDropTargets;
     var selectedSocket; // <- WB
     var dragAction = {};
     var templateDrag, localDrag; // <- WB
-
+    
     var _dropCursor; // <- WB
-
+    
     // WB-specific
     function dropCursor(){
         if (!_dropCursor){
-            _dropCursor = document.querySelector('.dropCursor');
+            _dropCursor = document.querySelector('.drop-cursor');
         }
         return _dropCursor;
     }
-
+    
     function reset(){
         // console.log('reset dragTarget to null');
         dragTarget = null;
@@ -2432,22 +2539,45 @@ global.ajax = ajax;
         scope = null; // <- WB
         templateDrag = false; // <- WB
         localDrag = false; // <- WB
+        blockMenu = document.querySelector('#block_menu');
+        var scratchpad= document.querySelector('.scratchpad'); // <- WB
+        workspace = null;
+        selectedSocket = null;
+        _dropCursor = null;
+        startParent = null;
+        startSibling = null;
     }
     reset();
-
-
-
+    
     function initDrag(event){
+        console.log('initDrag(%o)', event);
+        
         // Called on mousedown or touchstart, we haven't started dragging yet
         // DONE: Don't start drag on a text input or select using :input jquery selector
+        
         var eT = event.wbTarget; // <- WB
+        console.log(eT);
+        //For some reason this is the scratchpad
         //Check whether the original target was an input ....
         // WB-specific
         if (wb.matches(event.target, 'input, select, option, .disclosure, .contained')  && !wb.matches(eT, '#block_menu *')) {
-            // console.log('not a drag handle');
+            console.log('not a drag handle');
             return undefined;
         }
-        var target = wb.closest(eT, '.block'); // <- WB
+        
+        var target = null;
+        if (eT.classList.contains('scratchpad')) {
+            var clickedBlock = getClickedBlock(scratchpad, event);
+            if (clickedBlock != false) {
+                console.log("The event has block");
+                target = clickedBlock;
+            } else {
+                return undefined;
+            }
+        } else {
+            target = wb.closest(eT, '.block'); // <- WB
+        }
+        //This throws an error when block is in scratchpad
         if (target){
             // WB-Specific
             if (wb.matches(target, '.scripts_workspace')){
@@ -2457,13 +2587,14 @@ global.ajax = ajax;
             dragTarget = target;
             // WB-Specific
             if (target.parentElement.classList.contains('block-menu')){
+                //console.log('target parent: %o', target.parentElement);
                 target.dataset.isTemplateBlock = 'true';
                 templateDrag = true;
             }
-        	dragAction.target = target;
+            dragAction.target = target;
             // WB-Specific
             if (target.parentElement.classList.contains('locals')){
-                // console.log('target parent: %o', target.parentElement);
+                //console.log('target parent: %o', target.parentElement);
                 target.dataset.isLocal = 'true';
                 localDrag = true;
             }
@@ -2476,8 +2607,8 @@ global.ajax = ajax;
             startSibling = target.nextElementSibling;
             // WB-Specific
             if(startSibling && !wb.matches(startSibling, '.block')) {
-            	// Sometimes the "next sibling" ends up being the cursor
-            	startSibling = startSibling.nextElementSibling;
+                // Sometimes the "next sibling" ends up being the cursor
+                startSibling = startSibling.nextElementSibling;
             }
         }else{
             console.warn('not a valid drag target');
@@ -2489,12 +2620,13 @@ global.ajax = ajax;
     function startDrag(event){
         // called on mousemove or touchmove if not already dragging
         if (!dragTarget) {return undefined;}
+        // console.log('startDrag(%o)', event);
         dragTarget.classList.add("dragIndication");
         currentPosition = {left: event.wbPageX, top: event.wbPageY};
-		// Track source for undo/redo
-		dragAction.target = dragTarget;
-		dragAction.fromParent = startParent;
-		dragAction.fromBefore = startSibling;
+        // Track source for undo/redo
+        dragAction.target = dragTarget;
+        dragAction.fromParent = startParent;
+        dragAction.fromBefore = startSibling;
         // target = clone target if in menu
         // FIXME: Set different listeners on menu blocks than on the script area
         // WB-Specific
@@ -2504,8 +2636,8 @@ global.ajax = ajax;
             // console.log('set drag target to clone of old drag target');
             dragTarget = wb.cloneBlock(dragTarget); // clones dataset and children, yay
             dragAction.target = dragTarget;
-			// If we're dragging from the menu, there's no source to track for undo/redo
-			dragAction.fromParent = dragAction.fromBefore = null;
+            // If we're dragging from the menu, there's no source to track for undo/redo
+            dragAction.fromParent = dragAction.fromBefore = null;
             // Event.trigger(dragTarget, 'wb-clone'); // not in document, won't bubble to document.body
             dragTarget.classList.add('dragIndication');
             if (localDrag){
@@ -2514,8 +2646,6 @@ global.ajax = ajax;
                 scope = null;
             }
             cloned = true;
-            // Make sure the workspace is available to drag to
-            wb.showWorkspace('block');
         }else{
             // TODO: handle detach better (generalize restoring sockets, put in language file)
             // FIXME: Need to handle this somewhere
@@ -2527,8 +2657,9 @@ global.ajax = ajax;
         // get position and append target to .content, adjust offsets
         // set last offset
         dragTarget.style.position = 'absolute'; // FIXME, this should be in CSS
+        dragTarget.style.pointerEvents = 'none'; // FIXME, this should be in CSS
         // WB-Specific
-        document.querySelector('.content.editor').appendChild(dragTarget);
+        document.body.appendChild(dragTarget);
         // WB-Specific
         if (cloned){
             // call this here so it can bubble to document.body
@@ -2543,7 +2674,6 @@ global.ajax = ajax;
             elem.classList.add('dropTarget');
             return wb.rect(elem);
         });
-
         // start timer for drag events
         timer = setTimeout(hitTest, dragTimeout);
         return false;
@@ -2552,6 +2682,7 @@ global.ajax = ajax;
     function drag(event){
         if (!dragTarget) {return undefined;}
         if (!currentPosition) {startDrag(event);}
+        // console.log('drag(%o)', event);
         event.preventDefault();
         // update the variables, distance, button pressed
         var nextPosition = {left: event.wbPageX, top: event.wbPageY}; // <- WB
@@ -2584,16 +2715,19 @@ global.ajax = ajax;
         return false;
     }
 
-    function endDrag(end){
+    function endDrag(event){
+        // console.log('endDrag(%o) dragging: %s', event, dragging);
+        if (!dragging) {return undefined;}
         clearTimeout(timer);
         timer = null;
-        if (!dragging) {return undefined;}
-        handleDrop(end.altKey || end.ctrlKey);
+        handleDrop(event,event.altKey || event.ctrlKey);
         reset();
+        event.preventDefault();
         return false;
     }
 
-    function handleDrop(copyBlock){
+    function handleDrop(event,copyBlock){
+        // console.log('handleDrop(%o)', copyBlock);
         // TODO:
            // is it over the menu
            // 1. Drop if there is a target
@@ -2608,20 +2742,42 @@ global.ajax = ajax;
             dragTarget.parentElement.removeChild(dragTarget);
             // Add history action if the source block was in the workspace
             if(!templateDrag) {
-	        	// If we're dragging to the menu, there's no destination to track for undo/redo
-    	    	dragAction.toParent = dragAction.toBefore = null;
-        		wb.history.add(dragAction);
-        	}
-        }else if (dropTarget){
+                // If we're dragging to the menu, there's no destination to track for undo/redo
+                dragAction.toParent = dragAction.toBefore = null;
+                wb.history.add(dragAction);
+            }
+        } else if (wb.overlap(dragTarget, scratchpad)) {
+            var scratchPadStyle = scratchpad.getBoundingClientRect();
+            var newOriginX = scratchPadStyle.left;
+            var newOriginY = scratchPadStyle.top;
+
+            var blockStyle = dragTarget.getBoundingClientRect();
+            var oldX = blockStyle.left;
+            var oldY = blockStyle.top;
+
+            dragTarget.style.position = "absolute";
+            dragTarget.style.left = (oldX - newOriginX) + "px";
+            dragTarget.style.top = (oldY - newOriginY) + "px";
+            scratchpad.appendChild(dragTarget);
+
+            //when dragging from workspace to scratchpad, this keeps workspace from
+            //moving around when block in scratchpad is moved.
+            //dragTarget.parentElement.removeChild(dragTarget); 
+            Event.trigger(dragTarget, 'wb-add');
+            return;
+        }
+        
+        else if (dropTarget){
+            //moving around when dragged block is moved in scratchpad
             dropTarget.classList.remove('dropActive');
             if (wb.matches(dragTarget, '.step')){
                 // Drag a step to snap to a step
                 // dropTarget.parent().append(dragTarget);
                 if(copyBlock && !templateDrag) {
                     // FIXME: This results in two blocks if you copy-drag back to the starting socket
-                	revertDrop();
+                    revertDrop();
                     // console.log('clone dragTarget block to dragTarget');
-                	dragTarget = wb.cloneBlock(dragTarget);
+                    dragTarget = wb.cloneBlock(dragTarget);
                 }
                 dropTarget.insertBefore(dragTarget, dropCursor());
                 dragTarget.removeAttribute('style');
@@ -2629,9 +2785,9 @@ global.ajax = ajax;
             }else{
                 // Insert a value block into a socket
                 if(copyBlock && !templateDrag) {
-                	revertDrop();
+                    revertDrop();
                     // console.log('clone dragTarget value to dragTarget');
-                	dragTarget = wb.cloneBlock(dragTarget);
+                    dragTarget = wb.cloneBlock(dragTarget);
                 }
                 dropTarget.appendChild(dragTarget);
                 dragTarget.removeAttribute('style');
@@ -2640,8 +2796,8 @@ global.ajax = ajax;
             dragAction.toParent = dragTarget.parentNode;
             dragAction.toBefore = dragTarget.nextElementSibling;
             if(dragAction.toBefore && !wb.matches(dragAction.toBefore, '.block')) {
-            	// Sometimes the "next sibling" ends up being the cursor
-            	dragAction.toBefore = dragAction.toBefore.nextElementSibling;
+                // Sometimes the "next sibling" ends up being the cursor
+                dragAction.toBefore = dragAction.toBefore.nextElementSibling;
             }
             wb.history.add(dragAction);
         }else{
@@ -2649,70 +2805,70 @@ global.ajax = ajax;
                 // remove cloned block (from menu)
                 dragTarget.parentElement.removeChild(dragTarget);
             }else{
-            	revertDrop();
+                revertDrop();
             }
         }
     }
     
     /* There's basically four types of drag actions
-- Drag-in – dragging a block from the menu to the workspace
- 	If fromParent is null, this is the type of drag that occurred.
- 	- To undo: remove the block from the workspace
- 	- To redo: re-insert the block into the workspace
-- Drag-around - dragging a block from one position to another in the workspace
-	Indicated by neither of fromParent and toParent being null.
-	- To undo: remove the block from the old position and re-insert it at the new position.
-	- To redo: remove the block from the old position and re-insert it at the new position.
-- Drag-out - dragging a block from the workspace to the menu (thus deleting it)
-	If toParent is null, this is the type of drag that occurred.
-	- To undo: re-insert the block into the workspace.
-	- To redo: remove the block from the workspace.
-- Drag-copy - dragging a block from one position to another in the workspace and duplicating it
-	At the undo/redo level, no distinction from drag-in is required.
-	- To undo: remove the block from the new location.
-	- To redo: re-insert the block at the new location.
-	
-	Note: If toBefore or fromBefore is null, that just means the location refers to the last
-	possible position (ie, the block was added to or removed from the end of a sequence). Thus,
-	we don't check those to determine what action to undo/redo.
- 	*/
+    - Drag-in – dragging a block from the menu to the workspace
+        If fromParent is null, this is the type of drag that occurred.
+        - To undo: remove the block from the workspace
+        - To redo: re-insert the block into the workspace
+    - Drag-around - dragging a block from one position to another in the workspace
+        Indicated by neither of fromParent and toParent being null.
+        - To undo: remove the block from the old position and re-insert it at the new position.
+        - To redo: remove the block from the old position and re-insert it at the new position.
+    - Drag-out - dragging a block from the workspace to the menu (thus deleting it)
+        If toParent is null, this is the type of drag that occurred.
+        - To undo: re-insert the block into the workspace.
+        - To redo: remove the block from the workspace.
+    - Drag-copy - dragging a block from one position to another in the workspace and duplicating it
+        At the undo/redo level, no distinction from drag-in is required.
+        - To undo: remove the block from the new location.
+        - To redo: re-insert the block at the new location.
+    
+    Note: If toBefore or fromBefore is null, that just means the location refers to the last
+    possible position (ie, the block was added to or removed from the end of a sequence). Thus,
+    we don't check those to determine what action to undo/redo.
+    */
     
     function undoDrag() {
-    	if(this.toParent != null) {
-    		// Remove the inserted block
+        if(this.toParent != null) {
+            // Remove the inserted block
             // WB-Specific
-    		Event.trigger(this.target, 'wb-remove');
-    		this.target.remove();
-    	}
-    	if(this.fromParent != null) {
-    		// Put back the removed block
-    		this.target.removeAttribute('style');
+            Event.trigger(this.target, 'wb-remove');
+            this.target.remove();
+        }
+        if(this.fromParent != null) {
+            // Put back the removed block
+            this.target.removeAttribute('style');
             // WB-Specific
-    		if(wb.matches(this.target,'.step')) {
-    			this.fromParent.insertBefore(this.target, this.fromBefore);
-    		} else {
-    			this.fromParent.appendChild(this.target);
-    		}
+            if(wb.matches(this.target,'.step')) {
+                this.fromParent.insertBefore(this.target, this.fromBefore);
+            } else {
+                this.fromParent.appendChild(this.target);
+            }
             // WB-Specific
-			Event.trigger(this.target, 'wb-add');
-    	}
+            Event.trigger(this.target, 'wb-add');
+        }
     }
     
     function redoDrag() {
-    	if(this.toParent != null) {
+        if(this.toParent != null) {
             // WB-Specific
-    		if(wb.matches(this.target,'.step')) {
-    			this.toParent.insertBefore(this.target, this.toBefore);
-    		} else {
-    			this.toParent.appendChild(this.target);
-    		}
-			Event.trigger(this.target, 'wb-add');
-    	}
-    	if(this.fromParent != null) {
+            if(wb.matches(this.target,'.step')) {
+                this.toParent.insertBefore(this.target, this.toBefore);
+            } else {
+                this.toParent.appendChild(this.target);
+            }
+            Event.trigger(this.target, 'wb-add');
+        }
+        if(this.fromParent != null) {
             // WB-Specific
-    		Event.trigger(this.target, 'wb-remove');
-    		this.target.remove();
-    	}
+            Event.trigger(this.target, 'wb-remove');
+            this.target.remove();
+        }
     }
 
     function resetDragStyles() {
@@ -2726,30 +2882,30 @@ global.ajax = ajax;
     }
     
     function revertDrop() {
-		// Put blocks back where we got them from
-		if (startParent){
-			if (wb.matches(startParent, '.socket')){
-				// wb.findChildren(startParent, 'input').forEach(function(elem){
-				//     elem.hide();
-				// });
-			}
-			if(startSibling) {
-				startParent.insertBefore(dragTarget, startSibling);
-			} else {
-				startParent.appendChild(dragTarget);
-			}
-			dragTarget.removeAttribute('style');
-			startParent = null;
-		}else{
-			workspace.appendChild(dragTarget); // FIXME: We'll need an index into the canvas array
-			wb.reposition(dragTarget, startPosition);
-		}
+        // Put blocks back where we got them from
+        if (startParent){
+            if (wb.matches(startParent, '.socket')){
+                // wb.findChildren(startParent, 'input').forEach(function(elem){
+                //     elem.hide();
+                // });
+            }
+            if(startSibling) {
+                startParent.insertBefore(dragTarget, startSibling);
+            } else {
+                startParent.appendChild(dragTarget);
+            }
+            dragTarget.removeAttribute('style');
+            startParent = null;
+        }else{
+            workspace.appendChild(dragTarget); // FIXME: We'll need an index into the canvas array
+            wb.reposition(dragTarget, startPosition);
+        }
         Event.trigger(dragTarget, 'wb-add');
     }
 
     function positionExpressionDropCursor(){
         if (!potentialDropTargets.length){
-            console.log('no drop targets found');
+            // console.log('no drop targets found');
             return;
         }
         var targets = potentialDropTargets.map(function(target){
@@ -2877,39 +3033,112 @@ global.ajax = ajax;
         return '.socket[data-type=' + name + '] > .holder';
     }
     
+    function registerScratchSpace() {
+        var workspace = document.querySelector('.workspace');
+        var mainWorkspace = document.querySelector('scripts_workspace');
+        var id = "23423443";
+        var sBlock = wb.Block({
+                group: 'scripts_scratchspace',
+                id: id,
+                scriptId: id,
+                scopeId: id,
+                blocktype: 'context',
+                sockets: [
+                ],
+                script: '[[1]]',
+                isTemplateBlock: false,
+                help: 'Place script blocks here for quick access'
+            });
+    
+        workspace.insertBefore(sBlock, mainWorkspace);
+    }
+    
     function cancelDrag(event) {
-    	// Cancel if escape key pressed
+        // Cancel if escape key pressed
         // console.log('cancel drag of %o', dragTarget);
-    	if(event.keyCode == 27) {
-    		resetDragStyles();
-	    	revertDrop();
-			clearTimeout(timer);
-			timer = null;
-			reset();
-			return false;
+        if(event.keyCode == 27) {
+            resetDragStyles();
+            revertDrop();
+            clearTimeout(timer);
+            timer = null;
+            reset();
+            return false;
+        }
+    }
+    
+    function getClickedBlock(element, event) {
+        var children = element.childNodes;
+        //console.log(children);
+        var x = event.clientX;
+        var y = event.clientY;
+    
+        console.log("Mouse x " + x);
+        console.log("Mouse y" + y);
+    
+        for (var i = 0; i < children.length; i++){
+            console.log(children[i]);
+            if (children[i].nodeType != 3) {
+                var r = children[i].getBoundingClientRect();
+                console.log(r);
+                if (r.bottom > y && r.top < y && r.left < x && r.right > x) {
+                    return children[i];
+                }
+            }
+        }
+        return false;
+    }
+    
+    
+    //This function arranges the blocks into a grid. Future functions could
+    //sort the blocks by type, frequency of use, or other such metrics
+    function arrangeScratchPad() {
+	var PADDING = 5;
+	
+	var scratchPadRect = scratchpad.getBoundingClientRect();
+	
+	var width = scratchPadRect.width;
+	var xOrigin = scratchPadRect.x;
+	var yOrigin = scratchPadRect.y;
+	
+	var x = xOrigin;
+	var y = yOrigin;
+	
+	var children = scratchpad.childNodes;
+	
+	for (var i = 0; i < children.length; i++) {
+	    if (children[i].nodeType != 3) {
+		var r = children[i];
+		
+		var rBounding = r.getBoundingClientRect();
+		
+		r.style.top = y + "px";
+		r.style.left = x + "px";
+		
+		x += rBounding.width + PADDING;
+		
+		if (xOrigin >= width) {
+		    x = xOrigin;
+		    y += rBounding.height + PADDING;
+		}
 	    }
+	}
+	
+	
     }
 
     // Initialize event handlers
     wb.initializeDragHandlers = function(){
         // console.log('initializeDragHandlers');
-        if (Event.isTouch){
-            Event.on('.content', 'touchstart', '.block', initDrag);
-            Event.on('.content', 'touchmove', null, drag);
-            Event.on('.content', 'touchend', null, endDrag);
-            // TODO: A way to cancel the drag?
-            // Event.on('.scripts_workspace', 'tap', '.socket', selectSocket);
-        }else{
-            Event.on('.content', 'mousedown', '.block', initDrag);
-            Event.on('.content', 'mousemove', null, drag);
-            Event.on('.content', 'mouseup', null, endDrag);
-            Event.on(document.body, 'keyup', null, cancelDrag);
-            // Event.on('.scripts_workspace', 'click', '.socket', selectSocket);
-        }
+        Event.on('.content', 'touchstart', '.block', initDrag);
+        Event.on('.content', 'touchmove', null, drag);
+        Event.on('.content', 'touchend', null, endDrag);
+        // TODO: A way to cancel touch drag?
+    Event.on('.content', 'mousedown', '.scratchpad', initDrag);
+        Event.on('.content', 'mousedown', '.block', initDrag);
+        Event.on('.content', 'mousemove', null, drag);
+        Event.on(document.body, 'mouseup', null, endDrag);
+        Event.on(document.body, 'keyup', null, cancelDrag);
     };
-
-
-
 })(this);
 
 
@@ -2974,29 +3203,35 @@ global.ajax = ajax;
 // registerSeqNum(int) make sure we don't re-use sequence numbers
 // Socket(json) -> Socket element
 
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 
     var elem = wb.elem;
 
+    var nextSeqNum = 0;
+    var blockRegistry = {}; /* populated in function "registerBlock", which is
+                               called by the Block() function below*/
 
-    var _nextSeqNum = 0;
-
-    var newSeqNum = function(){
-        _nextSeqNum++;
-        return _nextSeqNum;
+    function newSeqNum(){
+        nextSeqNum++;
+        return nextSeqNum;
     };
 
-    var registerSeqNum = function(seqNum){
+    function registerSeqNum(seqNum){
         // When reifying saved blocks, call this for each block to make sure we start new blocks
         // that do not overlap with old ones.
         if (!seqNum) return;
-        _nextSeqNum = Math.max(parseInt(seqNum, 10), _nextSeqNum);
+        nextSeqNum = Math.max(parseInt(seqNum, 10), nextSeqNum);
     }
 
-    var blockRegistry = {};
-    wb.blockRegistry = blockRegistry;
+    function resetSeqNum(){
+        nextSeqNum = 0;
+        blockRegistry = {};
+        wb.blockRegistry = blockRegistry;
+    }
 
-    var registerBlock = function(blockdesc){
+    function registerBlock(blockdesc){
         if (blockdesc.seqNum){
             registerSeqNum(blockdesc.seqNum);
         }else if (!blockdesc.isTemplateBlock){
@@ -3008,11 +3243,11 @@ global.ajax = ajax;
         blockRegistry[blockdesc.id] = blockdesc;
     }
 
-    var getHelp = function(id){
+    function getHelp(id){
         return blockRegistry[id] ? blockRegistry[id].help : '';
     }
 
-    var getScript = function(id){
+    function getScript(id){
         try{
             return blockRegistry[id].script;
         }catch(e){
@@ -3022,27 +3257,28 @@ global.ajax = ajax;
         }
     }
 
-    var getSockets = function(block){
+    function getSockets(block){
         return wb.findChildren(wb.findChild(block, '.label'), '.socket');
     }
 
-    var getSocketValue = function(socket){
+    function getSocketValue (socket){
         return socketValue(wb.findChild(socket, '.holder'));
     }
 
-    var createSockets = function(obj){
+    function createSockets(obj){
         return obj.sockets.map(function(socket_descriptor){
             return Socket(socket_descriptor, obj);
         });
     }
 
     var Block = function(obj){
-        // FIXME:
-        // Handle customized names (sockets)
         registerBlock(obj);
         // if (!obj.isTemplateBlock){
         //     console.log('block seq num: %s', obj.seqNum);
         // }
+        if (!obj.isTemplateBlock){
+            updateFromTemplateBlock(obj);
+        }
         var block = elem(
             'div',
             {
@@ -3107,18 +3343,13 @@ global.ajax = ajax;
                 label.insertBefore(elem('div', {'class': 'disclosure'}), label.firstElementChild);
             }
         }
-        // if (!obj.isTemplateBlock){
+        //if (!obj.isTemplateBlock){
         //     console.log('instantiated block %o from description %o', block, obj);
-        // }
+        //}
         return block;
     }
 
     // Block Event Handlers
-
-    Event.on(document.body, 'wb-remove', '.block', removeBlock);
-    Event.on(document.body, 'wb-add', '.block', addBlock);
-    Event.on(document.body, 'wb-clone', '.block', onClone);
-    Event.on(document.body, 'wb-delete', '.block', deleteBlock);
 
     function removeBlock(event){
         event.stopPropagation();
@@ -3184,9 +3415,9 @@ global.ajax = ajax;
                     spec.isTemplateBlock = true;
                     spec.isLocal = true;
                     spec.group = block.dataset.group;
-                    if (!spec.seqNum){
+                    // if (!spec.seqNum){
                         spec.seqNum = block.dataset.seqNum;
-                    }
+                    // }
                     // add scopeid to local blocks
                     spec.scopeId = parent.id;
                     if(!spec.id){
@@ -3216,18 +3447,13 @@ global.ajax = ajax;
         }
     }
 
-    function onClone(event){
-        // a block has been cloned. Praise The Loa!
-        var block = event.wbTarget;
-        // console.log('block cloned %o', block);
-    }
-
     var Socket = function(desc, blockdesc){
         // desc is a socket descriptor object, block is the owner block descriptor
         // Sockets are described by text, type, and (default) value
         // type and value are optional, but if you have one you must have the other
         // If the type is choice it must also have a options for the list of values
         // that can be found in the wb.choiceLists
+        // A socket may also have a suffix, text after the value
         // A socket may also have a block, the id of a default block
         // A socket may also have a uValue, if it has been set by the user, over-rides value
         // A socket may also have a uName if it has been set by the user, over-rides name
@@ -3248,7 +3474,7 @@ global.ajax = ajax;
             socket.dataset.options = desc.options;
         }
         // if (!blockdesc.isTemplateBlock){
-        //     console.log('socket seq num: %s', blockdesc.seqNum);
+        //      console.log('socket seq num: %s', blockdesc.seqNum);
         // }
         socket.firstElementChild.innerHTML = socket.firstElementChild.innerHTML.replace(/##/, ' <span class="seq-num">' + (blockdesc.seqNum || '##') + '</span>');
         if (desc.type){
@@ -3259,25 +3485,39 @@ global.ajax = ajax;
         if (desc.block){
             socket.dataset.block = desc.block;
         }
+        socket.dataset.seqNum = blockdesc.seqNum;
         if (!blockdesc.isTemplateBlock){
+            //console.log('socket seq num: %s', blockdesc.seqNum);
             var newBlock = null;
             if (desc.uBlock){
                 // console.log('trying to instantiate %o', desc.uBlock);
+                delete desc.uValue;
                 newBlock = Block(desc.uBlock);
-                // console.log('created instance: %o', newBlock);
-            }else if (desc.block){
+                //console.log('created instance: %o', newBlock);
+            } else if (desc.block && ! desc.uValue){
+                //console.log('desc.block');
                 newBlock = cloneBlock(document.getElementById(desc.block));
+            }else if (desc.block && desc.uValue){
+                // for debugging only
+                // console.log('block: %s, uValue: %s', desc.block, desc.uValue);                
             }
             if (newBlock){
+                //console.log('appending new block');
                 holder.appendChild(newBlock);
                 addExpression({'wbTarget': newBlock});
             }
+        }
+        if (desc.suffix){
+            socket.dataset.suffix = desc.suffix;
+            socket.appendChild(elem('span', {'class': 'suffix'}, desc.suffix));
         }
         return socket;
     }
 
 
     function socketDesc(socket){
+        var parentBlock = wb.closest(socket, '.block');
+        var isTemplate = !!parentBlock.dataset.isTemplateBlock;
         var desc = {
             name: socket.dataset.name,
         }
@@ -3294,36 +3534,57 @@ global.ajax = ajax;
         if (socket.dataset.block){
             desc.block = socket.dataset.block;
         }
+        if (socket.dataset.suffix){
+            desc.suffix = socket.dataset.suffix;
+        }
         // User-specified settings
+        if (isTemplate) return desc;
         var uName = wb.findChild(socket, '.name').textContent;
         var uEle = wb.findChild(socket, '.name')
         
-        if (desc.name !== uName){
+        if (desc.name.replace(/##/, ' ' + socket.dataset.seqNum) !== uName){
             desc.uName = uName;
         }
         var holder = wb.findChild(socket, '.holder');
         if (holder){
             var input = wb.findChild(holder, 'input, select');
-            desc.uValue = input.value;
-            var block = wb.findChild(holder, '.block');
+            // var block = wb.findChild(holder, '.block');
             if (wb.matches(holder.lastElementChild, '.block')){
                 desc.uBlock = blockDesc(holder.lastElementChild);
+            }else{
+                desc.uValue = input.value;
             }
         }
         return desc;
+    }
+
+    function updateFromTemplateBlock(obj){
+        // Retrieve the things we don't need to duplicate in every instance block description
+        var tB = blockRegistry[obj.scriptId];
+        if (!tB){
+            console.error('Error: could not get template block for  for %o', obj);
+            return obj;
+        }
+        obj.blocktype = tB.blocktype;
+        obj.group = tB.group;
+        obj.help = tB.help;
+        obj.type = tB.type;
     }
 
     function blockDesc(block){
         var label = wb.findChild(block, '.label');
         var sockets = wb.findChildren(label, '.socket');
         var desc = {
-            blocktype: block.dataset.blocktype,
-            group: block.dataset.group,
             id: block.id,
-            help: block.title,
             scopeId: block.dataset.scopeId,
             scriptId: block.dataset.scriptId,
             sockets: sockets.map(socketDesc)
+        }
+        if (block.dataset.group === 'scripts_workspace'){
+            desc.blocktype = block.dataset.blocktype;
+            desc.group = block.dataset.group;
+            desc.help = block.dataset.help;
+            desc.type = block.dataset.type;            
         }
         if (block.dataset.seqNum){
             desc.seqNum  = block.dataset.seqNum;
@@ -3339,9 +3600,6 @@ global.ajax = ajax;
         }
         if (block.dataset.localSource){
             desc.localSource = block.dataset.localSource;
-        }
-        if (block.dataset.type){
-            desc.type = block.dataset.type;
         }
         if (block.dataset.locals){
             desc.locals = JSON.parse(block.dataset.locals);
@@ -3363,10 +3621,14 @@ global.ajax = ajax;
         ////////////////////
         // Why were we deleting seqNum here?
         // I think it was from back when menu template blocks had sequence numbers
+        // UPDATE:
+        // No, it was because we want cloned blocks (and the locals they create) to get 
+        // new sequence numbers. But, if the block being clones is an instance of a local then we
+        // don't want to get a new sequence number.
         // /////////////////
-        // if (!blockdesc.isLocal){
-        //     delete blockdesc.seqNum;
-        // }
+        if (!block.dataset.localSource){
+            delete blockdesc.seqNum;
+        }
         if (blockdesc.isTemplateBlock){
             blockdesc.scriptId = block.id;            
         }
@@ -3390,6 +3652,9 @@ global.ajax = ajax;
         if (type === 'int' || type === 'float'){
             type = 'number';
         }
+        if (type === 'image'){
+            type = '_image'; // avoid getting input type="image"
+        }
         switch(type){
             case 'any':
                 value = obj.uValue || obj.value || ''; break;
@@ -3397,6 +3662,8 @@ global.ajax = ajax;
                 value = obj.uValue || obj.value || 0; break;
             case 'string':
                 value = obj.uValue || obj.value || ''; break;
+            case 'regex':
+                value = obj.uValue || obj.value || /.*/; break;
             case 'color':
                 value = obj.uValue || obj.value || '#000000'; break;
             case 'date':
@@ -3407,8 +3674,6 @@ global.ajax = ajax;
                 value = obj.uValue || obj.value || new Date().toISOString(); break;
             case 'url':
                 value = obj.uValue || obj.value || 'http://waterbearlang.com/'; break;
-            case 'image':
-                value = obj.uValue || obj.value || ''; break;
             case 'phone':
                 value = obj.uValue || obj.value || '604-555-1212'; break;
             case 'email':
@@ -3429,10 +3694,11 @@ global.ajax = ajax;
             default:
                 value = obj.uValue || obj.value || '';
         }
-        var input = elem('input', {type: type, value: value});
+        var input = elem('input', {type: type, value: value, 'data-oldvalue': value});
 
         //Only enable editing for the appropriate types
-        if (!(type === "string" || type === "any" || 
+        if (!(type === "string" || type === "any" || type === 'regex' ||
+              type === "url"    || type === "phone" ||
               type === "number" || type === "color")) {
             input.readOnly = true;
         }
@@ -3441,28 +3707,33 @@ global.ajax = ajax;
         return input;
     }
 
-    var socketValue = function(holder){
+    function socketValue(holder){
         if (holder.children.length > 1){
             return codeFromBlock(wb.findChild(holder, '.block'));
         }else{
             var value = wb.findChild(holder, 'input, select').value;
             var type = holder.parentElement.dataset.type;
-            if (type === 'string' || type === 'choice' || type === 'color'){
+            if (type === 'string' || type === 'choice' || type === 'color' || type === 'url'){
                 if (value[0] === '"'){value = value.slice(1);}
                 if (value[value.length-1] === '"'){value = value.slice(0,-1);}
                 value = value.replace(/"/g, '\\"');
                 value = '"' + value + '"';
+            } else if (type === 'regex'){
+                if (value[0] === '/'){value = value.slice(1);}
+                if (value[value.length-1] === '/'){value = value.slice(0,-1);}
+                value = value.replace(/\//g, '\\/');
+                value = '/' + value + '/';
             }
             return value;
         }
     }
 
-    var codeFromBlock = function(block){
+    function codeFromBlock(block){
         var scriptTemplate = getScript(block.dataset.scriptId).replace(/##/g, '_' + block.dataset.seqNum);
         if (!scriptTemplate){
             // If there is no scriptTemplate, things have gone horribly wrong, probably from 
             // a block being removed from the language rather than hidden
-            wb.findAll('.block[data-scriptId=' + block.dataset.scriptId).forEach(function(elem){
+            wb.findAll('.block[data-script-id="' + block.dataset.scriptId + '"]').forEach(function(elem){
                 elem.style.backgroundColor = 'red';
             });
         }
@@ -3567,14 +3838,20 @@ global.ajax = ajax;
         }
     }
 
+    Event.on(document.body, 'wb-remove', '.block', removeBlock);
+    Event.on(document.body, 'wb-add', '.block', addBlock);
+    Event.on(document.body, 'wb-delete', '.block', deleteBlock);
+
+    wb.blockRegistry = blockRegistry;
 
     // Export methods
     wb.Block = Block;
     wb.blockDesc = blockDesc;
+    wb.socketDesc = socketDesc;
     wb.registerSeqNum = registerSeqNum;
+    wb.resetSeqNum = resetSeqNum;
     wb.cloneBlock = cloneBlock;
     wb.codeFromBlock = codeFromBlock;
-    wb.addBlockHandler = addBlock;
     wb.changeName = changeName;
     wb.getSockets = getSockets;
     wb.getSocketValue = getSocketValue;
@@ -3592,26 +3869,30 @@ global.ajax = ajax;
 // * Loading and saving to LocalStorage (including currentScript)
 // * Loading examples
 // * etc.
+/* Note: LocalStorage is persistent, for things you want to have available
+   even if the user leaves the site or restarts their browser. SessionStorage
+   is volatile and will be deleted if they restart the browser.*/
 
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 
-	wb.saveCurrentScripts = function saveCurrentScripts(){
+	function saveCurrentScripts(){
 		if (!wb.scriptModified){
 			// console.log('nothing to save');
 			// nothing to save
 			return;
 		}
-		wb.showWorkspace('block');
 		document.querySelector('#block_menu').scrollIntoView();
 		localStorage['__' + wb.language + '_current_scripts'] = scriptsToString();
 	};
 
 	// Save script to gist;
-	wb.saveCurrentScriptsToGist = function saveCurrentScriptsToGist(event){
+	function saveCurrentScriptsToGist(event){
 	    event.preventDefault();
 		// console.log("Saving to Gist");
 		var title = prompt("Save to an anonymous Gist titled: ");
-
+		if ( !title ) return;
 		ajax.post("https://api.github.com/gists", function(data){
 	        //var raw_url = JSON.parse(data).files["script.json"].raw_url;
 	        var gistID = JSON.parse(data).url.split("/").pop();
@@ -3628,13 +3909,15 @@ global.ajax = ajax;
 	    	"public": true,
 	    	"files": {
 	    		"script.json": {
-	    			"content": scriptsToString(title)
+	    			"content": scriptsToString(title, '', title)
 	    		},
 	    	}
-	    }));
+	    }), function(statusCode, x){
+            alert("Can't save to Gist:\n" + statusCode + " (" + x.statusText + ") ");
+        });
 	};
 	//populate the gist submenu with recent gists
-	wb.loadRecentGists = function loadRecentGists() {
+	function loadRecentGists() {
 		var localGists = localStorage['__' + wb.language + '_recent_gists'];
 		var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
 		var gistContainer = document.querySelector("#recent_gists");
@@ -3661,31 +3944,42 @@ global.ajax = ajax;
 		}
 	};
 
-
-	function scriptsToString(title, description){
+	//Potential FIXME: I feel that title should be the filename, but uName || name
+	//determines what is shown in the workspace.
+	function scriptsToString(title, description, name){
 		if (!title){ title = ''; }
 		if (!description){ description = ''; }
+		if (!name){ name = 'Workspace';}
 		var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-		return JSON.stringify({
+		var json = {
 			title: title,
 			description: description,
 			date: Date.now(),
 			waterbearVersion: '2.0',
 			blocks: blocks.map(wb.blockDesc)
-		});
+		};
+
+		if(json.blocks[0].sockets[0].name){
+			json.blocks[0].sockets[0].name = name;
+		}else if(json.blocks[0].sockets[0].uName){
+			json.blocks[0].sockets[0].uName = name;
+		}
+
+		return JSON.stringify(json, null, '    ');
 	}
 
 
-	wb.createDownloadUrl = function createDownloadUrl(evt){
+	function createDownloadUrl(evt){
 	    evt.preventDefault();
-	    var title = prompt("Save file as: ");
+	    var name = prompt("Save file as: ");
+	    if( !name ) return;
 		var URL = window.webkitURL || window.URL;
-		var file = new Blob([scriptsToString()], {type: 'application/json'});
+		var file = new Blob([scriptsToString('','',name)], {type: 'application/json'});
 		var reader = new FileReader();
 		var a = document.createElement('a');
 		reader.onloadend = function(){
 			a.href = reader.result;
-			a.download = title + '.json';
+			a.download = name + '.json';
 			a.target = '_blank';
 			document.body.appendChild(a);
 			a.click();
@@ -3693,16 +3987,22 @@ global.ajax = ajax;
 		reader.readAsDataURL(file);
 	};
 
-	wb.loadScriptsFromGistId = function loadScriptsFromGistId(id){
+	function loadScriptsFromGistId(id){
 		//we may get an event passed to this function so make sure we have a valid id or ask for one
 		var gistID = isNaN(parseInt(id)) ? prompt("What Gist would you like to load? Please enter the ID of the Gist: ")  : id;
 		// console.log("Loading gist " + id);
+		if( !gistID ) return;
 		ajax.get("https://api.github.com/gists/"+gistID, function(data){
 			loadScriptsFromGist({data:JSON.parse(data)});
+	    }, function(statusCode, x){
+            alert("Can't load from Gist:\n" + statusCode + " (" + x.statusText + ") ");
 		});
+        var path = location.href.split('?')[0];
+        path += "?gist=" + gistID;
+        history.pushState(null, '', path);
 	};
 
-	wb.loadScriptsFromFilesystem = function loadScriptsFromFilesystem(event){
+	function loadScriptsFromFilesystem(event){
 		var input = document.createElement('input');
 		input.setAttribute('type', 'file');
 		input.setAttribute('accept', 'application/json');
@@ -3750,32 +4050,36 @@ global.ajax = ajax;
 	}
 
 	function loadScriptsFromExample(name){
-		wb.ajax('examples/' + wb.language + '/' + name + '.json', function(exampleJson){
+		ajax.get('examples/' + wb.language + '/' + name + '.json', function(exampleJson){
 			loadScriptsFromObject(JSON.parse(exampleJson));
-		}, function(xhr, status){
-			console.error('Error in wb.ajax:', status);
+		}, function(statusCode, xhr){
+			console.error(statusCode + xhr);
 		});
 	}
 
-	wb.loadCurrentScripts = function(queryParsed){
+	function loadCurrentScripts(queryParsed){
 		// console.log('loadCurrentScripts(%s)', JSON.stringify(queryParsed));
 		if (wb.loaded) return;
+		wb.scriptLoaded = false;
 		if (queryParsed.gist){
-			// console.log("Loading gist %s", queryParsed.gist);
+			//console.log("Loading gist %s", queryParsed.gist);
 			ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
 				loadScriptsFromGist({data:JSON.parse(data)});
+	        }, function(statusCode, x){
+              alert("Can't save to gist:\n" + statusCode + " (" + x.statusText + ") ");
 			});
 		}else if (queryParsed.example){
-			// console.log('loading example %s', queryParsed.example);
+			//console.log('loading example %s', queryParsed.example);
 			loadScriptsFromExample(queryParsed.example);
 		}else if (localStorage['__' + wb.language + '_current_scripts']){
-			// console.log('loading current script from local storage');
+			//console.log('loading current script from local storage');
 			var fileObject = JSON.parse(localStorage['__' + wb.language + '_current_scripts']);
 			if (fileObject){
 				loadScriptsFromObject(fileObject);
 			}
 		}else{
-			// console.log('no script to load, starting a new script');
+			//console.log('no script to load, starting a new script');	
+			wb.scriptLoaded = true;
 			wb.createWorkspace('Workspace');
 		}
 		wb.loaded = true;
@@ -3799,7 +4103,7 @@ global.ajax = ajax;
 		};
 	}
 
-	wb.getFiles = function getFiles(evt){
+	function getFiles(evt){
 		evt.stopPropagation();
 		evt.preventDefault();
 		var files = evt.dataTransfer.files;
@@ -3810,12 +4114,22 @@ global.ajax = ajax;
 	    }
 	}
 
+	wb.saveCurrentScripts = saveCurrentScripts;
+	wb.saveCurrentScriptsToGist = saveCurrentScriptsToGist;
+	wb.loadRecentGists = loadRecentGists;
+	wb.createDownloadUrl = createDownloadUrl;
+	wb.loadScriptsFromGistId = loadScriptsFromGistId;
+	wb.loadScriptsFromFilesystem = loadScriptsFromFilesystem;
+	wb.loadCurrentScripts = loadCurrentScripts;
+	wb.getFiles = getFiles;
 
 })(wb);
 
 /*end file.js*/
 
 /*begin undo.js*/
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 // Undo list
 
@@ -3904,28 +4218,26 @@ wb.history = {
 
 Event.on('.undoAction', 'click', null, undoLastAction);
 Event.on('.redoAction', 'click', null, redoLastAction);
+//begin short-cut implementation for redo and undo
+Events.bind(document, 'keystroke.Ctrl+Z', undoLastAction);
+Events.bind(document, 'keystroke.Ctrl+Y', redoLastAction);
+//for mac user, cmd added 
+Events.bind(document, 'keystroke.meta+Z', undoLastAction);
+Events.bind(document, 'keystroke.meta+Y', redoLastAction);
+//end short cut 
 Event.on(document.body, 'wb-script-loaded', null, clearUndoStack);
 
 })(wb);
+
 /*end undo.js*/
 
 /*begin ui.js*/
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 
 // UI Chrome Section
 
-function tabSelect(event){
-    var target = event.wbTarget;
-    event.preventDefault();
-    document.querySelector('.tabbar .selected').classList.remove('selected');
-    target.classList.add('selected');
-    if (wb.matches(target, '.scripts_workspace_tab')){
-        showWorkspace('block');
-    }else if (wb.matches(target, '.scripts_text_view_tab')){
-        showWorkspace('text');
-        updateScriptsView();
-    }
-}
 
 function accordion(event){
     event.preventDefault();
@@ -3938,33 +4250,12 @@ function accordion(event){
 }
 
 
-function showWorkspace(mode){
-    // console.log('showWorkspace');
-    var workspace = document.querySelector('.workspace');
-    var scriptsWorkspace = document.querySelector('.scripts_workspace');
-    if (!scriptsWorkspace) return;
-    var scriptsTextView = document.querySelector('.scripts_text_view');
-    if (mode === 'block'){
-	    scriptsWorkspace.style.display = '';
-	    scriptsTextView.style.display = 'none';
-        workspace.classList.remove('textview');
-        workspace.classList.add('blockview');
-    }else if (mode === 'text'){
-    	scriptsWorkspace.style.display = 'none';
-    	scriptsTextView.style.display = '';
-        workspace.classList.remove('blockview');
-        workspace.classList.add('textview');
-    }
-}
-// Expose this to dragging and saving functionality
-wb.showWorkspace = showWorkspace;
-
 function updateScriptsView(){
-    var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-    var view = wb.find(document.body, '.workspace .scripts_text_view');
+    var blocks = wb.findAll(document.body, '.scripts_workspace');
+    var view = wb.find(document.body, '.scripts_text_view');
     wb.writeScript(blocks, view);
 }
-window.updateScriptsView = updateScriptsView;
+wb.updateScriptsView = updateScriptsView; 
 
 
 function changeSocket(event) {
@@ -4054,6 +4345,31 @@ function copyCommand(evt) {
 	action.redo();
 }
 
+function deleteCommand(evt) {
+	// console.log("Deleting a block!");
+	action = {
+		removed: this,
+		// Storing parent and next sibling in case removing the node from the DOM clears them
+		parent: this.parentNode,
+		before: this.nextSibling,
+		undo: function() {
+			// console.log(this);
+			if(wb.matches(this.removed,'.step')) {
+				this.parent.insertBefore(this.removed, this.before);
+			} else {
+				this.parent.appendChild(this.removed);
+			}
+			Event.trigger(this.removed, 'wb-add');
+		},
+		redo: function() {
+			Event.trigger(this.removed, 'wb-remove');
+			this.removed.remove();
+		},
+	}
+	wb.history.add(action);
+	action.redo();
+}
+
 function cutCommand(evt) {
 	// console.log("Cutting a block!");
 	action = {
@@ -4086,8 +4402,8 @@ function pasteCommand(evt) {
 	// console.log(pasteboard);
 	action = {
 		pasted: wb.cloneBlock(pasteboard),
-		into: cmenu_target.parentNode,
-		before: cmenu_target.nextSibling,
+		into: cmenuTarget.parentNode,
+		before: cmenuTarget.nextSibling,
 		undo: function() {
 			Event.trigger(this.pasted, 'wb-remove');
 			this.pasted.remove();
@@ -4098,7 +4414,7 @@ function pasteCommand(evt) {
 				this.into.insertBefore(this.pasted,this.before);
 			} else {
 				// console.log("Pasting an expression!");
-				cmenu_target.appendChild(this.pasted);
+				cmenuTarget.appendChild(this.pasted);
 			}
 			Event.trigger(this.pasted, 'wb-add');
 		},
@@ -4109,20 +4425,20 @@ function pasteCommand(evt) {
 
 function canPaste() {
 	if(!pasteboard) return false;
-	if(wb.matches(pasteboard,'.step') && !wb.matches(cmenu_target,'.holder')) {
+	if(wb.matches(pasteboard,'.step') && !wb.matches(cmenuTarget,'.holder')) {
 		return true;
 	}
-	if(wb.matches(pasteboard,'.expression') && wb.matches(cmenu_target,'.holder')) {
+	if(wb.matches(pasteboard,'.expression') && wb.matches(cmenuTarget,'.holder')) {
 		return true;
 	}
 	return false;
 }
 
 var pasteboard = null;
-var current_cmenu = null;
-var show_context = false;
-var cmenu_disabled = false;
-var cmenu_target = null;
+var cmenuCurrent = null;
+var showContext = false;
+var cmenuDisabled = false;
+var cmenuTarget = null;
 
 function cmenuitem_enabled(menuitem) {
 	if(menuitem.enabled) {
@@ -4182,10 +4498,10 @@ function closeContextMenu(evt) {
 function handleContextMenu(evt) {
 	// console.log('handling context menu');
 	stackTrace();
-	//if(!show_context) return;
+	//if(!showContext) return;
 	// console.log(evt.clientX, evt.clientY);
 	// console.log(evt.wbTarget);
-	if(cmenu_disabled || wb.matches(evt.wbTarget, '.block-menu *')) return;
+	if(cmenuDisabled || wb.matches(evt.wbTarget, '.block-menu *')) return;
 	else if(false);
 	else if(wb.matches(evt.wbTarget, '.block:not(.scripts_workspace) *')) {
 		setContextMenuTarget(evt.wbTarget);
@@ -4196,13 +4512,13 @@ function handleContextMenu(evt) {
 }
 
 function setContextMenuTarget(target) {
-	cmenu_target = target;
-	while(!wb.matches(cmenu_target, '.block') && !wb.matches(cmenu_target, '.holder')) {
-		// console.log(cmenu_target);
-		cmenu_target = cmenu_target.parentNode;
-		if(cmenu_target.tagName == 'BODY') {
+	cmenuTarget = target;
+	while(!wb.matches(cmenuTarget, '.block') && !wb.matches(cmenuTarget, '.holder')) {
+		// console.log(cmenuTarget);
+		cmenuTarget = cmenuTarget.parentNode;
+		if(cmenuTarget.tagName == 'BODY') {
 			console.error("Something went wrong with determining the context menu target!");
-			cmenu_target = null;
+			cmenuTarget = null;
 			contextDiv.style.display = 'none';
 		}
 	}
@@ -4218,8 +4534,8 @@ function showContextMenu(atX, atY) {
 
 function cmenuCallback(fcn) {
 	return function(evt) {
-		// console.log(cmenu_target);
-		fcn.call(cmenu_target,evt);
+		// console.log(cmenuTarget);
+		fcn.call(cmenuTarget,evt);
 		var contextDiv = document.getElementById('context_menu');
 		contextDiv.style.display = 'none';
 		evt.preventDefault();
@@ -4227,7 +4543,7 @@ function cmenuCallback(fcn) {
 }
 
 function disableContextMenu(evt) {
-	cmenu_disabled = true;
+	cmenuDisabled = true;
 	var enableBtn = document.querySelector('.cmenuEnable');
 	enableBtn.style.display = '';
 	var contextDiv = document.getElementById('context_menu');
@@ -4235,7 +4551,7 @@ function disableContextMenu(evt) {
 }
 
 function enableContextMenu(evt) {
-	cmenu_disabled = false;
+	cmenuDisabled = false;
 	var enableBtn = document.querySelector('.cmenuEnable');
 	enableBtn.style.display = 'none';
 }
@@ -4248,6 +4564,7 @@ var block_cmenu = {
 	//copySubscript: {name: 'Copy Subscript', callback: dummyCallback},
 	paste: {name: 'Paste', callback: pasteCommand, enabled: canPaste},
 	//cancel: {name: 'Cancel', callback: dummyCallback},
+        delete: {name: 'Delete', callback: deleteCommand},
 }
 
 // Test drawn from modernizr
@@ -4258,22 +4575,25 @@ function is_touch_device() {
 initContextMenus();
 
 // Build the Blocks menu, this is a public method
-wb.menu = function(blockspec){
+function menu(blockspec){
     var title = blockspec.name.replace(/\W/g, '');
     var specs = blockspec.blocks;
-    return edit_menu(title, specs);
+    var help = blockspec.help !== undefined ? blockspec.help : '';
+    return edit_menu(title, specs, help);
 };
 
-function edit_menu(title, specs, show){
+function edit_menu(title, specs, help, show){
 	menu_built = true;
     var group = title.toLowerCase().split(/\s+/).join('');
     var submenu = document.querySelector('.' + group + '+ .submenu');
     if (!submenu){
         var header = wb.elem('h3', {'class': group + ' accordion-header', 'id': 'group_'+group}, title);
         var submenu = wb.elem('div', {'class': 'submenu block-menu accordion-body'});
+        var description = wb.elem('p', {'class': 'accordion-description'}, help);
         var blockmenu = document.querySelector('#block_menu');
         blockmenu.appendChild(header);
         blockmenu.appendChild(submenu);
+        submenu.appendChild(description);
     }
     specs.forEach(function(spec, idx){
         spec.group = group;
@@ -4289,11 +4609,69 @@ function initContextMenus() {
 	document.querySelector('.cmenuEnable').style.display = 'none';
 }
 
+// functions to show various mobile views
+
+function handleShowButton(button, newView){
+	// stop result
+	wb.clearStage();
+	// enable previous button, disable current button
+	var currentButton = document.querySelector('.current-button');
+	if (currentButton){
+		currentButton.classList.remove('current-button');
+	}
+	button.classList.add('current-button');
+	//slide old view out, slide new view in
+	var oldView = document.querySelector('.current-view');
+	oldView.classList.remove('current-view');
+	oldView.style.transitionDuration = '0.5s';
+	oldView.style.left = '-100%';
+	newView.classList.add('current-view');
+	newView.style.transitionDuration = '0.5s';
+	newView.style.left = '0';
+	Event.once(document.body, 'transitionend', null, function(){
+		// console.log('transitionend: %o', oldView);
+		oldView.style.transitionDuration = '0s';
+		oldView.style.left = '100%';
+	});
+}
+
+function showFiles(evt){
+	handleShowButton(evt.target, document.querySelector('.files'));
+}
+
+function showBlocks(evt){
+	handleShowButton(evt.target, document.querySelector('#block_menu'));
+}
+
+function showScript(evt){
+	handleShowButton(evt.target, document.querySelector('.workspace'));
+}
+
+function showResult(evt){
+	handleShowButton(evt.target, document.querySelector('.results'));
+	Event.once(document.body, 'transitionend', null, wb.runCurrentScripts);
+}
 
 Event.on(document.body, 'change', 'input', changeSocket);
 Event.on('#block_menu', 'click', '.accordion-header', accordion);
-Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
+// Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
+if (document.body.clientWidth < 361){
+	// console.log('mobile view');
+	Event.on('.show-files', 'click', null, showFiles);
+	Event.on('.show-blocks', 'click', null, showBlocks);
+	Event.on('.show-script', 'click', null, showScript);
+	Event.on('.show-result', 'click', null, showResult);
+	document.querySelector('.show-script').classList.add('current-button');
+	document.querySelector('.workspace').classList.add('current-view');
+}
+if (document.body.clientWidth > 360){
+	// console.log('desktop view');
+	Event.on(document.body, 'change', 'input', updateScriptsView);
+	Event.on(document.body, 'wb-modified', null, updateScriptsView);
+}
+
+wb.menu = menu;
 
 })(wb);
 
@@ -4301,33 +4679,34 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 /*end ui.js*/
 
 /*begin workspace.js*/
+//The Workspace block is created with the function createWorkspace() in
+//this file. The createWorkspace() function is called in file.js
+
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 
-	wb.language = location.pathname.match(/\/([^/.]*)\.html/)[1];
-
-	wb.clearScripts = function clearScripts(event, force){
+	function clearScripts(event, force){
 		if (force || confirm('Throw out the current script?')){
-			var workspace = document.querySelector('.workspace > .scripts_workspace')
+			var workspace = document.querySelector('.scripts_workspace')
+            var path = location.href.split('?')[0];
+            history.pushState(null, '', path);
 			workspace.parentElement.removeChild(workspace);
 			wb.scriptModified = false;
+			wb.scriptLoaded = false;
 			wb.loaded = false;
+			wb.clearStage();
 			createWorkspace('Workspace');
-			document.querySelector('.workspace > .scripts_text_view').innerHTML = '';
+			document.querySelector('.scripts_text_view').innerHTML = '';
 			wb.history.clear();
+			wb.resetSeqNum();
 			delete localStorage['__' + wb.language + '_current_scripts'];
-			// FIXME: I'm not sure why clearing the script breaks dropping into the workspace
-			// For now will resort to the horrible hack of refreshing the page
-			location.reload();
 		}
 	}
-	Event.on('.clear_scripts', 'click', null, wb.clearScripts);
-	Event.on('.edit-script', 'click', null, function(event){
-		wb.historySwitchState('editor');
-	});
-
-	Event.on('.content', 'click', '.load-example', function(evt){
+	
+	function loadExample(event){
 		var path = location.href.split('?')[0];
-		path += "?example=" + evt.target.dataset.example;
+		path += "?example=" + event.target.dataset.example;
 		if (wb.scriptModified){
 			if (confirm('Throw out the current script?')){
 				wb.scriptModified = false;
@@ -4341,48 +4720,62 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 			history.pushState(null, '', path);
 			Event.trigger(document.body, 'wb-state-change');
 		}
-	});
+	}
 
-	var handleStateChange = function handleStateChange(evt){
+	function handleStateChange(event){
 		// hide loading spinner if needed
 		console.log('handleStateChange');
 		hideLoader();
 		wb.queryParams = wb.urlToQueryParams(location.href);
 		if (wb.queryParams.view === 'result'){
-			document.body.className = 'result';
+			document.body.classList.add('result');
+			document.body.classList.remove('editor');
 			wb.view = 'result';
 		}else{
-			document.body.className = 'editor';
+			document.body.classList.remove('result');
+			document.body.classList.add('editor');
 			wb.view = 'editor';
+		}
+		if (wb.queryParams.embedded === 'true'){
+			document.body.classList.add('embedded');
+		}else{
+			document.body.classList.remove('embedded');
 		}
 		// handle loading example, gist, currentScript, etc. if needed
 	    wb.loadCurrentScripts(wb.queryParams);
 	    // If we go to the result and can run the result inline, do it
-	    if (wb.view === 'result' && wb.runCurrentScripts){
-	    	// console.log('running current scripts');
+	    // if (wb.view === 'result' && wb.runCurrentScripts){
+	    // 	// This bothers me greatly: runs with the console.log, but not without it
+	    // 	console.log('running current scripts');
+	    // 	runFullSize();
+	    // }else{
+	    // 	if (wb.view === 'result'){
+		   //  	// console.log('we want to run current scripts, but cannot');
+		   //  }else{
+		   //  	runWithLayout();
+		   //  	// console.log('we do not care about current scripts, so there');
+		   //  }
+	    // }
+	    if (wb.toggleState.scripts_text_view){
+	    	wb.updateScriptsView();
+	    }
+	    if (wb.toggleState.stage || wb.view === 'result'){
+	    	// console.log('run current scripts');
 	    	wb.runCurrentScripts();
 	    }else{
-	    	if (wb.view === 'result'){
-		    	// console.log('we want to run current scripts, but cannot');
-		    }else{
-		    	// console.log('we do not care about current scripts, so there');
-		    }
+	    	wb.clearStage();
 	    }
 	}
-	Event.on(document.body, 'wb-state-change', null, handleStateChange);
 
-	var hideLoader = function hideLoader(){
+	function hideLoader(){
 	    var loader = document.querySelector('#block_menu_load');
 	    if (loader){
 	        loader.parentElement.removeChild(loader);
 	    }		
 	}
 
-
-	// Load and Save Section
-
-	wb.historySwitchState = function historySwitchState(state, clearFiles){
-		// console.log('historySwitchState(%o, %s)', state, !!clearFiles);
+	function historySwitchState(state, clearFiles){
+		//console.log('historySwitchState(%o, %s)', state, !!clearFiles);
 		var params = wb.urlToQueryParams(location.href);
 		if (state !== 'result'){
 			delete params['view'];
@@ -4397,21 +4790,13 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 		Event.trigger(document.body, 'wb-state-change');
 	}
 
+
 	window.addEventListener('unload', wb.saveCurrentScripts, false);
 	window.addEventListener('load', wb.loadRecentGists, false);
 
-	Event.on('.save_scripts', 'click', null, wb.saveCurrentScriptsToGist);
-	Event.on('.download_scripts', 'click', null, wb.createDownloadUrl);
-	Event.on('.load_from_gist', 'click', null, wb.loadScriptsFromGistId);
-	Event.on('.restore_scripts', 'click', null, wb.loadScriptsFromFilesystem);
-
-
-	wb.loaded = false;
-
-
 	// Allow saved scripts to be dropped in
 	function createWorkspace(name){
-	    // console.log('createWorkspace');
+	    console.log('createWorkspace');
 		var id = uuid();
 		var workspace = wb.Block({
 			group: 'scripts_workspace',
@@ -4430,47 +4815,37 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 		});
 		wb.wireUpWorkspace(workspace);
 	}
-	wb.createWorkspace = createWorkspace;
-
-	wb.wireUpWorkspace = function wireUpWorkspace(workspace){
+	
+	function wireUpWorkspace(workspace){
 		workspace.addEventListener('drop', wb.getFiles, false);
-		workspace.addEventListener('dragover', function(evt){evt.preventDefault();}, false);
+		workspace.addEventListener('dragover', function(event){event.preventDefault();}, false);
 		wb.findAll(document, '.scripts_workspace').forEach(function(ws){
 	        ws.parentElement.removeChild(ws); // remove any pre-existing workspaces
 	    });
 		document.querySelector('.workspace').appendChild(workspace);
-		workspace.querySelector('.contained').appendChild(wb.elem('div', {'class': 'dropCursor'}));
-		wb.initializeDragHandlers();
+		workspace.querySelector('.contained').appendChild(wb.elem('div', {'class': 'drop-cursor'}));
+		// wb.initializeDragHandlers();
+		Event.trigger(document.body, 'wb-workspace-initialized');
 	};
+
 
 	function handleDragover(evt){
 	    // Stop Firefox from grabbing the file prematurely
-	    evt.stopPropagation();
-	    evt.preventDefault();
-	    evt.dataTransfer.dropEffect = 'copy';
+	    event.stopPropagation();
+	    event.preventDefault();
+	    event.dataTransfer.dropEffect = 'copy';
 	}
 
-
-
-	Event.on('.workspace', 'click', '.disclosure', function(evt){
-		var block = wb.closest(evt.wbTarget, '.block');
+	function disclosure(event){
+		var block = wb.closest(event.wbTarget, '.block');
 		if (block.dataset.closed){
 			delete block.dataset.closed;
 		}else{
 			block.dataset.closed = true;
 		}
-	});
+	}
 
-	Event.on('.workspace', 'dblclick', '.locals .name', wb.changeName);
-	Event.on('.workspace', 'keypress', 'input', wb.resize);
-	Event.on('.workspace', 'change', 'input, select', function(evt){
-		Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'valueChanged'});
-
-	});
-	// Event.on(document.body, 'wb-loaded', null, function(evt){
-	// 	console.log('menu loaded');
-	// });
-	Event.on(document.body, 'wb-script-loaded', null, function(evt){
+	function handleScriptLoad(event){
 		wb.scriptModified = false;
 		wb.scriptLoaded = true;
 		if (wb.view === 'result'){
@@ -4490,28 +4865,160 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 		}
 		// clear undo/redo stack
 		console.log('script loaded');
-	});
+	}
 
-	Event.on(document.body, 'wb-modified', null, function(evt){
+	function handleScriptModify(event){
 		// still need modified events for changing input values
 		if (!wb.scriptLoaded) return;
 		if (!wb.scriptModified){
 			wb.scriptModified = true;
 			wb.historySwitchState(wb.view, true);
 		}
-	});
+	}
+
+	// function runFullSize(){
+	// 	['#block_menu', '.workspace', '.scripts_text_view'].forEach(function(sel){
+	// 		wb.hide(wb.find(document.body, sel));
+	// 	});
+	// 	wb.show(wb.find(document.body, '.stage'));
+	// }
+
+	// function runWithLayout(){
+	// 	['#block_menu', '.workspace'].forEach(function(sel){
+	// 		wb.show(wb.find(document.body, sel));
+	// 	});
+	// 	['stage', 'scripts_text_view', 'tutorial', 'scratchpad', 'scripts_workspace'].forEach(function(name){
+	// 		toggleComponent({detail: {name: name, state: wb.toggleState[name]}});
+	// 	});
+	// }
+
+	function toggleComponent(evt){
+		var component = wb.find(document.body, '.' + evt.detail.name);
+		if (!component) return;
+		evt.detail.state ? wb.show(component) : wb.hide(component);
+		var results = wb.find(document.body, '.results');
+		// Special cases
+		switch(evt.detail.name){
+			case 'stage':
+				if (evt.detail.state){
+					wb.show(results);
+				}else{
+					wb.clearStage();
+					if (!wb.toggleState.scripts_text_view){
+						wb.hide(results);
+					}
+				}
+				break;
+			case 'scripts_text_view':
+				if (evt.detail.state){
+					wb.show(results);
+					wb.updateScriptsView();
+				}else{
+					if (!wb.toggleState.stage){
+						wb.hide(results);
+					}
+				}
+				break;
+			case 'tutorial':
+			case 'scratchpad':
+			case 'scripts_workspace':
+				if (! (wb.toggleState.tutorial || wb.toggleState.scratchpad || wb.toggleState.scripts_workspace)){
+					wb.hide(wb.find(document.body, '.workspace'));
+				}else{
+					wb.show(wb.find(document.body, '.workspace'));
+				}
+			default:
+				// do nothing
+				break;
+		}
+		if (wb.toggleState.stage){
+			// restart script on any toggle
+			// so it runs at the new size
+			wb.runCurrentScripts();
+		}
+
+	}
+
+	Event.on(document.body, 'wb-toggle', null, toggleComponent);
 
 	window.addEventListener('popstate', function(evt){
-		// console.log('popstate event');
+		console.log('popstate event');
 		Event.trigger(document.body, 'wb-state-change');
 	}, false);
 
+	window.addEventListener('load', function(evt){
+		console.log('load event');
+		Event.trigger(document.body, 'wb-state-change');
+	})
+
 	// Kick off some initialization work
-	window.addEventListener('load', function(){
-		console.log('window loaded');
+	Event.once(document.body, 'wb-workspace-initialized', null, function initHistory(){
+		console.log('workspace ready');
 		wb.windowLoaded = true;
+		wb.workspaceInitialized = true;
 		Event.trigger(document.body, 'wb-state-change');
 	}, false);
+	Event.once(document.body, 'wb-workspace-initialized', null, wb.initializeDragHandlers);
+
+	Event.on('.clear_scripts', 'click', null, clearScripts);
+	Event.on('.edit-script', 'click', null, function(event){
+		wb.historySwitchState('editor');
+	});
+	Event.on(document.body, 'click', '.load-example', loadExample);
+	Event.on(document.body, 'wb-state-change', null, handleStateChange);
+	Event.on('.save_scripts', 'click', null, wb.saveCurrentScriptsToGist);
+	Event.on('.download_scripts', 'click', null, wb.createDownloadUrl);
+	Event.on('.load_from_gist', 'click', null, wb.loadScriptsFromGistId);
+	Event.on('.restore_scripts', 'click', null, wb.loadScriptsFromFilesystem);
+	Event.on('.workspace', 'click', '.disclosure', disclosure);
+	Event.on('.workspace', 'dblclick', '.locals .name', wb.changeName);
+	Event.on('.workspace', 'keypress', 'input', wb.resize);
+	Event.on('.workspace', 'change', 'input, select', function(event){
+		Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'valueChanged'});
+	});
+	Event.on(document.body, 'wb-script-loaded', null, handleScriptLoad);
+	Event.on(document.body, 'wb-modified', null, handleScriptModify);
+	Event.on('.run-scripts', 'click', null, function(){
+        wb.historySwitchState('result');
+    });
+    Event.on('.show-ide', 'click', null, function(){
+    	wb.historySwitchState('ide');
+    });
+    Event.on('.escape-embed', 'click', null, function(){
+    	// open this in a new window without embedded in the url
+    	var params = wb.urlToQueryParams(location.href);
+    	delete params.embedded;
+    	var url = wb.queryParamsToUrl(params);
+    	var a = wb.elem('a', {href: url, target: '_blank'});
+    	a.click();
+    });
+    // autorun buttons
+    Event.on('.run-script', 'click', null, function(){
+    	document.body.classList.add('running');
+    	wb.runCurrentScripts(true);
+    });
+    Event.on('.stop-script', 'click', null, function(){
+    	document.body.classList.remove('running');
+    	wb.clearStage();
+    });
+    Event.on('.autorun-script-on', 'click', null, function(){
+    	// turn it off
+    	document.body.classList.add('no-autorun');
+    	wb.autorun = false;
+    	wb.clearStage();
+    });
+    Event.on('.autorun-script-off', 'click', null, function(){
+    	document.body.classList.remove('no-autorun');
+    	wb.autorun = true;
+    	wb.runCurrentScripts(true);
+    });
+
+	wb.language = location.pathname.match(/\/([^/.]*)\.html/)[1];
+	wb.loaded = false;
+	wb.clearScripts = clearScripts;
+	wb.historySwitchState = historySwitchState;
+	wb.createWorkspace = createWorkspace;
+	wb.wireUpWorkspace = wireUpWorkspace;
 })(wb);
 
 /*end workspace.js*/
@@ -4522,24 +5029,29 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 // Allows the user to hide groups of blocks within the interface
 // Settings are stored in LocalStorage and retreived each
 // time the page is loaded.
+/* Note: LocalStorage is persistent, for things you want to have available
+   even if the user leaves the site or restarts their browser. SessionStorage
+   is volatile and will be deleted if they restart the browser.*/
 
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 
 	//save the state of the settings link
 	var closed = true;
 	var language = wb.language;
-	var settings_link;
+	var settingsLink;
 	//add a link to show the show/hide block link
 	function addSettingsLink(callback) {
 		// console.log("adding settings link");
 		var block_menu = document.querySelector('#block_menu');
-		var settings_link = document.createElement('a');
-		settings_link.href = '#';
-		settings_link.style.float = 'right';
-		settings_link.appendChild(document.createTextNode('Show/Hide blocks'));
-		settings_link.addEventListener('click', toggleCheckboxDisplay);
-		block_menu.appendChild(settings_link);
-		return settings_link;
+		var settingsLink = document.createElement('a');
+		settingsLink.href = '#';
+		settingsLink.style.float = 'right';
+		settingsLink.appendChild(document.createTextNode('Show/Hide blocks'));
+		settingsLink.addEventListener('click', toggleCheckboxDisplay);
+		block_menu.appendChild(settingsLink);
+		return settingsLink;
 	}
 
 	//create the checkboxes next to the headers
@@ -4567,12 +5079,12 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 		if (closed) {
 			closed = false;
 			display = 'inline';
-			settings_link.innerHTML = 'Save';
+			settingsLink.innerHTML = 'Save';
 		} else {
 			//save was clicked
 			closed = true;
 			display = 'none'
-			settings_link.innerHTML = 'Show/Hide blocks';
+			settingsLink.innerHTML = 'Show/Hide blocks';
 			//save the settings
 			saveSettings();
 		}
@@ -4627,7 +5139,7 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
 
 	//after initliazation, create the settings and checkboxes
 	function load(){
-		settings_link = addSettingsLink();
+		settingsLink = addSettingsLink();
 		createCheckboxes();
 		loadSettings();
 	}
@@ -4646,10 +5158,16 @@ Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
  *    will include Minecraft and RPi-GPIO and othe RPi stuff
  */
 
+// Remove stage menu item until menus get templatized
+var stageMenu = document.querySelector('[data-target=stage]').parentElement;
+stageMenu.parentElement.removeChild(stageMenu);
+
+// A couple of do-nothing scripts for compatibility
+wb.runCurrentScripts = function(){ /* do nothing */ };
+wb.clearStage = function(){ /* do nothing */ };
 
 
 wb.wrap = function(script){
-    //return 'try{' + script + '}catch(e){console,log(e);}})()';
     return script;
 };
 
@@ -4688,7 +5206,6 @@ wb.ajax = {
     };
 
 
-document.querySelector('.stop-scripts').style.display = 'none';
     
 wb.resetrun = function(message){
     messagebox.innerHTML = message;
@@ -4702,7 +5219,10 @@ wb.resetrun = function(message){
 wb.runScript = function(script){
 
     // TODO : workout the ws address from the page address
-    var oSocket = new WebSocket("ws://192.168.1.101:8080/");
+    var aHost = window.location.host.split(":");
+    var oSocket = new WebSocket("ws://"+aHost[0]+":8080/");
+    
+    //var oSocket = new WebSocket("ws://192.168.1.101:8080/");
     
     var messagebox = document.querySelector('#messagebox');
     if(messagebox === null || messagebox.length === 0)
@@ -4725,9 +5245,7 @@ wb.runScript = function(script){
     };
     
     oSocket.onmessage = function(event) {
-        console.log("event =", event);
         var msg = JSON.parse(event.data);
-        console.log("onmessage msg =", msg);
         switch(msg.type) {
             case "recieved":
                 messagebox.innerHTML = "Code recieved on RPi";
@@ -4737,7 +5255,6 @@ wb.runScript = function(script){
                 document.querySelector('.run-scripts').style.display = 'none';
                 document.querySelector('.stop-scripts').style.display = 'inline-block';
                 
-                //Event.on('.stop-scripts', 'click', null, function(){
                 Event.once('.stop-scripts', 'click', null, function(){
                       oSocket.send(JSON.stringify({"command":"kill","pid":msg.pid}));
                 });
@@ -4752,15 +5269,15 @@ wb.runScript = function(script){
                 oSocket.close();
                 break;
             case "error":
-                wb.resetrun("Code Failed " + msg.data);
+                wb.resetrun("Code Failed " + msg.data.toString());
                 oSocket.close();
                 break;
             case "sterr":
                 messagebox.innerHTML = "Error Recieved " + msg.data;
                 break;    
             case "stdout":
-                messagebox.innerHTML = "Data Recieved " + msg.data;
-                console.log("msg.data =", msg.data);
+                messagebox.innerHTML = "Data Recieved ";// + msg.data;
+                console.log("msg.data =", msg.data.toString());
                 break;    
         }
   
@@ -4821,40 +5338,27 @@ Event.on('.edit-script', 'click', null, clearStage);
 wb.prettyScript = function(elements){
     
     var groups = wb.getGroupsFromElements(elements);    
-    console.log("groups =", groups);
-    
     var before = groups.map(function(group){
-            console.log("before group =", group);
-            
-            var req = wb.requiredjs.before[group];
-            if(typeof req !== "undefined")
-            {
-                return req;
-            }
-            return "";
+        var req = wb.requiredjs.before[group];
+        if(typeof req !== "undefined")
+        {
+            return req;
+        }
+        return "";
     }).join(" ")+ "\n// Your code starts here\n";
     
-    
-            console.log("wb.requiredjs.before =", wb.requiredjs.before);
-    console.log("before =", before);
-    
     var after = "\n//Your code ends here\n"+groups.map(function(group){
-            
-            var req = wb.requiredjs.after[group];
-            if(typeof req !== "undefined")
-            {
-                return req;
-            }
-            return "";
+        var req = wb.requiredjs.after[group];
+        if(typeof req !== "undefined")
+        {
+            return req;
+        }
+        return "";
     }).join(" ");
     
     var script = elements.map(function(elem){
         return wb.codeFromBlock(elem);
     }).join('');
-    
-    
-            console.log("wb.requiredjs.after =", wb.requiredjs.after);
-    console.log("after =", after);
     
     var pretty = js_beautify(before+script+after);
     
@@ -4926,13 +5430,45 @@ wb.requiredjs.after.piface =  "\nprocess.on('SIGINT',function(){console.log(\"Ca
 
 /*end languages/node/piface.js*/
 
+/*begin languages/node/firmata.js*/
+//arduino firmata  https://npmjs.org/search?q=firmata
+
+
+//wb.choiceLists.digitalinputpins = {"0":'Pin 0',"1":'Pin 1',"2":'Pin 2',"3":'Pin 3',"4":'Pin 4',"5":'Pin 5',"6":'Pin 6',"7":'Pin 7',"8":'Pin 8',"9":'Pin 9',"10":'Pin 10',"11":'Pin 11',"12":'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
+wb.choiceLists.firmatain = ["0","1" ,"2" ,"3" ,"4" ,"5" ,"6" ,"7"];
+wb.choiceLists.firmatabutton = [0,1 ,2 ,3];
+wb.choiceLists.firmatarelays = [0,1 ];
+wb.choiceLists.firmataout = ["0", 1 ,2 ,3 ,4 ,5 ,6 ,7];
+wb.choiceLists.firmataonoff = ["0", "1"];
+
+wb.choiceLists.highlow = ['HIGH', 'LOW'];
+wb.choiceLists.inoutput= ['INPUT', 'OUTPUT'];
+wb.choiceLists.onoff = ['ON', 'OFF'];
+wb.choiceLists.logic = ['true', 'false'];
+wb.choiceLists.digitalpins = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,'A0','A1','A2','A3','A4','A5'];
+wb.choiceLists.analoginpins = ['A0','A1','A2','A3','A4','A5'];
+wb.choiceLists.pwmpins = [3, 5, 6, 9, 10, 11];
+wb.choiceLists.baud = [9600, 300, 1200, 2400, 4800, 14400, 19200, 28800, 38400, 57600, 115200];
+wb.choiceLists.analogrefs = ['DEFAULT', 'INTERNAL', 'INTERNAL1V1', 'INTERNAL2V56', 'EXTERNAL'];
+
+wb.requiredjs.before.firmata = "var ArduinoFirmata = require('arduino-firmata');var arduino = new ArduinoFirmata();";
+wb.requiredjs.after.firmata =  "";
+
+/*end languages/node/firmata.js*/
+
 /*begin languages/node/mc_game.js*/
    
 
-wb.requiredjs.before.minecraftgame = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nrequire('./waterbear/dist/minecraftjs_runtime.js');";
+wb.requiredjs.before.minecraftgame = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nvar v= require('vec3');";
 
 wb.requiredjs.after.minecraftgame =  "\nprocess.on('SIGINT',function(){console.log(\"Caught SIGINT\");client.end(); process.exit();});process.on('exit',function(){console.log(\"Caught exit\");client.end();});";
 
+
+// TODO : fix blocktypes to number or text not both
+// TODO : find direction code and loops
+// TODO : find distance code
+// TODO : write in area detect
+// TODO : research the eventsBlockHits
 
 /*end languages/node/mc_game.js*/
 
@@ -4944,6 +5480,24 @@ wb.requiredjs.after.minecraftgame =  "\nprocess.on('SIGINT',function(){console.l
 
 wb.choiceLists.types = wb.choiceLists.types.concat(['position']);
 wb.choiceLists.rettypes = wb.choiceLists.rettypes.concat(['position']);
+wb.choiceLists.directions= ['up', 'down', 'north', 'south','east','west','none'];
+
+
+
+/*,
+        {
+            "blocktype": "expression",
+            "id": "9ec42170-3575-4993-85b1-a51d515e3463",
+            "sockets": [
+                {
+                    "name": "Temp Position"
+                }
+            ],
+            "type": "position",
+            "script": "tempposition",
+            "help": "position"
+        }
+        */
 /*end languages/node/mc_position.js*/
 
 /*begin languages/node/mc_blocks.js*/
@@ -5179,7 +5733,7 @@ wb.menu({
             "help": "repeat until the condition is false",
             "sockets": [
                 {
-                    "name": "Forever if",
+                    "name": "Repeat While",
                     "type": "boolean",
                     "value": "false"
                 }
@@ -5205,9 +5759,6 @@ wb.menu({
                     "type": "choice",
                     "options": "pifacein",
                     "value": "choice"
-                },
-                {
-                    "name": "is ON"
                 }
             ]
         },
@@ -5216,10 +5767,10 @@ wb.menu({
             "id": "f6fee9db-64c8-42fc-9285-f8c99c069bfa",
             "script": "pfio.read_input()",
             "type": "int",
-            "help": "8 Pins as a Digital Input",
+            "help": "All 8 Pins as a Digital Input",
             "sockets": [
                 {
-                    "name": "All Inputs as number"
+                    "name": "Inputs as number"
                 }
             ]
         },
@@ -5232,16 +5783,13 @@ wb.menu({
                 {
                     "name": "Set output",
                     "type": "choice",
-                    "options": "pifacein",
+                    "options": "pifaceout",
                     "value": "choice"
                 },
                 {
                     "name": "to",
                     "type": "boolean",
-                    "value": null,
-                    "atype": "choice",
-                    "aoptions": "pifaceonoff",
-                    "avalue": "choice"
+                    "value": null
                 }
             ]
         },
@@ -5257,10 +5805,236 @@ wb.menu({
                     "value": "0"
                 }
             ]
+        },
+        
+        {
+            "blocktype": "step",
+            "id": "c18294d2-8df0-4d3f-8f80-3f24f46b17c3",
+            "script": "output## = {{1}};",
+            "help": "Create a named pin set to output",
+            "sockets": [
+                {
+                    "name": "Create output## using Output Pin",
+                    "type": "choice",
+                    "options": "pifaceout",
+                    "value": "choice"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "sockets": [
+                        {
+                            "name": "output##"
+                        },
+                        {
+                            "name": "=",
+                            "type": "boolean",
+                            "value": null
+                        }
+                    ],
+                    "script": "pfio.digital_write(output##,{{1}});"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "353a7962-7318-470d-8b19-09c5568ba413",
+            "script": "input## = {{1}};",
+            "help": "Create a named pin set to input",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "input##"
+                        }
+                    ],
+                    "script": "pfio.digital_read(input##)",
+                    "help": "Is the digital input pin ON",
+                    "type": "boolean"
+                }
+            ],
+            "sockets": [
+                {
+                    "name": "Create input## using Input Pin",
+                    "type": "choice",
+                    "options": "pifacein",
+                    "value": "choice"
+                }
+            ]
         }
+        
     ]
 });
 /*end languages/node/piface.json*/
+
+/*begin languages/node/firmata.json*/
+wb.menu({
+    "name": "Firmata",
+    "blocks": [
+        {
+            "blocktype": "context",
+            "id": "0cadc709-e4eb-4aa4-9e1e-374fdf71dac3",
+            "sockets": [
+                {
+                    "name": "Connect To Firmata"
+                }
+            ],
+            "script": "arduino.connect();arduino.on('connect', function(){[[1]]});",
+            "help": "All Firmata things in here"
+        },
+        {
+            "blocktype": "step",
+            "id": "a7096d17-06bd-4986-a6de-4eeffc68ec88",
+            "script": "digital_output## = {{1}}; arduino.pinMode(digital_output##, ArduinoFirmata.OUTPUT);",
+            "help": "Create a named pin set to output",
+            "sockets": [
+                {
+                    "name": "Create digital_output## on Pin",
+                    "type": "choice",
+                    "options": "digitalpins",
+                    "value": "choice"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "sockets": [
+                        {
+                            "name": "digital_output##"
+                        },
+                        {
+                            "name": "to",
+                            "type": "boolean",
+                            "value": null
+                        }
+                    ],
+                    "script": "arduino.digitalWrite(digital_output##, {{1}}, function(){});"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "0ff728fe-e833-4887-8c1c-16380100d007",
+            "script": "digital_input## = {{1}}; pinMode(digital_input##, INPUT);",
+            "help": "Create a named pin set to input",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "digital_input##"
+                        }
+                    ],
+                    "script": "arduino.digitalRead(digital_input##)",
+                    "help": "Is the digital input pin ON",
+                    "type": "boolean"
+                }
+            ],
+            "sockets": [
+                {
+                    "name": "Create digital_input## on Pin",
+                    "type": "choice",
+                    "options": "digitalpins",
+                    "value": "choice"
+                }
+            ]
+        },
+        
+        {
+            "blocktype": "step",
+            "id": "5501b22e-e6ae-4a86-8c67-b8d3e60d7fff",
+            "script": "analog_output## = {{1}}; arduino.pinMode(analog_output##, ArduinoFirmata.OUTPUT);",
+            "help": "Create a named pin set to output",
+            "sockets": [
+                {
+                    "name": "Create analog_output## on Pin",
+                    "type": "choice",
+                    "options": "pwmpins",
+                    "value": "choice"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "sockets": [
+                        {
+                            "name": "analog_output##"
+                        },
+                        {
+                            "name": "to",
+                            "type": "int",
+                            "value": null
+                        }
+                    ],
+                    "script": "arduino.analogWrite(analog_output##, {{1}}, function(){});"
+                }
+            ]
+        },
+        
+        {
+            "blocktype": "step",
+            "id": "b335d921-f23c-4a2c-b35a-9407ccd6d60c",
+            "script": "servo## = {{1}}; arduino.pinMode(servo##, ArduinoFirmata.OUTPUT);",
+            "help": "Create a named pin set to servo",
+            "sockets": [
+                {
+                    "name": "Create servo## on Pin",
+                    "type": "choice",
+                    "options": "pwmpins",
+                    "value": "choice"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "sockets": [
+                        {
+                            "name": "servo##"
+                        },
+                        {
+                            "name": "to angle",
+                            "type": "int",
+                            "value": null
+                        }
+                    ],
+                    "script": "arduino.servoWrite(servo##, {{1}}, function(){});"
+                }
+            ]
+        },
+        
+        {
+            "blocktype": "step",
+            "id": "9d686235-2644-475d-a21a-b5c1df89185f",
+            "script": "analog_input## = {{1}}; pinMode(analog_input##, INPUT);",
+            "help": "Create a named pin set to input",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "analog_input##"
+                        }
+                    ],
+                    "script": "arduino.analogRead(analog_input##)",
+                    "help": "The value on analog input pin",
+                    "type": "int"
+                }
+            ],
+            "sockets": [
+                {
+                    "name": "Create analog_input## on Pin",
+                    "type": "choice",
+                    "options": "analoginpins",
+                    "value": "choice"
+                }
+            ]
+        }
+        
+    ]
+});
+/*end languages/node/firmata.json*/
 
 /*begin languages/node/mc_game.json*/
 wb.menu({
@@ -5275,7 +6049,7 @@ wb.menu({
                         "name": "Connect To Minecraft"
                     }
                 ],
-            "script": "var client = new Minecraft('localhost', 4711, function() {var zeros={x:0, y:0, z:0};[[1]]});",
+            "script": "var client = new Minecraft('localhost', 4711, function() {[[1]]});",
             "help": "All Minecraft things in here"
         },
         
@@ -5286,7 +6060,7 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Say",
-                    "type": "string",
+                    "type": "any",
                     "value": "hi"
                 },
                 {
@@ -5294,7 +6068,7 @@ wb.menu({
                 }
                 
             ],
-            "script": "client.chat({{1}});",
+            "script": "client.chat({{1}}.toString());",
             "help": "Send a message as chat"
         },
         
@@ -5339,7 +6113,7 @@ wb.menu({
                     "name": "Get Player Tile Position"
                 }
             ],
-            "script": "client.getTile(function(data){console.log(\"data =\", data); var aData = data.toString().trim().split(\",\"); console.log(\"aData =\", aData); var playerposition = {x:parseInt(aData[0],10), y: parseInt(aData[1],10), z: parseInt(aData[2],10)}; [[1]]});",
+            "script": "client.getTile(function(playerposition){[[1]]});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -5355,10 +6129,20 @@ wb.menu({
                     "blocktype": "expression",
                     "sockets": [
                         {
+                            "name": "Player Stood on Position"
+                        }
+                    ],
+                    "script": "playerposition.minus(v(0,1,0))",
+                    "type": "position"
+                },
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
                             "name": "Player Position as text"
                         }
                     ],
-                    "script": "\"x:\"+playerposition.x.toString()+\", y:\"+playerposition.y.toString()+\", z:\"+playerposition.z.toString()",
+                    "script": "playerposition.toString()",
                     "type": "string"
                 }
             ],
@@ -5391,7 +6175,7 @@ wb.menu({
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
             ],
-            "script": "var posA## = {{1}};var posB## = {{2}};var position## = {x:(posA##.x+posB##.x), y:(posA##.y+posB##.y) , z:(posA##.z+posB##.z)};",
+            "script": "var position## = {{1}}.plus({{2}});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -5416,8 +6200,8 @@ wb.menu({
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
             ],
-            "script": "client.setTile({{1}}.x, {{1}}.y, {{1}}.z);",
-            "help": "Move Player to x, y, z of position"
+            "script": "client.setTile({{1}});",
+            "help": "Move Player to position"
         }
         
     
@@ -5449,9 +6233,9 @@ wb.menu({
                     "type": "number",
                     "value": "0"
                 }
-            ], 
-            "type":"position",
-            "script": "{x:{{1}}, y:{{2}} , z:{{3}}}",
+            ],
+            "type": "position",
+            "script": "v({{1}}, {{2}} , {{3}})",
             "help": "A position: x is across, y is up and z is depth"
         },
         {
@@ -5461,12 +6245,11 @@ wb.menu({
                 {
                     "name": "Centre Position"
                 }
-            ], 
-            "type":"position",
-            "script": "zeros",
+            ],
+            "type": "position",
+            "script": "v()",
             "help": "position"
         },
-        
         {
             "blocktype": "step",
             "id": "0ae2eba9-582e-4a3a-92b2-0f8484397e90",
@@ -5476,8 +6259,8 @@ wb.menu({
                     "type": "position",
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
-            ],  
-            "script": "var posA## = {{1}}; var posB## = {{2}}; var position## = posA##;",
+            ],
+            "script": "var position## = {{1}}.clone();",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -5485,13 +6268,11 @@ wb.menu({
                         {
                             "name": "Position##"
                         }
-                    ],  
-                    
+                    ],
                     "script": "position##",
                     "type": "position"
                 }
             ],
-            
             "help": "create new position"
         },
         {
@@ -5508,8 +6289,8 @@ wb.menu({
                     "type": "position",
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
-            ],  
-            "script": "({{1}}.x === {{2}}.x && {{1}}.y === {{2}}.y && {{1}}.z === {{2}}.z);",
+            ],
+            "script": "({{1}}.equal({{2}})",
             "type": "boolean",
             "help": "are 2 positions the same"
         },
@@ -5527,8 +6308,8 @@ wb.menu({
                     "type": "position",
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
-            ],  
-            "script": "var posA## = {{1}}; var posB## = {{2}}; var position## = {x:(posA##.x+posB##.x), y:(posA##.y+posB##.y) , z:(posA##.z+posB##.z)};",
+            ],
+            "script": "var position## = {{1}}.plus({{2}});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -5536,13 +6317,11 @@ wb.menu({
                         {
                             "name": "Position##"
                         }
-                    ],  
-                    
+                    ],
                     "script": "position##",
                     "type": "position"
                 }
             ],
-            
             "help": "create new position by adding 2 others"
         },
         {
@@ -5555,7 +6334,7 @@ wb.menu({
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
             ],
-            "script": "client.getHeight({{1}}.x, {{1}}.z, function(height##){var groundposition = {x:{{1}}.x, y:parseInt(height##,10) , z:{{1}}.z}; [[1]]});",
+            "script": "client.getHeight({{1}}, function(groundposition){[[1]]});",
             "locals": [
                 {
                     "blocktype": "expression",
@@ -5575,11 +6354,11 @@ wb.menu({
             "id": "c95312f6-da99-4516-b43d-6f759c42b5c5",
             "sockets": [
                 {
-                    "name": "x from",                    
+                    "name": "x from",
                     "type": "position",
-                    "block":"8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
-            ],  
+            ],
             "script": "{{1}}.x",
             "type": "number",
             "help": "the x (across) part of the postion"
@@ -5591,9 +6370,9 @@ wb.menu({
                 {
                     "name": "y from",
                     "type": "position",
-                    "block":"8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
-            ],  
+            ],
             "script": "{{1}}.y",
             "type": "number",
             "help": "the y (up) part of the postion"
@@ -5605,9 +6384,9 @@ wb.menu({
                 {
                     "name": "z from",
                     "type": "position",
-                    "block":"8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 }
-            ],  
+            ],
             "script": "{{1}}.z",
             "type": "number",
             "help": "the z (depth) part of the postion"
@@ -5624,42 +6403,180 @@ wb.menu({
                 {
                     "name": "as text"
                 }
-            ],  
-            "script": "\"x:\"+{{1}}.x.toString()+\", y:\"+{{1}}.y.toString()+\", z:\"+{{1}}.z.toString()",
+            ],
+            "script": "{{1}}.toString()",
             "type": "string",
             "help": "Position as text"
+        },
+        {
+            "blocktype": "step",
+            "id": "e28a420d-9b94-4480-ad0f-ebe4e68134b0",
+            "sockets": [
+                {
+                    "name": "Set",
+                    "type": "position",
+                    "block": "590c8aef-a755-4df5-8930-b430db5a3c3d"
+                },
+                {
+                    "name": "to",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],
+            "script": "{{1}}.update({{2}});",
+            "help": "Set position variable to a new postion"
+        },
+        {
+            "blocktype": "expression",
+            "id": "d453a2dc-cebc-47dd-b421-09d450bd7e88",
+            "sockets": [
+                {
+                    "name": "Distance from",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "to",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],
+            "script": "{{1}}.distanceTo({{2}})",
+            "type":"number",
+            "help": "the distance between 2 positions"
+        },
+        {
+            "blocktype": "context",
+            "id": "10ec4498-1aa8-44ff-9620-b338a2cdc3cb",
+            "sockets": [
+                {
+                    "name": "For each direction from",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "by",
+                    "type": "number",
+                    "value": "1"
+                },
+                {
+                    "name": "block(s)"
+                }
+            ],
+            "script": "client.directions.forEach(function(dir, idx){var position##=client.directioncalcs[dir]({{1}},{{2}});[[1]]});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Position##"
+                        }
+                    ],
+                    "script": "position##",
+                    "type": "position"
+                }
+            ],
+            "help": "Go around each direction"
+        },
+        {
+            "blocktype": "step",
+            "id": "4072476e-cdc4-43b1-b36b-a8c5829c113c",
+            "sockets": [
+                {
+                    "name": "Create Position## from",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "offset by",
+                    "type": "number",
+                    "value": "1"
+                },
+                {
+                    "name": " ",
+                    "type": "choice",
+                    "options": "directions",
+                    "value": "choice"
+                }
+            ],
+            "script": "var position##=client.directioncalcs[{{3}}]({{1}},{{2}});",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "Position##"
+                        }
+                    ],
+                    "script": "position##",
+                    "type": "position"
+                }
+            ],
+            "help": "create new position by adding a distance and direction"
+        },
+        {
+            "blocktype": "expression",
+            "type":"boolean",
+            "id": "635a2e41-94d8-4f63-b20b-8e9340c0f2c5",
+            "sockets": [
+                {
+                    "name": "Is",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "between",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                },
+                {
+                    "name": "and",
+                    "type": "position",
+                    "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
+                }
+            ],
+            "script": "({{1}}.min({{2}}).equal({{2}}) && {{1}}.max({{3}}).equal({{3}}))",
+            "help": "is 1st point between 2nd and 3rd"
         }
     ]
-}
-);
+});
 /*end languages/node/mc_position.json*/
 
 /*begin languages/node/mc_blocks.json*/
 wb.menu({
     "name": "Blocks",
-    "id": "63b8ffcc-9b51-4a5e-b687-634945bfb9b8",
     "blocks": [
         {
             "blocktype": "context",
-            "id": "b8020f54-43d2-4207-8529-336eb035898c",
+            "id": "c500a7f0-7117-40ea-9139-b161e19f190b",
             "sockets": [
                     {
-                        "name": "get Block Type at",
+                        "name": "Get Block Type at",
                         "type": "position",
                         "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                     }
                 ],
-            "script": "client.getBlock({{1}}.x, {{1}}.y, {{1}}.z, function(block##){[[1]]});",
+            "script": "client.getBlock({{1}}, function(block##){[[1]]});",
             "locals": [
                 {
                     "blocktype": "expression",
                     "sockets": [
                             {
-                                "name": "block##"
+                                "name": "Block Type Number"
                             }
                         ],
-                    "script": "parseInt(block##)",
+                    "script": "block##",
                     "type": "number"
+                },
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                            {
+                                "name": "Block Type Name"
+                            }
+                        ],
+                    "script": "client.getBlockName(block##)",
+                    "type": "string"
                 }
             ],
             "help": "get block type at x, y, z"
@@ -5669,13 +6586,13 @@ wb.menu({
             "id": "a7c17404-8555-42be-877e-9d01d7647604",
             "sockets": [
                     {
-                    "name": "block",
+                    "name":"block",
                     "type": "choice",
                     "options": "blocks",
                     "value": "choice"
                 }
                 ],
-            "script": "{{1}}",
+            "script": "client.blocks[{{1}}]",
             "type": "number",
             "help": "a blocktype"
         },
@@ -5695,7 +6612,7 @@ wb.menu({
                     "value": "choice"
                 }
             ],
-            "script": "client.setBlock({{1}}.x, {{1}}.y, {{1}}.z, client.blocks[{{2}}]);",
+            "script": "client.setBlock({{1}}, client.blocks[{{2}}]);",
             "help": "set block at position"
         },
         {
@@ -5705,6 +6622,7 @@ wb.menu({
             "sockets": [
                 {
                     "name": "set Blocks between",
+                
                     "type": "position",
                     "block": "8bb6aab6-273d-4671-8caa-9c15b5c486a7"
                 },
@@ -5720,7 +6638,7 @@ wb.menu({
                     "value": "choice"
                 }
             ],
-            "script": "client.setBlocks({{1}}.x, {{1}}.y, {{1}}.z, {{2}}.x, {{2}}.y, {{2}}.z, client.blocks[{{3}}]);",
+            "script": "client.setBlocks({{1}}, {{2}}, client.blocks[{{3}}]);",
             "help": "set blocks in a 3D rectangle between the first and second postions to .."
         },
         {
@@ -5733,7 +6651,7 @@ wb.menu({
                     "value": "0"
                 }
             ],
-            "script": "Object.keys(client.blocks).filter(function(element){return (client.blocks[element] === {{1}});})",
+            "script": "client.getBlockName({{1}})",
             "type": "string",
             "help": "name of a blocktype by number"
         }

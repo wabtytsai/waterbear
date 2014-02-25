@@ -14,29 +14,35 @@
 // registerSeqNum(int) make sure we don't re-use sequence numbers
 // Socket(json) -> Socket element
 
+// global variable wb is initialized in the HTML before any javascript files
+// are loaded (in template/template.html)
 (function(wb){
 
     var elem = wb.elem;
 
+    var nextSeqNum = 0;
+    var blockRegistry = {}; /* populated in function "registerBlock", which is
+                               called by the Block() function below*/
 
-    var _nextSeqNum = 0;
-
-    var newSeqNum = function(){
-        _nextSeqNum++;
-        return _nextSeqNum;
+    function newSeqNum(){
+        nextSeqNum++;
+        return nextSeqNum;
     };
 
-    var registerSeqNum = function(seqNum){
+    function registerSeqNum(seqNum){
         // When reifying saved blocks, call this for each block to make sure we start new blocks
         // that do not overlap with old ones.
         if (!seqNum) return;
-        _nextSeqNum = Math.max(parseInt(seqNum, 10), _nextSeqNum);
+        nextSeqNum = Math.max(parseInt(seqNum, 10), nextSeqNum);
     }
 
-    var blockRegistry = {};
-    wb.blockRegistry = blockRegistry;
+    function resetSeqNum(){
+        nextSeqNum = 0;
+        blockRegistry = {};
+        wb.blockRegistry = blockRegistry;
+    }
 
-    var registerBlock = function(blockdesc){
+    function registerBlock(blockdesc){
         if (blockdesc.seqNum){
             registerSeqNum(blockdesc.seqNum);
         }else if (!blockdesc.isTemplateBlock){
@@ -48,11 +54,11 @@
         blockRegistry[blockdesc.id] = blockdesc;
     }
 
-    var getHelp = function(id){
+    function getHelp(id){
         return blockRegistry[id] ? blockRegistry[id].help : '';
     }
 
-    var getScript = function(id){
+    function getScript(id){
         try{
             return blockRegistry[id].script;
         }catch(e){
@@ -62,27 +68,28 @@
         }
     }
 
-    var getSockets = function(block){
+    function getSockets(block){
         return wb.findChildren(wb.findChild(block, '.label'), '.socket');
     }
 
-    var getSocketValue = function(socket){
+    function getSocketValue (socket){
         return socketValue(wb.findChild(socket, '.holder'));
     }
 
-    var createSockets = function(obj){
+    function createSockets(obj){
         return obj.sockets.map(function(socket_descriptor){
             return Socket(socket_descriptor, obj);
         });
     }
 
     var Block = function(obj){
-        // FIXME:
-        // Handle customized names (sockets)
         registerBlock(obj);
         // if (!obj.isTemplateBlock){
         //     console.log('block seq num: %s', obj.seqNum);
         // }
+        if (!obj.isTemplateBlock){
+            updateFromTemplateBlock(obj);
+        }
         var block = elem(
             'div',
             {
@@ -147,18 +154,13 @@
                 label.insertBefore(elem('div', {'class': 'disclosure'}), label.firstElementChild);
             }
         }
-        // if (!obj.isTemplateBlock){
+        //if (!obj.isTemplateBlock){
         //     console.log('instantiated block %o from description %o', block, obj);
-        // }
+        //}
         return block;
     }
 
     // Block Event Handlers
-
-    Event.on(document.body, 'wb-remove', '.block', removeBlock);
-    Event.on(document.body, 'wb-add', '.block', addBlock);
-    Event.on(document.body, 'wb-clone', '.block', onClone);
-    Event.on(document.body, 'wb-delete', '.block', deleteBlock);
 
     function removeBlock(event){
         event.stopPropagation();
@@ -224,9 +226,9 @@
                     spec.isTemplateBlock = true;
                     spec.isLocal = true;
                     spec.group = block.dataset.group;
-                    if (!spec.seqNum){
+                    // if (!spec.seqNum){
                         spec.seqNum = block.dataset.seqNum;
-                    }
+                    // }
                     // add scopeid to local blocks
                     spec.scopeId = parent.id;
                     if(!spec.id){
@@ -256,18 +258,13 @@
         }
     }
 
-    function onClone(event){
-        // a block has been cloned. Praise The Loa!
-        var block = event.wbTarget;
-        // console.log('block cloned %o', block);
-    }
-
     var Socket = function(desc, blockdesc){
         // desc is a socket descriptor object, block is the owner block descriptor
         // Sockets are described by text, type, and (default) value
         // type and value are optional, but if you have one you must have the other
         // If the type is choice it must also have a options for the list of values
         // that can be found in the wb.choiceLists
+        // A socket may also have a suffix, text after the value
         // A socket may also have a block, the id of a default block
         // A socket may also have a uValue, if it has been set by the user, over-rides value
         // A socket may also have a uName if it has been set by the user, over-rides name
@@ -288,7 +285,7 @@
             socket.dataset.options = desc.options;
         }
         // if (!blockdesc.isTemplateBlock){
-        //     console.log('socket seq num: %s', blockdesc.seqNum);
+        //      console.log('socket seq num: %s', blockdesc.seqNum);
         // }
         socket.firstElementChild.innerHTML = socket.firstElementChild.innerHTML.replace(/##/, ' <span class="seq-num">' + (blockdesc.seqNum || '##') + '</span>');
         if (desc.type){
@@ -299,25 +296,39 @@
         if (desc.block){
             socket.dataset.block = desc.block;
         }
+        socket.dataset.seqNum = blockdesc.seqNum;
         if (!blockdesc.isTemplateBlock){
+            //console.log('socket seq num: %s', blockdesc.seqNum);
             var newBlock = null;
             if (desc.uBlock){
                 // console.log('trying to instantiate %o', desc.uBlock);
+                delete desc.uValue;
                 newBlock = Block(desc.uBlock);
-                // console.log('created instance: %o', newBlock);
-            }else if (desc.block){
+                //console.log('created instance: %o', newBlock);
+            } else if (desc.block && ! desc.uValue){
+                //console.log('desc.block');
                 newBlock = cloneBlock(document.getElementById(desc.block));
+            }else if (desc.block && desc.uValue){
+                // for debugging only
+                // console.log('block: %s, uValue: %s', desc.block, desc.uValue);                
             }
             if (newBlock){
+                //console.log('appending new block');
                 holder.appendChild(newBlock);
                 addExpression({'wbTarget': newBlock});
             }
+        }
+        if (desc.suffix){
+            socket.dataset.suffix = desc.suffix;
+            socket.appendChild(elem('span', {'class': 'suffix'}, desc.suffix));
         }
         return socket;
     }
 
 
     function socketDesc(socket){
+        var parentBlock = wb.closest(socket, '.block');
+        var isTemplate = !!parentBlock.dataset.isTemplateBlock;
         var desc = {
             name: socket.dataset.name,
         }
@@ -334,36 +345,57 @@
         if (socket.dataset.block){
             desc.block = socket.dataset.block;
         }
+        if (socket.dataset.suffix){
+            desc.suffix = socket.dataset.suffix;
+        }
         // User-specified settings
+        if (isTemplate) return desc;
         var uName = wb.findChild(socket, '.name').textContent;
         var uEle = wb.findChild(socket, '.name')
         
-        if (desc.name !== uName){
+        if (desc.name.replace(/##/, ' ' + socket.dataset.seqNum) !== uName){
             desc.uName = uName;
         }
         var holder = wb.findChild(socket, '.holder');
         if (holder){
             var input = wb.findChild(holder, 'input, select');
-            desc.uValue = input.value;
-            var block = wb.findChild(holder, '.block');
+            // var block = wb.findChild(holder, '.block');
             if (wb.matches(holder.lastElementChild, '.block')){
                 desc.uBlock = blockDesc(holder.lastElementChild);
+            }else{
+                desc.uValue = input.value;
             }
         }
         return desc;
+    }
+
+    function updateFromTemplateBlock(obj){
+        // Retrieve the things we don't need to duplicate in every instance block description
+        var tB = blockRegistry[obj.scriptId];
+        if (!tB){
+            console.error('Error: could not get template block for  for %o', obj);
+            return obj;
+        }
+        obj.blocktype = tB.blocktype;
+        obj.group = tB.group;
+        obj.help = tB.help;
+        obj.type = tB.type;
     }
 
     function blockDesc(block){
         var label = wb.findChild(block, '.label');
         var sockets = wb.findChildren(label, '.socket');
         var desc = {
-            blocktype: block.dataset.blocktype,
-            group: block.dataset.group,
             id: block.id,
-            help: block.title,
             scopeId: block.dataset.scopeId,
             scriptId: block.dataset.scriptId,
             sockets: sockets.map(socketDesc)
+        }
+        if (block.dataset.group === 'scripts_workspace'){
+            desc.blocktype = block.dataset.blocktype;
+            desc.group = block.dataset.group;
+            desc.help = block.dataset.help;
+            desc.type = block.dataset.type;            
         }
         if (block.dataset.seqNum){
             desc.seqNum  = block.dataset.seqNum;
@@ -379,9 +411,6 @@
         }
         if (block.dataset.localSource){
             desc.localSource = block.dataset.localSource;
-        }
-        if (block.dataset.type){
-            desc.type = block.dataset.type;
         }
         if (block.dataset.locals){
             desc.locals = JSON.parse(block.dataset.locals);
@@ -403,10 +432,14 @@
         ////////////////////
         // Why were we deleting seqNum here?
         // I think it was from back when menu template blocks had sequence numbers
+        // UPDATE:
+        // No, it was because we want cloned blocks (and the locals they create) to get 
+        // new sequence numbers. But, if the block being clones is an instance of a local then we
+        // don't want to get a new sequence number.
         // /////////////////
-        // if (!blockdesc.isLocal){
-        //     delete blockdesc.seqNum;
-        // }
+        if (!block.dataset.localSource){
+            delete blockdesc.seqNum;
+        }
         if (blockdesc.isTemplateBlock){
             blockdesc.scriptId = block.id;            
         }
@@ -430,6 +463,9 @@
         if (type === 'int' || type === 'float'){
             type = 'number';
         }
+        if (type === 'image'){
+            type = '_image'; // avoid getting input type="image"
+        }
         switch(type){
             case 'any':
                 value = obj.uValue || obj.value || ''; break;
@@ -437,6 +473,8 @@
                 value = obj.uValue || obj.value || 0; break;
             case 'string':
                 value = obj.uValue || obj.value || ''; break;
+            case 'regex':
+                value = obj.uValue || obj.value || /.*/; break;
             case 'color':
                 value = obj.uValue || obj.value || '#000000'; break;
             case 'date':
@@ -447,8 +485,6 @@
                 value = obj.uValue || obj.value || new Date().toISOString(); break;
             case 'url':
                 value = obj.uValue || obj.value || 'http://waterbearlang.com/'; break;
-            case 'image':
-                value = obj.uValue || obj.value || ''; break;
             case 'phone':
                 value = obj.uValue || obj.value || '604-555-1212'; break;
             case 'email':
@@ -469,10 +505,11 @@
             default:
                 value = obj.uValue || obj.value || '';
         }
-        var input = elem('input', {type: type, value: value});
+        var input = elem('input', {type: type, value: value, 'data-oldvalue': value});
 
         //Only enable editing for the appropriate types
-        if (!(type === "string" || type === "any" || 
+        if (!(type === "string" || type === "any" || type === 'regex' ||
+              type === "url"    || type === "phone" ||
               type === "number" || type === "color")) {
             input.readOnly = true;
         }
@@ -481,28 +518,33 @@
         return input;
     }
 
-    var socketValue = function(holder){
+    function socketValue(holder){
         if (holder.children.length > 1){
             return codeFromBlock(wb.findChild(holder, '.block'));
         }else{
             var value = wb.findChild(holder, 'input, select').value;
             var type = holder.parentElement.dataset.type;
-            if (type === 'string' || type === 'choice' || type === 'color'){
+            if (type === 'string' || type === 'choice' || type === 'color' || type === 'url'){
                 if (value[0] === '"'){value = value.slice(1);}
                 if (value[value.length-1] === '"'){value = value.slice(0,-1);}
                 value = value.replace(/"/g, '\\"');
                 value = '"' + value + '"';
+            } else if (type === 'regex'){
+                if (value[0] === '/'){value = value.slice(1);}
+                if (value[value.length-1] === '/'){value = value.slice(0,-1);}
+                value = value.replace(/\//g, '\\/');
+                value = '/' + value + '/';
             }
             return value;
         }
     }
 
-    var codeFromBlock = function(block){
+    function codeFromBlock(block){
         var scriptTemplate = getScript(block.dataset.scriptId).replace(/##/g, '_' + block.dataset.seqNum);
         if (!scriptTemplate){
             // If there is no scriptTemplate, things have gone horribly wrong, probably from 
             // a block being removed from the language rather than hidden
-            wb.findAll('.block[data-scriptId=' + block.dataset.scriptId).forEach(function(elem){
+            wb.findAll('.block[data-script-id="' + block.dataset.scriptId + '"]').forEach(function(elem){
                 elem.style.backgroundColor = 'red';
             });
         }
@@ -607,14 +649,20 @@
         }
     }
 
+    Event.on(document.body, 'wb-remove', '.block', removeBlock);
+    Event.on(document.body, 'wb-add', '.block', addBlock);
+    Event.on(document.body, 'wb-delete', '.block', deleteBlock);
+
+    wb.blockRegistry = blockRegistry;
 
     // Export methods
     wb.Block = Block;
     wb.blockDesc = blockDesc;
+    wb.socketDesc = socketDesc;
     wb.registerSeqNum = registerSeqNum;
+    wb.resetSeqNum = resetSeqNum;
     wb.cloneBlock = cloneBlock;
     wb.codeFromBlock = codeFromBlock;
-    wb.addBlockHandler = addBlock;
     wb.changeName = changeName;
     wb.getSockets = getSockets;
     wb.getSocketValue = getSocketValue;
