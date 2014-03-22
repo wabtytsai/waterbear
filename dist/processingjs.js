@@ -12146,13 +12146,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 
 /*begin auth.js*/
 (function(global) {
-    var currentUser = 'bob@example.com';
-
-    navigator.id.watch({
-        loggedInUser: currentUser,
-        onlogin: verifyAssertion,
-        onlogout: function() {}
-    });
+    //var currentUser = 'bob@example.com';
 
     var signinLink = document.getElementById('signin');
     if (signinLink) {
@@ -12165,19 +12159,27 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
     if (signoutLink) {
         signoutLink.onclick = function() {
             navigator.id.logout();
+            window.location.reload();
         };
     }
 
-    function simpleXhrSentinel(xhr) {
+    function signinSentinel(xhr) {
         return function() {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200) {
-                    // reload page to reflect new login state
-                    console.log('reloading');
                     window.location.reload();
                 } else {
-                    console.log('error validating');
                     navigator.id.logout();
+                }
+            }
+        }
+    }
+
+    function signoutSentinel(xhr) {
+        return function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    window.location.reload();
                 }
             }
         }
@@ -12185,20 +12187,24 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 
     function verifyAssertion(assertion) {
         var xhr = new XMLHttpRequest();
-        var params = "assertion=" + assertion;
         xhr.open("POST", "/auth/persona?assertion=" + assertion.toString(), true);
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.setRequestHeader("Content-length", params.length);
-        xhr.onreadystatechange = simpleXhrSentinel(xhr);
+        //xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = signSentinel(xhr);
         xhr.send();
     }
 
     function signoutUser() {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "/logout", true);
-        xhr.onreadystatechange = simpleXhrSentinel(xhr);
-        xhr.send(null);
+        xhr.onreadystatechange = signoutSentinel(xhr);
+        xhr.send();
     }
+
+    navigator.id.watch({
+        //loggedInUser: currentUser,
+        onlogin: verifyAssertion,
+        onlogout: signoutUser
+    });
 })(this);
 /*end auth.js*/
 
