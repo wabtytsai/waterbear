@@ -1,4 +1,5 @@
 {
+    "sectionkey": "controls",
     "name": "Controls",
     "help": "Contains control flow, variables, setters, and messaging blocks.",
     "blocks": [
@@ -21,9 +22,9 @@
             "sockets": [
                 {
                     "name": "when",
-                    "type": "choice",
+                    "type": "string",
                     "options": "keys",
-                    "value": "choice",
+                    "value": "a",
                     "suffix": "key pressed"
                 }
             ]
@@ -48,9 +49,9 @@
             "sockets": [
                 {
                     "name": "when",
-                    "type": "choice",
+                    "type": "string",
                     "options": "pointerEvents",
-                    "value": "choice"
+                    "value": ""
                 }
             ]
         },

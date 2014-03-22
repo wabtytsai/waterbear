@@ -783,8 +783,10 @@ var SAT = window['SAT'] = {};
 /*end SAT.js*/
 
 /*begin languages/javascript/javascript_runtime.js*/
+(function(window){
+    'use strict';
 // Timer utility
-//console.log('Loaded runtime, defining utilities');
+//window.console.log('Loaded runtime, defining utilities');
 function Timer(){
     this.time = 0;
     this.start_time = Date.now();
@@ -975,7 +977,7 @@ function range(start, end, step){
     if (step === undefined){
         step = 1;
     }
-    var i,val;
+    var i,val, len;
     len = end - start;
     for (i = 0; i < len; i++){
         val = i * step + start;
@@ -1015,7 +1017,7 @@ function angle(shape){
  */
 
 // Declare namespace
-twinapex = {}
+var twinapex = {}
 
 twinapex.debug = {}
 
@@ -1118,10 +1120,10 @@ twinapex.debug.manageExceptions = function(func) {
 // - fake Firebug console.log for other browsers
 if(typeof(console) == "undefined") {
     // Install dummy functions, so that logging does not break the code if Firebug is not present
-    var console = {};
-    console.log = function(msg) {};
-    console.info = function(msg) {};
-    console.warn = function(msg) {};
+    window.console = {};
+    window.console.log = function(msg) {};
+    window.console.info = function(msg) {};
+    window.console.warn = function(msg) {};
 
     // TODO: Add IE Javascript console output
 
@@ -1133,14 +1135,25 @@ if(typeof(console) == "undefined") {
 
 var global = new Global();
 var local = new Local();
-
+window.Global = Global;
+window.Local = Local;
+window.global = global;
+window.local = local;
+window.Timer = Timer;
+window.twinapex = twinapex;
+window.rad2deg = rad2deg;
+window.deg2rad = deg2rad;
+window.range = range;
+window.randint = randint;
+window.angle = angle;
 console.log('runtime ready');
+})(window);
 
 /*end languages/javascript/javascript_runtime.js*/
 
 /*begin languages/javascript/asset_runtime.js*/
-(function(){
-
+(function(window){
+'use strict';
 var assets = {};
 
 function getAssetType(url){
@@ -1172,7 +1185,7 @@ function preloadAssets(assetUrls, callback){
 	if (!assetUrls.length){
 		return callback();
 	}
-	load = function() {
+	var load = function() {
 		// console.log('loaded');
 		loaded++;
 	    if (loaded >= toload){
@@ -1212,24 +1225,28 @@ Global.prototype.preloadImage = preloadImage; // called by script block to set u
 Global.prototype.preloadAudio = preloadAudio;
 Global.prototype.preloadVideo = preloadVideo;
 
-})();
+})(window);
 /*end languages/javascript/asset_runtime.js*/
 
 /*begin languages/javascript/control_runtime.js*/
     // Polyfill for built-in functionality, just to get rid of namespaces in older
     // browsers, or to emulate it for browsers that don't have requestAnimationFrame yet
+    (function(window){
+    	'use strict';
     window.requestAnimationFrame = window.requestAnimationFrame ||
                                    window.mozRequestAnimationFrame || 
                                    window.msRequestAnimationFrame || 
                                    window.webkitRequestAnimationFrame || 
                                    function(fn){ setTimeout(fn, 20); };
-
+})(window);
 /*end languages/javascript/control_runtime.js*/
 
 /*begin languages/javascript/sprite_runtime.js*/
 // Sprite Routines
 
 // This uses and embeds code from https://github.com/jriecken/sat-js
+(function(window){
+    'use strict';
 
 function Sprite(type, color){
     this.color = color;
@@ -1301,8 +1318,6 @@ function createSprite(shape, color){
     }
 };
 
-window.Sprite = Sprite;
-
 Sprite.prototype.isPolygon = function(){
     return this.type === 'polygon';
 };
@@ -1330,11 +1345,11 @@ Sprite.prototype.setPos = function(x, y){
 Sprite.prototype.draw = function(ctx){
     //rotation
     if(this.image != null){
-    	ctx.save();
-    	ctx.translate(this.getPos().x,this.getPos().y);
-    	ctx.rotate( this.facingDegrees *Math.PI/180);
-    	ctx.drawImage(this.image, 0, 0,this.size.w,this.size.h);
-    	ctx.restore();
+        ctx.save();
+        ctx.translate(this.getPos().x,this.getPos().y);
+        ctx.rotate( this.facingDegrees *Math.PI/180);
+        ctx.drawImage(this.image, 0, 0,this.size.w,this.size.h);
+        ctx.restore();
     }else{
         ctx.fillStyle = this.color;
         ctx.beginPath();
@@ -1351,17 +1366,17 @@ Sprite.prototype.draw = function(ctx){
         ctx.fill();
     }
     if(this.text != null){
-    	ctx.fillStyle = this.color;
-    	ctx.fill();
-    	ctx.textAlign="center";
-    	var height = this.size.h * 0.6;
-    	ctx.font = String(height) +"px Arial";
-    	ctx.fillStyle = this.tColor;
-    	ctx.save();
-    	ctx.translate(this.getPos().x ,this.getPos().y );
-    	ctx.rotate( this.facingDegrees *Math.PI/180);
-    	ctx.fillText(this.text,this.size.w *0.5,this.size.h *0.6, this.size.w *0.8);
-    	ctx.restore();
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.textAlign="center";
+        var height = this.size.h * 0.6;
+        ctx.font = String(height) +"px Arial";
+        ctx.fillStyle = this.tColor;
+        ctx.save();
+        ctx.translate(this.getPos().x ,this.getPos().y );
+        ctx.rotate( this.facingDegrees *Math.PI/180);
+        ctx.fillText(this.text,this.size.w *0.5,this.size.h *0.6, this.size.w *0.8);
+        ctx.restore();
     }
 };
 
@@ -1575,10 +1590,23 @@ Sprite.prototype.edgeWrap = function(stage_width, stage_height){
     }
 }
 
+window.createRectSprite = createRectSprite; // deprecated
+window.createTextSprite = createTextSprite;
+window.createImageSprite = createImageSprite;
+window.createPolygonSprite = createPolygonSprite;
+window.createCircleSprite = createCircleSprite;
+window.createSprite = createSprite;
+window.isSpriteClicked = isSpriteClicked;
+window.Sprite = Sprite;
+
+})(window);
+
 /*end languages/javascript/sprite_runtime.js*/
 
 /*begin languages/javascript/voice_runtime.js*/
 // Music Routines
+(function(window){
+	'use strict';
 function Voice(){
     this.on = false;
     this.osc;       // The oscillator which will generate tones
@@ -1612,6 +1640,10 @@ Voice.prototype.startOsc = function() {
 
 // Turn off the oscillator
 Voice.prototype.stopOsc = function() {
+	//during use strict you can't call stop more than once
+	// Failed to execute 'stop' on 'OscillatorNode': cannot call stop more than once. 
+	// so add conditional
+	if(this.on)
     this.osc.stop(0);
     this.osc.disconnect();
     this.on = false;
@@ -1709,6 +1741,8 @@ Voice.notes = [
 	'C8'
 ];
 Voice.refNote = Voice.notes.indexOf('A4');
+window.Voice = Voice;
+})(window);
 
 /*end languages/javascript/voice_runtime.js*/
 
@@ -1725,7 +1759,9 @@ Voice.refNote = Voice.notes.indexOf('A4');
 /*end languages/javascript/boolean_runtime.js*/
 
 /*begin languages/javascript/canvas_runtime.js*/
-Shape = {};
+(function(window){
+    'use strict';
+var Shape = {};
 
 window.Shape = Shape;
 
@@ -1799,6 +1835,7 @@ Shape.strokeShape = function(shape, color, width) {
     local.ctx.restore();
 
 };
+})(window);
 
 /*end languages/javascript/canvas_runtime.js*/
 
@@ -1811,8 +1848,10 @@ Shape.strokeShape = function(shape, color, width) {
 /*end languages/javascript/image_runtime.js*/
 
 /*begin languages/javascript/math_runtime.js*/
-
+(function(window){
+	'use strict';
 function gcd(a,b) {
+	var c;
 	while(b > 0) {
 		c = Math.abs(b);
 		b = Math.abs(a) % c;
@@ -1828,8 +1867,8 @@ function lcm(a,b) {
 // Adapted from an example found on Wikipedia:
 // http://en.wikipedia.org/w/index.php?title=Lanczos_approximation&oldid=552993029#Simple_implementation
 
-g = 7
-p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+var g = 7
+var p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
      771.32342877765313, -176.61502916214059, 12.507343278686905,
      -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7]
  
@@ -1847,8 +1886,10 @@ function gamma(n) {
 		return Math.sqrt(2*Math.PI) * Math.pow(t,n+0.5) * Math.exp(-t) * x;
 	}
 }
-
-
+window.gcd = gcd;
+window.lcm = lcm;
+window.gamma = gamma;
+})(window);
 /*end languages/javascript/math_runtime.js*/
 
 /*begin languages/javascript/random_runtime.js*/
@@ -1944,10 +1985,15 @@ function removeChoice(list){
 /*end languages/javascript/random_runtime.js*/
 
 /*begin languages/javascript/vector_runtime.js*/
+(function(window) {
+'use strict';
 function Vector(x,y) {
     this.x = x;
     this.y = y;
 };
+
+window.Vector = Vector;
+})(window);
 /*end languages/javascript/vector_runtime.js*/
 
 /*begin languages/javascript/object_runtime.js*/
@@ -1958,6 +2004,8 @@ function Vector(x,y) {
 
 // This was built directly from the formal definition of Levenshtein distance found on Wikipedia
 // It's possible there's a more efficient way of doing it?
+(function(window){
+	'use strict';
 function levenshtein(a,b) {
 	function indicator(i,j) {
 		if(a[i-1] == b[j-1])
@@ -1975,7 +2023,8 @@ function levenshtein(a,b) {
 	}
 	return helper(a.length,b.length);
 }
-
+window.levenshtein = levenshtein;
+})(window);
 /*end languages/javascript/string_runtime.js*/
 
 /*begin languages/javascript/path_runtime.js*/
@@ -1996,7 +2045,7 @@ function levenshtein(a,b) {
 
 /*begin languages/javascript/motion_runtime.js*/
 (function(global){
-
+'use strict';
 var accelerometer = {
     direction: ""
 };
@@ -2062,7 +2111,7 @@ global.accelerometer = accelerometer;
 
 /*begin languages/javascript/geolocation_runtime.js*/
 (function(global){
-
+'use strict';
 var location = {};
 
 if (navigator.geolocation){
@@ -2129,8 +2178,39 @@ global.location = location;
 })(global);
 /*end languages/javascript/geolocation_runtime.js*/
 
-/*begin languages/javascript/size_runtime.js*/
+/*begin languages/javascript/date_runtime.js*/
 
+/*end languages/javascript/date_runtime.js*/
+
+/*begin languages/javascript/size_runtime.js*/
+// Size Routines
+
+/**
+ * Convert size parameter to pixel value 
+ * 
+ * @param {?number=} x is the size parameter
+ * @param {?relativeUnit=} unit is px or %
+ * @param {?boolean=} isWidth is true for width, false for height
+ * @return {number} pixel value for size
+ *
+ * Notes: -em and pt irrelevant for these purposes, need way to disable these
+ *         options in the dropdown
+ */
+function convert(x, relativeUnit, isWidth) {
+  switch(relativeUnit) {
+    case "px":
+      return x;
+    case "%":
+      if(isWidth){
+        return (global.stage_width*x)/100;
+      }
+      else {
+        return (global.stage_height*x)/100;
+      }
+    default: //need this b/c examples currently have size blocks w/o option list
+      return x; 
+  }
+}
 /*end languages/javascript/size_runtime.js*/
 
 /*begin languages/javascript/text_runtime.js*/

@@ -4,6 +4,7 @@
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
+	'use strict';
 
 	function clearScripts(event, force){
 		if (force || confirm('Throw out the current script?')){
@@ -45,14 +46,21 @@
 		// hide loading spinner if needed
 		console.log('handleStateChange');
 		hideLoader();
+		var viewButtons = document.querySelectorAll('.views + .sub-menu .toggle');
 		wb.queryParams = wb.urlToQueryParams(location.href);
 		if (wb.queryParams.view === 'result'){
 			document.body.classList.add('result');
 			document.body.classList.remove('editor');
+			for(var i = 0; i < viewButtons.length; i++) {
+				viewButtons[i].classList.add('disabled');
+			}
 			wb.view = 'result';
 		}else{
 			document.body.classList.remove('result');
 			document.body.classList.add('editor');
+			for(var i = 0; i < viewButtons.length; i++) {
+				viewButtons[i].classList.remove('disabled');
+			}
 			wb.view = 'editor';
 		}
 		if (wb.queryParams.embedded === 'true'){

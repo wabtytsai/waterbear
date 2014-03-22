@@ -1,5 +1,7 @@
 {
+	"sectionkey": "arrays",
     "name": "Arrays",
+    "help": "Arrays are lists of items. Items can be added and removed, located, sorted and more.",
     "blocks": [
         {
             "blocktype": "step",

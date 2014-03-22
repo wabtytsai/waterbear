@@ -1,4 +1,5 @@
 {
+    "sectionkey": "color",
     "name": "Color",
     "help": "Color blocks are for creating, converting, and manipulating colors",
     "blocks": [
@@ -289,9 +290,9 @@
                 },
                 {
                     "name": "repeats",
-                    "type": "choice",
+                    "type": "string",
                     "options": "repetition",
-                    "value": "choice"
+                    "value": "repeat"
                 }
             ]
         }

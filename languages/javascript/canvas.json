@@ -1,4 +1,5 @@
 {
+    "sectionkey": "canvas",
     "name": "Canvas",
     "help": "Canvas blocks are blocks that are about drawing on the canvas but don't fit elsewhere. Also look at the Sprites, Shapes, and Path menus.",
     "blocks": [
@@ -56,9 +57,9 @@
             "sockets": [
                 {
                     "name": "global composite operator",
-                    "type": "choice",
+                    "type": "string",
                     "options": "globalCompositeOperators",
-                    "value": "choice"
+                    "value": "source-over"
                 }
             ]
         },
@@ -133,9 +134,9 @@
             "sockets": [
                 {
                     "name": "line cap",
-                    "type": "choice",
+                    "type": "string",
                     "options": "linecap",
-                    "value": "choice"
+                    "value": "round"
                 }
             ]
         },
@@ -147,9 +148,9 @@
             "sockets": [
                 {
                     "name": "line join",
-                    "type": "choice",
+                    "type": "string",
                     "options": "linejoin",
-                    "value": "choice"
+                    "value": null
                 }
             ]
         },

@@ -1,4 +1,5 @@
 {
+    "sectionkey": "text",
     "name": "Text",
     "help": "Text blocks represent and manipulate the way text is drawn to the screen, things like alignment, font, and size.",
     "blocks": [
@@ -15,9 +16,9 @@
                 },
                 {
                     "name": "",
-                    "type": "choice",
+                    "type": "string",
                     "options": "unit",
-                    "value": "choice"
+                    "value": "px"
                 },
                 {
                     "name": "",
@@ -34,9 +35,9 @@
             "sockets": [
                 {
                     "name": "text align",
-                    "type": "choice",
+                    "type": "string",
                     "options": "align",
-                    "value": "choice"
+                    "value": "left"
                 }
             ]
         },
@@ -48,9 +49,9 @@
             "sockets": [
                 {
                     "name": "text baseline",
-                    "type": "choice",
+                    "type": "string",
                     "options": "baseline",
-                    "value": "choice"
+                    "value": ""
                 }
             ]
         },

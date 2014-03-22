@@ -1,5 +1,7 @@
 {
+	"sectionkey": "control",
     "name": "Control",
+    "help": "Contains control flow, variables, setters, and messaging blocks.",
     "blocks": [
         {
             "blocktype": "eventhandler",

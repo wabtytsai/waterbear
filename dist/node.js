@@ -1839,8 +1839,14 @@ hljs.LANGUAGES.javascript = {
 var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=document.readyState==="complete";if(!a){function b(){a=!0}window.addEventListener?window.addEventListener("load",b,!1):window.attachEvent&&window.attachEvent("onload",b)}return function(){return a}}(),e={mouseenter:{attachesTo:"mouseover",eventTest:function(a){return!withinElement(a,a.originalTarget(),"fromElement")}},mouseleave:{attachesTo:"mouseout",eventTest:function(a){return!withinElement(a,a.originalTarget(),"toElement")}},hashchange:{bind:function(a,b){f.addEventListener(b)},unbind:function(a,b){f.removeEventListener(b)},invoke:function(a){f.dispatchEvent()}},keystroke:{attachesTo:"keydown",eventTest:function(a){return g.runTest(a,a.getNamespace().split(".")[0])}}},f=new function(){var b=this,c=25,d=[],e=function(){var a=(location+"").match(/^[^#]*(#.+)$/);return a?a[1]:""},f=function(a){a[0]!=="#"&&(a="#"+a),location.hash=a},g=function(){var a=!1;return function(b){typeof b=="boolean"&&(a=b);return a}}(),h=function(b,c){return a.buildEventObject("hashchange",{},merge({oldURL:b,newURL:location+""},c||{}))},i=function(a){var b;for(var c=0,e=d.length;c<e;c++)b=d[c].call(window,a);a.returnValue!=null&&(b=a.returnValue);return b},j=function(){var a=e(),d=location+"",f=!1,h=null;return{start:function(){f||(f=!0,h=window.setInterval(function(){var c=e();c!==a&&(a=c,g()||b.dispatchEvent(d),d=location+"")},c))},stop:function(){f&&(f=!1,window.clearInterval(h))}}}(),k=function(a){var a=a||window.event,b=a._isEmulated||!1;!g()&&!b&&(g(!0),j.stop());return i(a)};b.init=function(){attachListener(window,"hashchange",k),g()||j.start()},b.addEventListener=function(a){d.push(a)},b.removeEventListener=function(a){var b=[];for(var c=0,e=d.length;c<e;c++)d[c]!==a&&b.push(d[c]);d=b},b.dispatchEvent=function(a){return i(h(location+"",a))}},g=function(){var a={type:"keydown",propagate:!1,disable_in_input:!0,target:document,keycode:!1},b={"`":"~",1:"!",2:"@",3:"#",4:"$",5:"%",6:"^",7:"&",8:"*",9:"(",0:")","-":"_","=":"+",";":":","'":'"',",":"<",".":">","/":"?","\\":"|"},c={esc:27,escape:27,tab:9,space:32,"return":13,enter:13,backspace:8,scrolllock:145,scroll_lock:145,scroll:145,capslock:20,caps_lock:20,caps:20,numlock:144,num_lock:144,num:144,pause:19,"break":19,insert:45,home:36,"delete":46,end:35,pageup:33,page_up:33,pu:33,pagedown:34,page_down:34,pd:34,left:37,up:38,right:39,down:40,f1:112,f2:113,f3:114,f4:115,f5:116,f6:117,f7:118,f8:119,f9:120,f10:121,f11:122,f12:123},d=function(){return{shift:{wanted:!1,pressed:!1},ctrl:{wanted:!1,pressed:!1},alt:{wanted:!1,pressed:!1},meta:{wanted:!1,pressed:!1}}},e=function(a,e,f){var g,h,i,j,k,l;if(f.disable_in_input){i=a.currentTarget;if(i&&i.tagName&&(i.tagName.toLowerCase()==="input"||i.tagName.toLowerCase()==="textarea")&&i!==f.target)return}a.keyCode?k=a.keyCode:a.which&&(k=a.which),j=String.fromCharCode(k).toLowerCase(),k===188&&(j=","),k===190&&(j="."),g=e.split("+"),h=0,l=d(),a.ctrlKey&&(l.ctrl.pressed=!0),a.shiftKey&&(l.shift.pressed=!0),a.altKey&&(l.alt.pressed=!0),a.metaKey&&(l.meta.pressed=!0);for(var m=0;m<g.length;m++){var n=g[m];n==="ctrl"||n==="control"?(h++,l.ctrl.wanted=!0):n==="shift"?(h++,l.shift.wanted=!0):n==="alt"?(h++,l.alt.wanted=!0):n==="meta"?(h++,l.meta.wanted=!0):n.length>1?c[n]===k&&h++:f.keycode?f.keycode===k&&h++:j===n?h++:b[j]&&a.shiftKey&&(j=b[j],j===n&&h++)}return h===g.length&&l.ctrl.pressed===l.ctrl.wanted&&l.shift.pressed===l.shift.wanted&&l.alt.pressed===l.alt.wanted&&l.meta.pressed===l.meta.wanted};return{runTest:function(b,c,d){var d=d||{};for(var f in a)a.hasOwnProperty(f)&&d[f]===undefined&&(d[f]=a[f]);return e(b,c.toLowerCase(),d)},defaults:a}}(),h=function(){var a=function(a){if(typeof this=="undefined"||typeof a=="undefined"||typeof this[a]=="undefined")return!1;return this[a]!==this.constructor.prototype[a]};return function(b){try{b.prototype.hasOwnProperty=a;if(typeof b.hasOwnProperty!="function")throw 0}catch(c){b.hasOwnProperty=a}}}();EventController=function(a,b){var c=this,d=!1,a=a,b=b,e=null;typeof a.hasOwnProperty!="function"&&h(a),c.target=c.srcElement=b;for(var f in a)a.hasOwnProperty(f)&&typeof a[f]!="function"&&(c[f]=a[f]);c.getNamespace=function(){return e},c._setNamespace=function(a){e=a},c.mousePosition=function(){var b=0,c=0;if(a.pageX||a.pageY)b=a.pageX,c=a.pageY;else if(a.clientX||a.clientY)b=a.clientX+document.body.scrollLeft+document.documentElement.scrollLeft,c=a.clientY+document.body.scrollTop+document.documentElement.scrollTop;return{x:b,y:c}},c.eventObject=function(){return a},c.originalTarget=function(){return b},c.stopPropagation=function(){typeof a.stopPropagation=="function"&&a.stopPropagation(),a.cancelBubble=!0},c.cancelDefault=function(){d||(d=!0,typeof a.preventDefault=="function"&&a.preventDefault(),a.returnValue=!1)},c.isDefaultCanceled=function(){return d}},EventFunction=function(a,b){var c=this,b=b;a=a||undefined;if(typeof a!="function")return undefined;c.call=function(b,c){return a.call(b,c)}},EventWrapper=function(a,b){var c=this,a=a||null,b=b||null,d={},f=!1,g=!1,h=function(a){var b=d;for(var c=0,e=a.length;c<e;c++){var f=a[c];typeof b[f]!="object"&&(b[f]={}),b=b[f]}typeof b["."]!="object"&&(b["."]=[]);return b};c.registerFunction=function(a,b){var d=h(b);d["."].push(new EventFunction(a,c))},c.removeNamespace=function(a){if(a&&a.length){var b=a.pop(),c=h(a);c[b]={}}else d={}},c.run=function(c,f){var f=f||new EventController(c,a),g=[],h=b in e&&e[b].eventTest?e[b].eventTest:function(){return!0},i=function(b){var c=null;for(var d in b)if(b.hasOwnProperty(d)){f._setNamespace(g.join("."));if(d==="."){if(h(f))for(var e=0,j=b[d].length;e<j;e++)c=b[d][e].call(a,f),c===!1&&f.cancelDefault()}else g.push(d),c=i(b[d]),g.pop()}return c},j=i(d);return f.isDefaultCanceled()?!1:j};if(b in e){var i=e[b],j=!!i.bind&&!!i.unbind,k=function(a){return c.run(a||window.event)};c.bindEvent=function(){g||(g=!0,j?i.bind(a,k):attachListener(a,i.attachesTo,k))},c.unbindEvent=function(){g&&(g=!1,j?i.unbind(a,k):detachListener(a,i.attachesTo,k))}}else{var k=function(a){return c.run(a||window.event)};c.bindEvent=function(){g||(g=!0,attachListener(a,b,k))},c.unbindEvent=function(){g&&(g=!1,detachListener(a,b,k))}}c.bindEvent()},EventHandler=function(a){var c=this,a=a||null,d={};b.push(c),c.getTarget=function(){return a},c.registerEvent=function(b,c){if(typeof b!="string"||typeof c!="function")return!1;var e=b.split("."),f;b=e.shift(),f=e,startsWithOn.test(b)&&(b=b.substring(2)),d[b]===undefined&&(d[b]=new EventWrapper(a,b)),d[b].registerFunction(c,f)},c.removeEvent=function(a){var a=a||!1,b;if(typeof a!="string")return!1;if(a==="*"){for(var c in d)d.hasOwnProperty(c)&&d[c].removeNamespace(!1);return!0}b=a.split("."),a=b.shift(),d[a].removeNamespace(b)}},startsWithOn=/^on/,startsWithDOM=/^DOM/,attachListener=function(a,b,c){if(a.addEventListener)startsWithOn.test(b)&&(b=b.substring(2)),a.addEventListener(b,c,!1);else if(a.attachEvent)!startsWithDOM.test(b)&&!startsWithOn.test(b)&&(b="on"+b),a.attachEvent(b,c);else throw new YourBrowserFailsError("Could not attach event listener")},detachListener=function(a,b,c){if(a.removeEventListener)startsWithOn.test(b)&&(b=b.substring(2)),a.removeEventListener(b,c,!1);else if(a.detachEvent)!startsWithDOM.test(b)&&!startsWithOn.test(b)&&(b="on"+b),a.detachEvent(b,c);else throw new YourBrowserFailsError("Could not detach event listener")},invokeListener=function(b,c,d){var e;if(b.dispatchEvent)startsWithOn.test(c)&&(c=c.substring(2)),e=a.buildEventObject(b,c,d),b.dispatchEvent(e);else if(b.fireEvent)!startsWithDOM.test(c)&&!startsWithOn.test(c)&&(c="on"+c),e=a.buildEventObject(b,c,d),b.fireEvent(c,e);else throw new YourBrowserFailsError("Could not invoke event listener")},getEventTarget=function(a,b){var c=!1;a.target?c=a.target:a.srcElement&&(c=a.srcElement),!c&&a.srcElement===null&&(c=b||window),c.nodeType==3&&(c=c.parentNode);return c},withinElement=function(a,b,c){var d=a.relatedTarget,e;d==null&&(d=a[c]||null);try{while(d&&d!==b)d=d.parentNode;e=d===b}catch(f){e=!1}return e},getHandlerByTarget=function(a){for(var c=0;c<b.length;c++)if(b[c].getTarget()===a)return b[c];return!1},getEventHandler=function(a){var b=getHandlerByTarget(a);return b?b:new EventHandler(a)},merge=function(){var a=Array.prototype.slice.call(arguments,0),b={};for(var c=0,d=a.length;c<d;c++)for(var e in a[c])a[c].hasOwnProperty(e)&&(b[e]=a[c][e]);return b},contains=function(a,b){for(var c=0,d=b.length;c<d;c++)if(b[c]===a)return!0;return!1},a.version=function(){return c},a.ready=function(){var a=[],b=!1;return function(c){d()?c():(a.push(c),b||Events.bind(window,"load",function(){for(var b=0,c=a.length;b<c;b++)a[b]()}))}}(),a.log=function(){var a=null,b=function(){a==null&&(typeof window.console!="undefined"?typeof window.console.log.apply=="function"?a=function(){window.console.log.apply(window.console,arguments)}:a=function(){window.console.log(arguments)}:typeof console!="undefined"?a=function(){console.log.apply(console,arguments)}:a=function(){});return a};return function(){var a=Array.prototype.slice.call(arguments,0);typeof a[0]=="string"&&(a[0]="["+Date()+"] - "+a[0]),b().apply(this,a)}}(),a.bind=function(a,b,c){var d=getEventHandler(a);return d.registerEvent(b,c)},a.unbind=function(a,b){var c=getEventHandler(a);return c.removeEvent(b)},a.specialEvents={exists:function(a){return e[a]!=null},add:function(a,b){e[a]==null&&(e[a]=b)},edit:function(a,b){if(e[a]!=null)for(var c in b)b.hasOwnProperty(c)&&(e[a][c]=b[c])},del:function(a){e[a]!=null&&(e[a]=null)}},a.invoke=function(a,b,c){return invokeListener(a,b,c)},a.buildEventObject=function(){var a={HTMLEvents:["abort","blur","change","error","focus","load","reset","resize","scroll","select","submit","unload","hashchange"],UIEvents:["DOMActivate","DOMFocusIn","DOMFocusOut"],KeyEvents:["keydown","keypress","keyup"],MouseEvents:["click","mousedown","mousemove","mouseout","mouseover","mouseup"],MutationEvents:["DOMAttrModified","DOMNodeInserted","DOMNodeRemoved","DOMCharacterDataModified","DOMNodeInsertedIntoDocument","DOMNodeRemovedFromDocument","DOMSubtreeModified"]},b=function(b){var c="Events";for(var d in a)if(a.hasOwnProperty(d)&&contains(b,a[d])){d==="KeyEvents"&&!window.KeyEvent&&(d="UIEvents");if(document.implementation.hasFeature(d,"2.0")||window[d.substring(0,d.length-1)])d="Events";c=d;break}return c},c={useDefaults:!1,bubbles:!0,cancelable:!1},d={winObj:window,detail:1},e={winObj:window,ctrlKey:!1,altKey:!1,shiftKey:!1,metaKey:!1,keyCode:0,charCode:0},f={winObj:window,ctrlKey:!1,altKey:!1,shiftKey:!1,metaKey:!1,button:0,relatedTarget:null},g={relatedNode:null,prevValue:null,newValue:null,attrName:null,attrChange:null};return document.createEvent?function(a,h,i){var j=b(event),k=document.createEvent(j),l=h,h=h||{};if(typeof l!="object"||h.useDefaults)j="Events";switch(j){case"Events":case"HTMLEvents":h=merge(c,h),k.initEvent(a,h.bubbles,h.cancelable);break;case"UIEvents":h=merge(c,d,h),k.initUIEvent(a,h.bubbles,h.cancelable,h.winObj,h.detail);break;case"KeyEvents":h=merge(c,e,h),k.initKeyEvent(a,h.bubbles,h.cancelable,h.winObj,h.ctrlKey,h.altKey,h.shiftKey,h.metaKey,h.keyCode,h.charCode);break;case"MouseEvents":h=merge(c,f,h),k.initMouseEvent(a,h.bubbles,h.cancelable,h.winObj,h.screenX,h.screenY,h.clientX,h.clientY,h.ctrlKey,h.altKey,h.shiftKey,h.metaKey,h.button,h.relatedTarget);break;case"MutationEvents":h=merge(c,g,h),k.initMutationEvent(a,h.bubbles,h.cancelable,h.relatedNode,h.prevValue,h.newValue,h.attrName,h.attrChange)}for(var m in i)i.hasOwnProperty(m)&&(k[m]=i[m]);return k}:document.createEventObject?function(a,b,d){var e=document.createEventObject(),b=merge(c,b||{},d);for(var f in b)b.hasOwnProperty(f)&&(e[f]=b[f]);return e}:function(a,b,d){return merge({type:a,timeStamp:(new Date).getTime(),target:target,srcElement:target,currentTarget:target,defaultPrevented:!1},c,b||{},d||{},{bubbles:!1})}}(),f.init()};typeof window.YourBrowserFailsError=="undefined"&&(window.YourBrowserFailsError=function(a){if(!this instanceof YourBrowserFailsError)return new YourBrowserFailsError(a);var b=function(){var a;try{(0)()}catch(b){a=b}return a}();this.name="YourBrowserFailsError",this.message=a,this.stack=b.stack||b.stacktrace||"Could not get a stack. MORE FAILS!!"});
 /*end events.min.js*/
 
+
+/* list of files used for localization of blocks */
+var l10nFiles = {};
+
+
 /*begin ajax.js*/
 (function (global) {
+    'use strict';
     function $(e) {
         if (typeof e == 'string') e = document.getElementById(e);
         return e
@@ -1855,7 +1861,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         return n
     };
 
-    ajax = {};
+    var ajax = {};
     ajax.x = function () {
         try {
             return new ActiveXObject('Msxml2.XMLHTTP')
@@ -1888,7 +1894,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         x.open(m, u, true);
         x.onreadystatechange = function () {
             if (x.readyState == 4 && x.status < 400) {
-                cType = x.getResponseHeader("Content-Type");
+                var cType = x.getResponseHeader("Content-Type");
                 f(x.responseText, cType);
             } else if (x.readyState == 4) {
                 if (e == undefined) {
@@ -2007,7 +2013,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // loaded (in template/template.html).
 // Extracts parameters from URL, used to switch embed modes, load from gist, etc.
 (function(global){
-
+'use strict';
 	// Source: http://stackoverflow.com/a/13984429
 	function urlToQueryParams(url){
 	    var qparams = {},
@@ -2059,6 +2065,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(global){
+    'use strict';
     //
     //
     // UTILITY FUNCTIONS
@@ -2071,33 +2078,36 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 
     function makeArray(arrayLike){
         return Array.prototype.slice.call(arrayLike);
-    };
+    }
 
     function reposition(elem, position){
         // put an absolutely positioned element in the right place
         // May need to take into account offsets of container
         elem.style.top = position.top + 'px';
         elem.style.left = position.left + 'px';
-    };
+    }
 
     function hide(elem){
         elem.classList.add('hidden');
-    };
+    }
 
     function show(elem){
         elem.classList.remove('hidden');
-    };
+    }
 
     var svgText = document.querySelector('.resize-tester');
     function resize(input){
-        if (!input) return;
+        if (!input)
+        {
+            return;
+        }
         if (input.wbTarget){
             input = input.wbTarget;
         }
         svgText.textContent = input.value || '';
         var textbox = svgText.getBBox();
         input.style.width = (textbox.width + 25) + 'px';
-    };
+    }
 
     // wb.mag = function mag(p1, p2){
     //     return Math.sqrt(Math.pow(p1.left - p2.left, 2) + Math.pow(p1.top - p2.top, 2));
@@ -2105,7 +2115,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 
     function dist(p1, p2, m1, m2){
         return Math.sqrt(Math.pow(p1 - m1, 2) + Math.pow(p2 - m2, 2));
-    };
+    }
 
 
     function overlapRect(r1, r2){ // determine area of overlap between two rects
@@ -2115,24 +2125,24 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         if (r1.bottom < r2.top){ return 0; }
         var max = Math.max, min = Math.min;
         return (max(r1.left, r2.left) - min(r1.right, r2.right)) * (max(r1.top, r2.top) - min(r1.bottom, r2.bottom));
-    };
+    }
 
     function rect(elem){
         return elem.getBoundingClientRect();
-    };
+    }
 
     function overlap(elem1, elem2){
         return wb.overlapRect(wb.rect(elem1), wb.rect(elem2));
-    };
+    }
 
     function area(elem){
         return elem.clientWidth * elem.clientHeight;
-    };
+    }
 
     function containedBy(target, container){
         var targetArea = Math.min(wb.area(target), wb.area(container) * 0.90);
         return target.overlap(container) >= targetArea;
-    };
+    }
 
     function closest(elem, selector){
         if (elem.jquery){
@@ -2149,7 +2159,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             elem = elem.parentElement;
         }
         return null;
-    };
+    }
 
     function indexOf(elem){
         var idx = 0;
@@ -2158,7 +2168,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             idx++;
         }
         return idx;
-    };
+    }
 
     function find(elem, selector){
         if (typeof(elem) === 'string'){
@@ -2166,7 +2176,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             elem = document.body;
         }
         return elem.querySelector(selector);
-    };
+    }
 
     function findAll(elem, selector){
         if (typeof(elem) === 'string'){
@@ -2174,13 +2184,13 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             elem = document.body;
         }
         return wb.makeArray(elem.querySelectorAll(selector));
-    };
+    }
 
     function findChildren(elem, selector){
         return wb.makeArray(elem.children).filter(function(item){
             return wb.matches(item, selector);
         });
-    };
+    }
 
     function findChild(elem, selector){
         if (arguments.length !== 2){
@@ -2194,7 +2204,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             }
         }
         return null;
-    };
+    }
 
    function elem(name, attributes, children){
         // name can be a jquery object, an element, or a string
@@ -2211,7 +2221,10 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         }
         if (attributes){
             Object.keys(attributes).forEach(function(key){
-                if (attributes[key] === null || attributes[key] === undefined) return;
+                if (attributes[key] === null || attributes[key] === undefined)
+                {
+                    return;
+                }
                 if (typeof attributes[key] === 'function'){
                     val = attributes[key](attributes);
                     if (val){
@@ -2222,7 +2235,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
                 }
             });
         }
-        if (children){
+        if (children !== null && children !== undefined){
             if (Array.isArray(children)){
                 children.forEach(function(child){
                     if (child.nodeName){
@@ -2246,7 +2259,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             }
         }
         return e;
-    };
+    }
 
 
     // Remove namespace for matches
@@ -2453,7 +2466,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // are loaded (in template/template.html)
 
 (function(global){
-
+'use strict';
     // After trying to find a decent drag-and-drop library which could handle
     // snapping tabs to slots *and* dropping expressions in sockets *and*
     // work on both touch devices and with mouse/trackpad *and* could prevent dragging
@@ -2508,6 +2521,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
     var timer;
     var dragTarget;
     var dropTarget;
+    var dropRects;
     var dragging;
     var currentPosition;
     var scope;
@@ -2519,6 +2533,9 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
     var selectedSocket; // <- WB
     var dragAction = {};
     var templateDrag, localDrag; // <- WB
+    var startPosition;
+    var pointerDown;
+    var cloned;
     
     var _dropCursor; // <- WB
     
@@ -2541,6 +2558,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         currentPosition = null;
         timer = null;
         dragging = false;
+        pointerDown = false;
         cloned = false; // <- WB
         scope = null; // <- WB
         templateDrag = false; // <- WB
@@ -2556,13 +2574,13 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
     reset();
     
     function initDrag(event){
-        console.log('initDrag(%o)', event);
+        // console.log('initDrag(%o)', event);
         
         // Called on mousedown or touchstart, we haven't started dragging yet
         // DONE: Don't start drag on a text input or select using :input jquery selector
-        
+        pointerDown = true;
         var eT = event.wbTarget; // <- WB
-        console.log(eT);
+        // console.log(eT);
         //For some reason this is the scratchpad
         //Check whether the original target was an input ....
         // WB-specific
@@ -2626,6 +2644,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
     function startDrag(event){
         // called on mousemove or touchmove if not already dragging
         if (!dragTarget) {return undefined;}
+        if (!pointerDown) {return undefined;}
         // console.log('startDrag(%o)', event);
         dragTarget.classList.add("dragIndication");
         currentPosition = {left: event.wbPageX, top: event.wbPageY};
@@ -2697,31 +2716,12 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         var currPos = wb.rect(dragTarget); // <- WB
         // WB-Specific
         wb.reposition(dragTarget, {left: currPos.left + dX, top: currPos.top + dY});
-        // Scoll workspace as needed
-        // WB-Specific
-        if (workspace){
-            // FIXME: is this why scroll-wheel doesn't work?
-            // FIXME: is this why scrolling down works poorly?
-            var container = workspace.parentElement;
-            var offset = wb.rect(container);
-            if (currPos.top < offset.top){
-                container.scrollTop -= Math.min(container.scrollTop, offset.top - currPos.top);
-            }else if (currPos.bottom > offset.bottom){
-                var maxVerticalScroll = container.scrollHeight - offset.height - container.scrollTop;
-                container.scrollTop += Math.min(maxVerticalScroll, currPos.bottom - offset.bottom);
-            }
-            if (currPos.left < offset.left){
-                container.scrollLeft -= Math.min(container.scrollLeft, offset.left - currPos.left);
-            }else if(currPos.right > offset.right){
-                var maxHorizontalScroll = container.scrollWidth - offset.width - container.scrollLeft;
-                container.scrollLeft += Math.min(maxHorizontalScroll, currPos.right - offset.right);
-            }
-        }
         currentPosition = nextPosition;
         return false;
     }
 
     function endDrag(event){
+        pointerDown = false;
         // console.log('endDrag(%o) dragging: %s', event, dragging);
         if (!dragging) {return undefined;}
         clearTimeout(timer);
@@ -3039,26 +3039,6 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         return '.socket[data-type=' + name + '] > .holder';
     }
     
-    function registerScratchSpace() {
-        var workspace = document.querySelector('.workspace');
-        var mainWorkspace = document.querySelector('scripts_workspace');
-        var id = "23423443";
-        var sBlock = wb.Block({
-                group: 'scripts_scratchspace',
-                id: id,
-                scriptId: id,
-                scopeId: id,
-                blocktype: 'context',
-                sockets: [
-                ],
-                script: '[[1]]',
-                isTemplateBlock: false,
-                help: 'Place script blocks here for quick access'
-            });
-    
-        workspace.insertBefore(sBlock, mainWorkspace);
-    }
-    
     function cancelDrag(event) {
         // Cancel if escape key pressed
         // console.log('cancel drag of %o', dragTarget);
@@ -3078,14 +3058,9 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         var x = event.clientX;
         var y = event.clientY;
     
-        console.log("Mouse x " + x);
-        console.log("Mouse y" + y);
-    
         for (var i = 0; i < children.length; i++){
-            console.log(children[i]);
             if (children[i].nodeType != 3) {
                 var r = children[i].getBoundingClientRect();
-                console.log(r);
                 if (r.bottom > y && r.top < y && r.left < x && r.right > x) {
                     return children[i];
                 }
@@ -3094,37 +3069,45 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         return false;
     }
     
+    function menuToScratchpad(event) {
+	cloned = wb.cloneBlock(event.target);
+	scratchpad.appendChild(cloned);
+    }
+    
     
     //This function arranges the blocks into a grid. Future functions could
     //sort the blocks by type, frequency of use, or other such metrics
-    function arrangeScratchPad() {
-	var PADDING = 5;
+    function arrangeScratchpad(event) {
+	var PADDING = 8;
 	
 	var scratchPadRect = scratchpad.getBoundingClientRect();
-	
 	var width = scratchPadRect.width;
-	var xOrigin = scratchPadRect.x;
-	var yOrigin = scratchPadRect.y;
+	var xOrigin = 5;
+	var yOrigin = 5;
 	
 	var x = xOrigin;
 	var y = yOrigin;
 	
 	var children = scratchpad.childNodes;
+	var maxHeight = 0;
 	
 	for (var i = 0; i < children.length; i++) {
 	    if (children[i].nodeType != 3) {
 		var r = children[i];
 		
 		var rBounding = r.getBoundingClientRect();
-		
+		if (rBounding.height > maxHeight) {
+		    maxHeight = rBounding.height;
+		}
 		r.style.top = y + "px";
 		r.style.left = x + "px";
-		
 		x += rBounding.width + PADDING;
 		
-		if (xOrigin >= width) {
+		if (x >= width - 25) {
+		    //We are going into a new row.
 		    x = xOrigin;
-		    y += rBounding.height + PADDING;
+		    y += maxHeight + PADDING;
+		    maxHeight = 0;
 		}
 	    }
 	}
@@ -3140,6 +3123,8 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         Event.on('.content', 'touchend', null, endDrag);
         // TODO: A way to cancel touch drag?
     Event.on('.content', 'mousedown', '.scratchpad', initDrag);
+    Event.on('.content', 'dblclick', null, arrangeScratchpad);
+    Event.on('.content', 'dblclick', '.block', menuToScratchpad)
         Event.on('.content', 'mousedown', '.block', initDrag);
         Event.on('.content', 'mousemove', null, drag);
         Event.on(document.body, 'mouseup', null, endDrag);
@@ -3155,6 +3140,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // See: https://en.wikipedia.org/wiki/Universally_unique_identifier for more info
 
 (function(global){
+  'use strict';
   function hex(length){
     if (length > 8) return hex(8) + hex(length-8); // routine is good for up to 8 digits
     var myHex = Math.random().toString(16).slice(2,2+length);
@@ -3212,7 +3198,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
-
+'use strict';
     var elem = wb.elem;
 
     var nextSeqNum = 0;
@@ -3222,19 +3208,24 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
     function newSeqNum(){
         nextSeqNum++;
         return nextSeqNum;
-    };
+    }
 
     function registerSeqNum(seqNum){
         // When reifying saved blocks, call this for each block to make sure we start new blocks
         // that do not overlap with old ones.
-        if (!seqNum) return;
+        if (!seqNum)
+        {
+            return;
+        }
         nextSeqNum = Math.max(parseInt(seqNum, 10), nextSeqNum);
     }
 
     function resetSeqNum(){
+        console.log('resetSeqNum (and also block registry)');
         nextSeqNum = 0;
-        blockRegistry = {};
-        wb.blockRegistry = blockRegistry;
+        // the lines below were breaking loading from files, and probably any load after the menus were built
+        // blockRegistry = {};
+        // wb.blockRegistry = blockRegistry;
     }
 
     function registerBlock(blockdesc){
@@ -3311,6 +3302,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
                 'data-local-source': obj.localSource || null, // help trace locals back to their origin
                 'data-sockets': JSON.stringify(obj.sockets),
                 'data-locals': JSON.stringify(obj.locals),
+                'data-keywords': JSON.stringify(obj.keywords),
                 'title': obj.help || getHelp(obj.scriptId || obj.id)
             },
             elem('div', {'class': 'label'}, createSockets(obj))
@@ -3353,7 +3345,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         //     console.log('instantiated block %o from description %o', block, obj);
         //}
         return block;
-    }
+    };
 
     // Block Event Handlers
 
@@ -3486,7 +3478,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         if (desc.type){
             socket.dataset.type = desc.type;
             var holder = elem('div', {'class': 'holder'}, [Default(desc)]);
-            socket.appendChild(holder)
+            socket.appendChild(holder);
         }
         if (desc.block){
             socket.dataset.block = desc.block;
@@ -3518,15 +3510,15 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             socket.appendChild(elem('span', {'class': 'suffix'}, desc.suffix));
         }
         return socket;
-    }
+    };
 
 
     function socketDesc(socket){
         var parentBlock = wb.closest(socket, '.block');
         var isTemplate = !!parentBlock.dataset.isTemplateBlock;
         var desc = {
-            name: socket.dataset.name,
-        }
+            name: socket.dataset.name
+        };
         // optional defined settings
         if (socket.dataset.type){
             desc.type = socket.dataset.type;
@@ -3544,9 +3536,12 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             desc.suffix = socket.dataset.suffix;
         }
         // User-specified settings
-        if (isTemplate) return desc;
+        if (isTemplate) 
+        {
+            return desc;
+        }
         var uName = wb.findChild(socket, '.name').textContent;
-        var uEle = wb.findChild(socket, '.name')
+        var uEle = wb.findChild(socket, '.name');
         
         if (desc.name.replace(/##/, ' ' + socket.dataset.seqNum) !== uName){
             desc.uName = uName;
@@ -3585,13 +3580,15 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
             scopeId: block.dataset.scopeId,
             scriptId: block.dataset.scriptId,
             sockets: sockets.map(socketDesc)
-        }
+        };
+
         if (block.dataset.group === 'scripts_workspace'){
             desc.blocktype = block.dataset.blocktype;
             desc.group = block.dataset.group;
             desc.help = block.dataset.help;
             desc.type = block.dataset.type;            
         }
+
         if (block.dataset.seqNum){
             desc.seqNum  = block.dataset.seqNum;
         }
@@ -3655,6 +3652,52 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         // return a block for block types
         var value;
         var type = obj.type;
+        
+        if(type === 'boolean')
+        {
+            obj.options = 'boolean';
+        }
+        
+        if(typeof obj.options !== 'undefined')
+        {
+            // DONE : #24
+            // DONE : #227
+            var choice = elem('select');
+            var list = wb.choiceLists[obj.options];
+            
+            if(Array.isArray(list))
+            {
+                wb.choiceLists[obj.options].forEach(function(opt){
+                    var option = elem('option', {}, opt);
+                    var value = obj.uValue || obj.value;
+                    
+                    if (value !== undefined && value !== null && value == opt){
+                        option.setAttribute('selected', 'selected');
+                    }
+                    
+                    choice.appendChild(option);
+                });
+            }
+            else
+            {
+                var values = Object.keys(list);
+                
+                values.forEach(function(val){
+                    var option = elem('option', {"value":val}, list[val]);
+                    var value = obj.uValue || obj.value;
+                    
+                    if (value !== undefined && value !== null && value == val){
+                        option.setAttribute('selected', 'selected');
+                    }
+                    
+                    choice.appendChild(option);
+                });
+            }
+            
+            return choice;
+        
+        }
+        
         if (type === 'int' || type === 'float'){
             type = 'number';
         }
@@ -3684,19 +3727,6 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
                 value = obj.uValue || obj.value || '604-555-1212'; break;
             case 'email':
                 value = obj.uValue || obj.value || 'waterbear@waterbearlang.com'; break;
-            case 'boolean':
-                obj.options = 'boolean';
-            case 'choice':
-                var choice = elem('select');
-                wb.choiceLists[obj.options].forEach(function(opt){
-                    var option = elem('option', {}, opt);
-                    var value = obj.uValue || obj.value;
-                    if (value && value === opt){
-                        option.setAttribute('selected', 'selected');
-                    }
-                    choice.appendChild(option);
-                });
-                return choice;
             default:
                 value = obj.uValue || obj.value || '';
         }
@@ -3711,7 +3741,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 
         wb.resize(input);
         return input;
-    }
+    };
 
     function socketValue(holder){
         if (holder.children.length > 1){
@@ -3719,7 +3749,9 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         }else{
             var value = wb.findChild(holder, 'input, select').value;
             var type = holder.parentElement.dataset.type;
-            if (type === 'string' || type === 'choice' || type === 'color' || type === 'url'){
+
+            // DONE : #227
+            if (type === 'string' || type === 'color' || type === 'url'){
                 if (value[0] === '"'){value = value.slice(1);}
                 if (value[value.length-1] === '"'){value = value.slice(0,-1);}
                 value = value.replace(/"/g, '\\"');
@@ -3764,7 +3796,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         var _code = scriptTemplate.replace(/\{\{\d\}\}/g, replace_values);
         var _code2 = _code.replace(/\[\[\d\]\]/g, replace_values);
         return _code2;
-    };
+    }
 
     function changeName(event){
         var nameSpan = event.wbTarget;
@@ -3790,37 +3822,38 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         input.parentElement.removeChild(input);
         nameSpan.style.display = 'initial';
         function propagateChange(newName) {
-			// console.log('now update all instances too');
-			var source = wb.closest(nameSpan, '.block');
-			var instances = wb.findAll(wb.closest(source, '.context'), '[data-local-source="' + source.dataset.localSource + '"]');
-			instances.forEach(function(elem){
-				wb.find(elem, '.name').textContent = newName;
-			});
+            // console.log('now update all instances too');
+            var source = wb.closest(nameSpan, '.block');
+            var instances = wb.findAll(wb.closest(source, '.context'), '[data-local-source="' + source.dataset.localSource + '"]');
+            instances.forEach(function(elem){
+                wb.find(elem, '.name').textContent = newName;
+                wb.find(elem, '.socket').dataset.name = newName;
+            });
 
-			//Change name of parent
-			var parent = document.getElementById(source.dataset.localSource);
-			var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
-			nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
+            //Change name of parent
+            var parent = document.getElementById(source.dataset.localSource);
+            var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
+            nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
 
-			//Change locals name of parent
-			var parentLocals = JSON.parse(parent.dataset.locals);
-			var localSocket = parentLocals[0].sockets[0];
-			localSocket.name = newName;
-			parent.dataset.locals = JSON.stringify(parentLocals);
+            //Change locals name of parent
+            var parentLocals = JSON.parse(parent.dataset.locals);
+            var localSocket = parentLocals[0].sockets[0];
+            localSocket.name = newName;
+            parent.dataset.locals = JSON.stringify(parentLocals);
 
-			wb.find(parent, '.name').textContent = nameTemplate;
-    	    Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
-		}
-		var action = {
-			undo: function() {
-				propagateChange(oldName);
-			},
-			redo: function() {
-				propagateChange(newName);
-			},
-		}
-		wb.history.add(action);
-		action.redo();
+            wb.find(parent, '.name').textContent = nameTemplate;
+            Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
+        }
+        var action = {
+            undo: function() {
+                propagateChange(oldName);
+            },
+            redo: function() {
+                propagateChange(newName);
+            }
+        };
+        wb.history.add(action);
+        action.redo();
     }
 
     function cancelUpdateName(event){
@@ -3837,16 +3870,142 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
         if (event.keyCode === 0x1B /* escape */ ){
             event.preventDefault();
             input.value = input.previousSibling.textContent;
-            input.blur()
+            input.blur();
         }else if(event.keyCode === 0x0D /* return or enter */ || event.keyCode === 0x09 /* tab */){
             event.preventDefault();
             input.blur();
         }
     }
 
+    /** Search filter */
+
+    var oldQuery = '';
+
+    function searchBlock(event) {
+        // Clear input if the clear button is pressed
+        var searchTextNode = document.getElementById('search_text');
+
+        if (event.target.id == 'search_clear') {
+            searchTextNode.value = '';
+        }
+
+        // Proceed if the query is changed
+        var query = searchTextNode.value.trim().toLowerCase();
+
+        if (oldQuery == query) {
+            return;
+        } else {
+            oldQuery = query;
+        }
+
+        var searchResultsNode = document.getElementById('search_results');
+        var blockMenuNode = document.getElementById('block_menu');
+
+        // For non-empty query, show all blocks; otherwise, hide all blocks
+        if (query) {
+            wb.show(searchResultsNode);
+            wb.hide(blockMenuNode);
+
+            while (searchResultsNode.firstChild) {
+                searchResultsNode.removeChild(searchResultsNode.firstChild);
+            }
+        } else {
+            wb.hide(searchResultsNode);
+            wb.show(blockMenuNode);
+            return;
+        }
+
+        // Clear suggestions
+        var suggestions = [];
+        var suggestionsNode = document.getElementById('search_suggestions');
+        while (suggestionsNode.firstChild) {
+            suggestionsNode.removeChild(suggestionsNode.firstChild);
+        }
+
+        var groups = document.querySelectorAll('.block-menu');
+     
+        for (var i = 0; i < groups.length; i++) {
+            var blocks = groups[i].getElementsByClassName('block');
+
+            for (var j = 0; j < blocks.length; j++) {
+                // Construct an array of keywords
+                var keywords = [];
+
+                var group = blocks[j].getAttribute('data-group');
+                if (group) {
+                    keywords.push(group);
+                }
+
+                var keywordsAttr = blocks[j].getAttribute('data-keywords');
+                if (keywordsAttr) {
+                    keywords = keywords.concat(JSON.parse(keywordsAttr));
+                }
+
+                // Find a match
+                var matchingKeywords = [];
+
+                for (var k = 0; k < keywords.length; k++) {
+                    if (keywords[k].indexOf(query) == 0) {
+                        matchingKeywords.push(keywords[k]);
+
+                        if (suggestions.indexOf(keywords[k]) == -1) {
+                            suggestions.push(keywords[k]);
+
+                            var suggestionNode = document.createElement('option');
+                            suggestionNode.value = keywords[k];
+                            suggestionsNode.appendChild(suggestionNode);
+                        }
+                    }
+                }
+
+                // Show/hide blocks
+                if (matchingKeywords.length > 0) {
+                    var resultNode = document.createElement('div');
+                    resultNode.classList.add('search_result');
+                    resultNode.classList.add(group);
+                    resultNode.style.backgroundColor = 'transparent';
+
+                    // Block
+                    resultNode.appendChild(blocks[j].cloneNode(true));
+
+                    // Fix result height
+                    var clearNode = document.createElement('div');
+                    clearNode.style.clear = 'both';
+                    resultNode.appendChild(clearNode);
+
+                    // Keyword name
+                    var keywordNode = document.createElement('span');
+                    keywordNode.classList.add('keyword');
+                    var keywordNodeContent = '<span class="keyword">';
+                    keywordNodeContent += '<span class="match">';
+                    keywordNodeContent += matchingKeywords[0].substr(0, query.length);
+                    keywordNodeContent += '</span>';
+                    keywordNodeContent += matchingKeywords[0].substr(query.length);
+
+                    for (var k = 1; k < matchingKeywords.length; k++) {
+                        keywordNodeContent += ', <span class="match">';
+                        keywordNodeContent += matchingKeywords[k].substr(0, query.length);
+                        keywordNodeContent += '</span>';
+                        keywordNodeContent += matchingKeywords[k].substr(query.length);
+                    }
+
+                    keywordNodeContent += '</span>';
+                    keywordNode.innerHTML = keywordNodeContent;
+                    resultNode.appendChild(keywordNode);
+
+                    searchResultsNode.appendChild(resultNode);
+                }
+            }
+        }
+    }
+
     Event.on(document.body, 'wb-remove', '.block', removeBlock);
     Event.on(document.body, 'wb-add', '.block', addBlock);
     Event.on(document.body, 'wb-delete', '.block', deleteBlock);
+
+    Event.on('#search_text', 'keyup', null, searchBlock);
+    Event.on('#search_text', 'input', null, searchBlock);
+    Event.on('#search_clear', 'click', null, searchBlock);
 
     wb.blockRegistry = blockRegistry;
 
@@ -3882,252 +4041,255 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
+'use strict';
+    function saveCurrentScripts(){
+        if (!wb.scriptModified){
+            // console.log('nothing to save');
+            // nothing to save
+            return;
+        }
+        document.querySelector('#block_menu').scrollIntoView();
+        localStorage['__' + wb.language + '_current_scripts'] = scriptsToString();
+    }
 
-	function saveCurrentScripts(){
-		if (!wb.scriptModified){
-			// console.log('nothing to save');
-			// nothing to save
-			return;
-		}
-		document.querySelector('#block_menu').scrollIntoView();
-		localStorage['__' + wb.language + '_current_scripts'] = scriptsToString();
-	};
+    // Save script to gist;
+    function saveCurrentScriptsToGist(event){
+        event.preventDefault();
+        // console.log("Saving to Gist");
+        var title = prompt("Save to an anonymous Gist titled: ");
+        if ( !title ) return;
+        ajax.post("https://api.github.com/gists", function(data){
+            //var raw_url = JSON.parse(data).files["script.json"].raw_url;
+            var gistID = JSON.parse(data).url.split("/").pop();
+            prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
 
-	// Save script to gist;
-	function saveCurrentScriptsToGist(event){
-	    event.preventDefault();
-		// console.log("Saving to Gist");
-		var title = prompt("Save to an anonymous Gist titled: ");
-		if ( !title ) return;
-		ajax.post("https://api.github.com/gists", function(data){
-	        //var raw_url = JSON.parse(data).files["script.json"].raw_url;
-	        var gistID = JSON.parse(data).url.split("/").pop();
-	        prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
+            //save gist id to local storage
+            var localGists = localStorage['__' + wb.language + '_recent_gists'];
+            var gistArray = localGists === undefined ? [] : JSON.parse(localGists);
+            gistArray.push(gistID);
+            localStorage['__' + wb.language + '_recent_gists'] = JSON.stringify(gistArray);
 
-	        //save gist id to local storage
-	        var localGists = localStorage['__' + wb.language + '_recent_gists'];
-	        var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
-	        gistArray.push(gistID);
-	        localStorage['__' + wb.language + '_recent_gists'] = JSON.stringify(gistArray);
-
-	    }, JSON.stringify({
-	    	"description": title,
-	    	"public": true,
-	    	"files": {
-	    		"script.json": {
-	    			"content": scriptsToString(title, '', title)
-	    		},
-	    	}
-	    }), function(statusCode, x){
+        }, JSON.stringify({
+            "description": title,
+            "public": true,
+            "files": {
+                "script.json": {
+                    "content": scriptsToString(title, '', title)
+                },
+            }
+        }), function(statusCode, x){
             alert("Can't save to Gist:\n" + statusCode + " (" + x.statusText + ") ");
         });
-	};
-	//populate the gist submenu with recent gists
-	function loadRecentGists() {
-		var localGists = localStorage['__' + wb.language + '_recent_gists'];
-		var gistArray = localGists == undefined ? [] : JSON.parse(localGists);
-		var gistContainer = document.querySelector("#recent_gists");
-		gistContainer.innerHTML = '';
+    }
+    //populate the gist submenu with recent gists
+    function loadRecentGists() {
+        var localGists = localStorage['__' + wb.language + '_recent_gists'];
+        var gistArray = localGists === undefined ? [] : JSON.parse(localGists);
+        var gistContainer = document.querySelector("#recent_gists");
+        gistContainer.innerHTML = '';
 
-		for (var i = 0; i < gistArray.length; i++) {
-			//add a new button to the gist sub-menu
-			var gist = gistArray[i];
-			var node = document.createElement("li");
-			var button = document.createElement('button');
-			var buttonText = document.createTextNode("#" + gist);
+        for (var i = 0; i < gistArray.length; i++) {
+            //add a new button to the gist sub-menu
+            var gist = gistArray[i];
+            var node = document.createElement("li");
+            var button = document.createElement('button');
+            var buttonText = document.createTextNode("#" + gist);
 
-			button.appendChild(buttonText);
-			button.classList.add('load-gist');
-			button.dataset.href = wb.language + ".html?gist=" + gist;
-			button.dataset.gist = gist;
+            button.appendChild(buttonText);
+            button.classList.add('load-gist');
+            button.dataset.href = wb.language + ".html?gist=" + gist;
+            button.dataset.gist = gist;
 
-			node.appendChild(button);
-			gistContainer.appendChild(node);
+            node.appendChild(button);
+            gistContainer.appendChild(node);
 
-			button.addEventListener('click', function(){
-				wb.loadScriptsFromGistId(this.dataset.gist);
-			});
-		}
-	};
+            button.addEventListener('click', function(){
+                wb.loadScriptsFromGistId(this.dataset.gist);
+            });
+        }
+    }
 
-	//Potential FIXME: I feel that title should be the filename, but uName || name
-	//determines what is shown in the workspace.
-	function scriptsToString(title, description, name){
-		if (!title){ title = ''; }
-		if (!description){ description = ''; }
-		if (!name){ name = 'Workspace';}
-		var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
-		var json = {
-			title: title,
-			description: description,
-			date: Date.now(),
-			waterbearVersion: '2.0',
-			blocks: blocks.map(wb.blockDesc)
-		};
+    //Potential FIXME: I feel that title should be the filename, but uName || name
+    //determines what is shown in the workspace.
+    function scriptsToString(title, description, name){
+        if (!title){ title = ''; }
+        if (!description){ description = ''; }
+        if (!name){ name = 'Workspace';}
+        var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
+        var json = {
+            title: title,
+            description: description,
+            date: Date.now(),
+            waterbearVersion: '2.0',
+            blocks: blocks.map(wb.blockDesc)
+        };
 
-		if(json.blocks[0].sockets[0].name){
-			json.blocks[0].sockets[0].name = name;
-		}else if(json.blocks[0].sockets[0].uName){
-			json.blocks[0].sockets[0].uName = name;
-		}
+        if(json.blocks[0].sockets[0].name){
+            json.blocks[0].sockets[0].name = name;
+        }else if(json.blocks[0].sockets[0].uName){
+            json.blocks[0].sockets[0].uName = name;
+        }
 
-		return JSON.stringify(json, null, '    ');
-	}
+        return JSON.stringify(json, null, '    ');
+    }
 
 
-	function createDownloadUrl(evt){
-	    evt.preventDefault();
-	    var name = prompt("Save file as: ");
-	    if( !name ) return;
-		var URL = window.webkitURL || window.URL;
-		var file = new Blob([scriptsToString('','',name)], {type: 'application/json'});
-		var reader = new FileReader();
-		var a = document.createElement('a');
-		reader.onloadend = function(){
-			a.href = reader.result;
-			a.download = name + '.json';
-			a.target = '_blank';
-			document.body.appendChild(a);
-			a.click();
-		};
-		reader.readAsDataURL(file);
-	};
+    function createDownloadUrl(evt){
+        evt.preventDefault();
+        var name = prompt("Save file as: ");
+        if( !name ) return;
+        var URL = window.webkitURL || window.URL;
+        var file = new Blob([scriptsToString('','',name)], {type: 'application/json'});
+        var reader = new FileReader();
+        var a = document.createElement('a');
+        reader.onloadend = function(){
+            a.href = reader.result;
+            a.download = name + '.json';
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+        };
+        reader.readAsDataURL(file);
+    }
 
-	function loadScriptsFromGistId(id){
-		//we may get an event passed to this function so make sure we have a valid id or ask for one
-		var gistID = isNaN(parseInt(id)) ? prompt("What Gist would you like to load? Please enter the ID of the Gist: ")  : id;
-		// console.log("Loading gist " + id);
-		if( !gistID ) return;
-		ajax.get("https://api.github.com/gists/"+gistID, function(data){
-			loadScriptsFromGist({data:JSON.parse(data)});
-	    }, function(statusCode, x){
+    function loadScriptsFromGistId(id){
+        //we may get an event passed to this function so make sure we have a valid id or ask for one
+        var gistID = isNaN(parseInt(id)) ? prompt("What Gist would you like to load? Please enter the ID of the Gist: ")  : id;
+        // console.log("Loading gist " + id);
+        if( !gistID ) return;
+        ajax.get("https://api.github.com/gists/"+gistID, function(data){
+            loadScriptsFromGist({data:JSON.parse(data)});
+        }, function(statusCode, x){
             alert("Can't load from Gist:\n" + statusCode + " (" + x.statusText + ") ");
-		});
+        });
         var path = location.href.split('?')[0];
         path += "?gist=" + gistID;
         history.pushState(null, '', path);
-	};
+    }
 
-	function loadScriptsFromFilesystem(event){
-		var input = document.createElement('input');
-		input.setAttribute('type', 'file');
-		input.setAttribute('accept', 'application/json');
-		input.addEventListener('change', function(evt){
-			var file = input.files[0];
-			loadScriptsFromFile(file);
-		});
-		input.click();
-	};
+    function loadScriptsFromFilesystem(event){
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'application/json');
+        input.addEventListener('change', function(evt){
+            var file = input.files[0];
+            loadScriptsFromFile(file);
+        });
+        input.click();
+    }
 
-	function loadScriptsFromObject(fileObject){
-	    // console.info('file format version: %s', fileObject.waterbearVersion);
-	    // console.info('restoring to workspace %s', fileObject.workspace);
-	    if (!fileObject) return wb.createWorkspace();
-	    var blocks = fileObject.blocks.map(wb.Block);
-	    if (!blocks.length){
-	    	return wb.createWorkspace();
-	    }
-	    if (blocks.length > 1){
-	    	console.error('not really expecting multiple blocks here right now');
-	    	console.error(blocks);
-	    }
-	    blocks.forEach(function(block){
-	    	wb.wireUpWorkspace(block);
-	    	Event.trigger(block, 'wb-add');
-	    });
-	    wb.loaded = true;
-	    Event.trigger(document.body, 'wb-script-loaded');
-	}
+    function loadScriptsFromObject(fileObject){
+        // console.info('file format version: %s', fileObject.waterbearVersion);
+        // console.info('restoring to workspace %s', fileObject.workspace);
+        if (!fileObject) return wb.createWorkspace();
+        var blocks = fileObject.blocks.map(wb.Block);
+        if (!blocks.length){
+            return wb.createWorkspace();
+        }
+        if (blocks.length > 1){
+            console.error('not really expecting multiple blocks here right now');
+            console.error(blocks);
+        }
+        blocks.forEach(function(block){
+            wb.wireUpWorkspace(block);
+            Event.trigger(block, 'wb-add');
+        });
+        wb.loaded = true;
+        Event.trigger(document.body, 'wb-script-loaded');
+    }
 
-	function loadScriptsFromGist(gist){
-		var keys = Object.keys(gist.data.files);
-		var file;
-		keys.forEach(function(key){
-			if (/.*\.json/.test(key)){
-				// it's a json file
-				file = gist.data.files[key].content;
-			}
-		});
-		if (!file){
-			console.error('no json file found in gist: %o', gist);
-			return;
-		}
-		loadScriptsFromObject(JSON.parse(file));
-	}
+    function loadScriptsFromGist(gist){
+        var keys = Object.keys(gist.data.files);
+        var file;
+        keys.forEach(function(key){
+            if (/.*\.json/.test(key)){
+                // it's a json file
+                file = gist.data.files[key].content;
+            }
+        });
+        if (!file){
+            console.error('no json file found in gist: %o', gist);
+            return;
+        }
+        loadScriptsFromJson(file);
+    }
 
-	function loadScriptsFromExample(name){
-		ajax.get('examples/' + wb.language + '/' + name + '.json', function(exampleJson){
-			loadScriptsFromObject(JSON.parse(exampleJson));
-		}, function(statusCode, xhr){
-			console.error(statusCode + xhr);
-		});
-	}
+    function loadScriptsFromExample(name){
+        ajax.get('examples/' + wb.language + '/' + name + '.json?b=' + Math.random(), function(exampleJson){
+            loadScriptsFromJson(exampleJson);
+        }, function(statusCode, xhr){
+            console.error(statusCode + xhr);
+        });
+    }
 
-	function loadCurrentScripts(queryParsed){
-		// console.log('loadCurrentScripts(%s)', JSON.stringify(queryParsed));
-		if (wb.loaded) return;
-		wb.scriptLoaded = false;
-		if (queryParsed.gist){
-			//console.log("Loading gist %s", queryParsed.gist);
-			ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
-				loadScriptsFromGist({data:JSON.parse(data)});
-	        }, function(statusCode, x){
+    function loadScriptsFromJson(jsonblob){
+        // wb.clearScripts(null, true);
+        wb.loaded = true;
+        loadScriptsFromObject(JSON.parse(jsonblob));
+        wb.scriptModified = true;
+    }
+
+    function loadCurrentScripts(queryParsed){
+        // console.log('loadCurrentScripts(%s)', JSON.stringify(queryParsed));
+        if (wb.loaded) return;
+        wb.scriptLoaded = false;
+        if (queryParsed.gist){
+            //console.log("Loading gist %s", queryParsed.gist);
+            ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
+                loadScriptsFromGist({data:JSON.parse(data)});
+            }, function(statusCode, x){
               alert("Can't save to gist:\n" + statusCode + " (" + x.statusText + ") ");
-			});
-		}else if (queryParsed.example){
-			//console.log('loading example %s', queryParsed.example);
-			loadScriptsFromExample(queryParsed.example);
-		}else if (localStorage['__' + wb.language + '_current_scripts']){
-			//console.log('loading current script from local storage');
-			var fileObject = JSON.parse(localStorage['__' + wb.language + '_current_scripts']);
-			if (fileObject){
-				loadScriptsFromObject(fileObject);
-			}
-		}else{
-			//console.log('no script to load, starting a new script');	
-			wb.scriptLoaded = true;
-			wb.createWorkspace('Workspace');
-		}
-		wb.loaded = true;
-		Event.trigger(document.body, 'wb-loaded');
-	};
+            });
+        }else if (queryParsed.example){
+            //console.log('loading example %s', queryParsed.example);
+            loadScriptsFromExample(queryParsed.example);
+        }else if (localStorage['__' + wb.language + '_current_scripts']){
+            //console.log('loading current script from local storage');
+            var fileObject = JSON.parse(localStorage['__' + wb.language + '_current_scripts']);
+            if (fileObject){
+                loadScriptsFromObject(fileObject);
+            }
+        }else{
+            //console.log('no script to load, starting a new script');  
+            wb.scriptLoaded = true;
+            wb.createWorkspace('Workspace');
+        }
+        wb.loaded = true;
+        Event.trigger(document.body, 'wb-loaded');
+    }
 
 	function loadScriptsFromFile(file){
-		fileName = file.name;
+		var fileName = file.name;
 		if (fileName.indexOf('.json', fileName.length - 5) === -1) {
-			console.error("File not a JSON file");
+			console.error("File is not a JSON file");
 			return;
 		}
 		var reader = new FileReader();
 		reader.readAsText( file );
 		reader.onload = function (evt){
-			wb.clearScripts(null, true);
-			var saved = JSON.parse(evt.target.result);
-			wb.loaded = true;
-			loadScriptsFromObject(saved);
-			wb.scriptModified = true;
+            loadScriptsFromJson(evt.target.result);
 		};
 	}
 
-	function getFiles(evt){
-		evt.stopPropagation();
-		evt.preventDefault();
-		var files = evt.dataTransfer.files;
-		if ( files.length > 0 ){
-	        // we only support dropping one file for now
-	        var file = files[0];
-	        loadScriptsFromFile(file);
-	    }
-	}
+    function getFiles(evt){
+        evt.stopPropagation();
+        evt.preventDefault();
+        var files = evt.dataTransfer.files;
+        if ( files.length > 0 ){
+            // we only support dropping one file for now
+            var file = files[0];
+            loadScriptsFromFile(file);
+        }
+    }
 
-	wb.saveCurrentScripts = saveCurrentScripts;
-	wb.saveCurrentScriptsToGist = saveCurrentScriptsToGist;
-	wb.loadRecentGists = loadRecentGists;
-	wb.createDownloadUrl = createDownloadUrl;
-	wb.loadScriptsFromGistId = loadScriptsFromGistId;
-	wb.loadScriptsFromFilesystem = loadScriptsFromFilesystem;
-	wb.loadCurrentScripts = loadCurrentScripts;
-	wb.getFiles = getFiles;
+    wb.saveCurrentScripts = saveCurrentScripts;
+    wb.saveCurrentScriptsToGist = saveCurrentScriptsToGist;
+    wb.loadRecentGists = loadRecentGists;
+    wb.createDownloadUrl = createDownloadUrl;
+    wb.loadScriptsFromGistId = loadScriptsFromGistId;
+    wb.loadScriptsFromFilesystem = loadScriptsFromFilesystem;
+    wb.loadCurrentScripts = loadCurrentScripts;
+    wb.getFiles = getFiles;
 
 })(wb);
 
@@ -4137,6 +4299,7 @@ var Events=new function(){var a=this,b=[],c="0.2.3-beta",d=function(){var a=docu
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
+	'use strict';
 // Undo list
 
 // Undo actions must support two methods:
@@ -4156,8 +4319,8 @@ function clearUndoStack(){
 	undoActions.length = 0;
 	currentAction = 0;
 	try{
-		document.querySelector('.undoAction').style.display = 'none';
-		document.querySelector('.redoAction').style.display = 'none';
+		document.querySelector('.undoAction').classList.add('disabled');
+		document.querySelector('.redoAction').classList.add('disabled');
 	}catch(e){
 		// don't worry if undo ui is not available yet
 	}
@@ -4168,15 +4331,15 @@ function undoLastAction() {
 	currentAction--;
 	undoActions[currentAction].undo();
 	if(currentAction <= 0) {
-		document.querySelector('.undoAction').style.display = 'none';
+		document.querySelector('.undoAction').classList.add('disabled');
 	}
-	document.querySelector('.redoAction').style.display = '';
+	document.querySelector('.redoAction').classList.remove('disabled');
 }
 
 try{
-	document.querySelector('.undoAction').style.display = 'none';
+	document.querySelector('.undoAction').classList.add('disabled');
 }catch(e){
-	// some languages do not yet support undo/redo
+	return; // some languages do not yet support undo/redo
 }
 
 function redoLastAction() {
@@ -4184,15 +4347,15 @@ function redoLastAction() {
 	undoActions[currentAction].redo();
 	currentAction++;
 	if(currentAction >= undoActions.length) {
-		document.querySelector('.redoAction').style.display = 'none';
+		document.querySelector('.redoAction').classList.add('disabled');
 	}
-	document.querySelector('.undoAction').style.display = '';
+	document.querySelector('.undoAction').classList.remove('disabled');
 }
 
 try{
-	document.querySelector('.redoAction').style.display = 'none';
+	document.querySelector('.redoAction').classList.add('disabled');
 }catch(e){
-	// some languages do not yet support undo/redo
+	return; // some languages do not yet support undo/redo
 }
 
 function addUndoAction(action) {
@@ -4210,8 +4373,8 @@ function addUndoAction(action) {
 	}
 	undoActions[currentAction] = action;
 	currentAction++;
-	document.querySelector('.undoAction').style.display = '';
-	document.querySelector('.redoAction').style.display = 'none';
+	document.querySelector('.undoAction').classList.remove('disabled');
+	document.querySelector('.redoAction').classList.add('disabled');
 	// console.log('undo stack: %s', undoActions.length);
 }
 
@@ -4222,8 +4385,8 @@ wb.history = {
 	clear: clearUndoStack
 }
 
-Event.on('.undoAction', 'click', null, undoLastAction);
-Event.on('.redoAction', 'click', null, redoLastAction);
+Event.on('.undoAction', 'click', ':not(.disabled)', undoLastAction);
+Event.on('.redoAction', 'click', ':not(.disabled)', redoLastAction);
 //begin short-cut implementation for redo and undo
 Events.bind(document, 'keystroke.Ctrl+Z', undoLastAction);
 Events.bind(document, 'keystroke.Ctrl+Y', redoLastAction);
@@ -4241,7 +4404,7 @@ Event.on(document.body, 'wb-script-loaded', null, clearUndoStack);
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
-
+'use strict';
 // UI Chrome Section
 
 
@@ -4268,7 +4431,7 @@ function changeSocket(event) {
 	// console.log("Changed a socket!");
 	var oldValue = event.target.getAttribute('data-oldvalue');
 	var newValue = event.target.value;
-	if(oldValue == undefined) oldValue = event.target.defaultValue;
+	if(oldValue === undefined) oldValue = event.target.defaultValue;
 	// console.log("New value:", newValue);
 	// console.log("Old value:", oldValue);
 	event.target.setAttribute('data-oldvalue', newValue);
@@ -4281,7 +4444,7 @@ function changeSocket(event) {
 			event.target.value = newValue;
 			event.target.setAttribute('data-oldvalue', newValue);
 		}
-	}
+	};
 	wb.history.add(action);
 }
 
@@ -4337,7 +4500,7 @@ function collapseCommand(key, opt){
 function copyCommand(evt) {
 	// console.log("Copying a block in ui.js!");
 	// console.log(this);
-	action = {
+	var action = {
 		copied: this,
 		oldPasteboard: pasteboard,
 		undo: function() {
@@ -4346,14 +4509,14 @@ function copyCommand(evt) {
 		redo: function() {
 			pasteboard = this.copied;
 		},
-	}
+	};
 	wb.history.add(action);
 	action.redo();
 }
 
 function deleteCommand(evt) {
 	// console.log("Deleting a block!");
-	action = {
+	var action = {
 		removed: this,
 		// Storing parent and next sibling in case removing the node from the DOM clears them
 		parent: this.parentNode,
@@ -4371,14 +4534,14 @@ function deleteCommand(evt) {
 			Event.trigger(this.removed, 'wb-remove');
 			this.removed.remove();
 		},
-	}
+	};
 	wb.history.add(action);
 	action.redo();
 }
 
 function cutCommand(evt) {
 	// console.log("Cutting a block!");
-	action = {
+	var action = {
 		removed: this,
 		// Storing parent and next sibling in case removing the node from the DOM clears them
 		parent: this.parentNode,
@@ -4399,14 +4562,14 @@ function cutCommand(evt) {
 			this.removed.remove();
 			pasteboard = this.removed;
 		},
-	}
+	};
 	wb.history.add(action);
 	action.redo();
 }
 
 function pasteCommand(evt) {
 	// console.log(pasteboard);
-	action = {
+	var action = {
 		pasted: wb.cloneBlock(pasteboard),
 		into: cmenuTarget.parentNode,
 		before: cmenuTarget.nextSibling,
@@ -4424,7 +4587,7 @@ function pasteCommand(evt) {
 			}
 			Event.trigger(this.pasted, 'wb-add');
 		},
-	}
+	};
 	wb.history.add(action);
 	action.redo();
 }
@@ -4462,10 +4625,11 @@ function buildContextMenu(options) {
 	var contextDiv = document.getElementById('context_menu');
 	contextDiv.innerHTML = '';
 	var menu = document.createElement('ul');
+	var item;
 	menu.classList.add('cmenu');
 	for(var key in options) {
 		if(options.hasOwnProperty(key) && options[key]) {
-			var item = document.createElement('li');
+			item = document.createElement('li');
 			if(cmenuitem_enabled(options[key])) {
 				Event.on(item, "click", null, cmenuCallback(options[key].callback));
 			} else {
@@ -4478,7 +4642,7 @@ function buildContextMenu(options) {
 			menu.appendChild(item);
 		}
 	}
-	var item = document.createElement('li');
+	item = document.createElement('li');
 	item.onclick = function(evt) {};
 	item.innerHTML = 'Disable this menu';
 	item.classList.add('topSep');
@@ -4507,7 +4671,7 @@ function handleContextMenu(evt) {
 	//if(!showContext) return;
 	// console.log(evt.clientX, evt.clientY);
 	// console.log(evt.wbTarget);
-	if(cmenuDisabled || wb.matches(evt.wbTarget, '.block-menu *')) return;
+	if(cmenuDisabled || wb.matches(evt.wbTarget, '.block_menu_wrapper *')) return;
 	else if(false);
 	else if(wb.matches(evt.wbTarget, '.block:not(.scripts_workspace) *')) {
 		setContextMenuTarget(evt.wbTarget);
@@ -4571,7 +4735,7 @@ var block_cmenu = {
 	paste: {name: 'Paste', callback: pasteCommand, enabled: canPaste},
 	//cancel: {name: 'Cancel', callback: dummyCallback},
         delete: {name: 'Delete', callback: deleteCommand},
-}
+};
 
 // Test drawn from modernizr
 function is_touch_device() {
@@ -4580,31 +4744,126 @@ function is_touch_device() {
 
 initContextMenus();
 
+var defaultLangData  = {};
+var localizationData = {};
+
+var l10nHalfDone = false;
+wb.l10nHalfDone = l10nHalfDone;
+
+/* will be set true by either code in l10n.js or initLanguageFiles() */
+initLanguageFiles();
+
 // Build the Blocks menu, this is a public method
 function menu(blockspec){
-    var title = blockspec.name.replace(/\W/g, '');
-    var specs = blockspec.blocks;
-    var help = blockspec.help !== undefined ? blockspec.help : '';
-    return edit_menu(title, specs, help);
-};
+    var id_blocks = {};
+    var blocks = blockspec.blocks;
 
-function edit_menu(title, specs, help, show){
-	menu_built = true;
+    // put blocks in data structure with block.id as key 
+    for (var key in blocks) {
+        var block = blocks[key];
+        id_blocks[block.id] = block;
+    }
+
+    // store blocks temporarily in defaultLangData
+    blockspec.blocks = id_blocks;
+    defaultLangData[blockspec.sectionkey] = blockspec;
+
+}
+
+function populateMenu() {
+	for (var key in defaultLangData) {
+
+        //default data
+        var blockspec = defaultLangData[key];
+
+        //read in from localized file
+        var l10nData = localizationData[blockspec.sectionkey];
+ 
+        //overwrite attributes in blockspec
+        wb.overwriteAttributes(blockspec, l10nData);
+
+		var title = blockspec.name;
+        var sectionKey = blockspec.sectionkey.replace(/\W/g, '');
+        var specs = blockspec.blocks;
+        var help = blockspec.help !== undefined ? blockspec.help : '';
+        edit_menu(title, sectionKey, specs, help);
+	}
+}
+
+function edit_menu(title, sectionKey, specs, help, show){
     var group = title.toLowerCase().split(/\s+/).join('');
-    var submenu = document.querySelector('.' + group + '+ .submenu');
+    var submenu = document.querySelector('.' + sectionKey + '+ .submenu');
     if (!submenu){
-        var header = wb.elem('h3', {'class': group + ' accordion-header', 'id': 'group_'+group}, title);
-        var submenu = wb.elem('div', {'class': 'submenu block-menu accordion-body'});
+        var header = wb.elem('h3', {'class': sectionKey + ' accordion-header', 'id': 'group_'+sectionKey}, title);
+        submenu = wb.elem('div', {'class': 'submenu block-menu accordion-body'});
         var description = wb.elem('p', {'class': 'accordion-description'}, help);
         var blockmenu = document.querySelector('#block_menu');
         blockmenu.appendChild(header);
         blockmenu.appendChild(submenu);
         submenu.appendChild(description);
     }
-    specs.forEach(function(spec, idx){
-        spec.group = group;
+    for (var key in specs) {
+        var spec = specs[key];
+        spec.group = sectionKey;
         spec.isTemplateBlock = true;
         submenu.appendChild(wb.Block(spec));
+    }
+}
+
+function initLanguageFiles(){
+    // pulled from workspace.js, one file below in the dist/javascript.js
+    var language = location.pathname.match(/\/([^/.]*)\.html/)[1];
+
+    //gets language locale code. en, es, de, etc.
+    var locale = (navigator.userLanguage || navigator.language || "en-US").substring(0,2);
+
+    // get list of paths of localized language files for language
+    var listFiles;
+
+    if ( (typeof(l10nFiles) != "undefined") && (typeof(l10nFiles[language]) != "undefined") )
+        listFiles = l10nFiles[language][locale];
+
+    // if no localized files exist 
+    if (!listFiles) {
+        if (l10nHalfDone) {
+            populateMenu();
+        } else {
+            l10nHalfDone = true;
+        }
+
+        return;
+    }
+
+    // open all relevent localized files for language 
+    listFiles.forEach(function(name, idx){
+        ajax.get('languages/' + language + '/' + 'localizations' + '/' + locale + '/' + name +'.json', function(json){
+            var lang = JSON.parse(json);
+
+            var id_blocks = {};
+            var blocks = lang.blocks;
+
+            // put blocks into proper structure. resembles blockRegistry 
+            for (var key in blocks) {
+                var block = blocks[key];
+                id_blocks[block.id] = block;
+            }
+
+            lang.blocks = id_blocks;
+            localizationData[lang.sectionkey] = lang;
+
+            // if this is the last file that needs to be retrieved (this step is done)
+            if ( idx === (listFiles.length - 1 )) {
+                if (wb.l10nHalfDone) {
+                    populateMenu();
+                } else {
+                    wb.l10nHalfDone = true;
+                }
+            }
+
+        }, function(xhr, status){
+            console.error('Error in ajax.get:', status);
+        });
+
     });
 }
 
@@ -4646,7 +4905,7 @@ function showFiles(evt){
 }
 
 function showBlocks(evt){
-	handleShowButton(evt.target, document.querySelector('#block_menu'));
+	handleShowButton(evt.target, document.querySelector('.block_menu_wrapper'));
 }
 
 function showScript(evt){
@@ -4658,9 +4917,24 @@ function showResult(evt){
 	Event.once(document.body, 'transitionend', null, wb.runCurrentScripts);
 }
 
+/* Search filter */
+
+function highlightSearch(event) {
+	var form = document.querySelector('#search > form');
+	form.style.border = "1px solid #FFA500";
+}
+
+function unhighlightSearch(event) {
+	var form = document.querySelector('#search > form');
+	form.style.border = "1px solid #CCC";
+}
+
 Event.on(document.body, 'change', 'input', changeSocket);
 Event.on('#block_menu', 'click', '.accordion-header', accordion);
 // Event.on('.tabbar', 'click', '.chrome_tab', tabSelect);
+
+Event.on('#search_text', 'focus', null, highlightSearch);
+Event.on('#search_text', 'blur', null, unhighlightSearch);
 
 if (document.body.clientWidth < 361){
 	// console.log('mobile view');
@@ -4678,9 +4952,10 @@ if (document.body.clientWidth > 360){
 }
 
 wb.menu = menu;
+wb.populateMenu = populateMenu;
+wb.l10nHalfDone = l10nHalfDone;
 
 })(wb);
-
 
 /*end ui.js*/
 
@@ -4691,6 +4966,7 @@ wb.menu = menu;
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
+	'use strict';
 
 	function clearScripts(event, force){
 		if (force || confirm('Throw out the current script?')){
@@ -4732,14 +5008,21 @@ wb.menu = menu;
 		// hide loading spinner if needed
 		console.log('handleStateChange');
 		hideLoader();
+		var viewButtons = document.querySelectorAll('.views + .sub-menu .toggle');
 		wb.queryParams = wb.urlToQueryParams(location.href);
 		if (wb.queryParams.view === 'result'){
 			document.body.classList.add('result');
 			document.body.classList.remove('editor');
+			for(var i = 0; i < viewButtons.length; i++) {
+				viewButtons[i].classList.add('disabled');
+			}
 			wb.view = 'result';
 		}else{
 			document.body.classList.remove('result');
 			document.body.classList.add('editor');
+			for(var i = 0; i < viewButtons.length; i++) {
+				viewButtons[i].classList.remove('disabled');
+			}
 			wb.view = 'editor';
 		}
 		if (wb.queryParams.embedded === 'true'){
@@ -5042,7 +5325,7 @@ wb.menu = menu;
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
-
+'use strict';
 	//save the state of the settings link
 	var closed = true;
 	var language = wb.language;
@@ -5131,7 +5414,7 @@ wb.menu = menu;
 		var hiddenBlocks = storedData == undefined ? [] : JSON.parse(storedData);
 		window.hbl = hiddenBlocks;
 		// console.log("Loading block preferences", hiddenBlocks);
-		for (key in hiddenBlocks) {
+		Object.keys(hiddenBlocks).forEach(function(key){
 			if(!hiddenBlocks[key]){
 				var h3 = document.getElementById(key);
 				if(h3 != null){
@@ -5140,8 +5423,8 @@ wb.menu = menu;
 					h3.classList.add('hidden');
 				}
 			}
-		}
-	};
+		});
+	}
 
 	//after initliazation, create the settings and checkboxes
 	function load(){
@@ -5168,6 +5451,30 @@ wb.menu = menu;
 var stageMenu = document.querySelector('[data-target=stage]').parentElement;
 stageMenu.parentElement.removeChild(stageMenu);
 
+var menu = document.querySelector('.menu');
+
+var newLi = document.createElement("li");
+var newBtn = document.createElement("button");
+newBtn.classList.add("run-remote");
+newBtn.textContent = "Run";
+newLi.appendChild(newBtn);
+menu.appendChild(newLi);
+
+var newLi2 = document.createElement("li");
+var newBtn2 = document.createElement("button");
+newBtn2.classList.add("stop-remote");
+newBtn2.textContent = "Stop";
+newLi2.appendChild(newBtn2);
+menu.appendChild(newLi2);
+
+//document.querySelector('.stop-remote').style.display = 'none';
+//var stop = document.querySelector('.stop-remote');
+//console.log("stop =", stop);
+//wb.hide(stop);
+
+wb.hide(document.querySelector('.stop-remote'));
+
+
 // A couple of do-nothing scripts for compatibility
 wb.runCurrentScripts = function(){ /* do nothing */ };
 wb.clearStage = function(){ /* do nothing */ };
@@ -5184,7 +5491,7 @@ function runCurrentScripts(event){
         var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
         wb.runScript( wb.prettyScript(blocks) );        
 }
-Event.on('.run-scripts', 'click', null, runCurrentScripts);
+Event.on('.run-remote', 'click', null, runCurrentScripts);
 
 
 wb.ajax = {
@@ -5214,79 +5521,96 @@ wb.ajax = {
 
     
 wb.resetrun = function(message){
+    var messagebox = document.querySelector('.messagebox');
     messagebox.innerHTML = message;
     window.setTimeout(function(){messagebox.innerHTML = "";}, 5000);
-    document.querySelector('.run-scripts').style.display = 'inline-block';
-    document.querySelector('.stop-scripts').style.display = 'none';
-    //Event.remove('.stop-scripts', 'click');
+    //document.querySelector('.run-remote').style.display = 'inline-block';
+    //document.querySelector('.stop-remote').style.display = 'none';
+    wb.hide(document.querySelector('.stop-remote'));
+    wb.show(document.querySelector('.run-remote'));
+    
+    //Event.remove('.stop-remote', 'click');
 
 };
+
+function stringFromData(dat){
+    var text = dat.map(function(chc){return String.fromCharCode(chc);}).join("");
+    return text;
+}
     
 wb.runScript = function(script){
 
-    // TODO : workout the ws address from the page address
     var aHost = window.location.host.split(":");
     var oSocket = new WebSocket("ws://"+aHost[0]+":8080/");
     
-    //var oSocket = new WebSocket("ws://192.168.1.101:8080/");
+    oSocket.bConnected = false;
     
-    var messagebox = document.querySelector('#messagebox');
-    if(messagebox === null || messagebox.length === 0)
-    {
-        messagebox = wb.elem('div', {"id":"messagebox"});
-        document.querySelector('.tabbar').appendChild(messagebox);
-        messagebox = document.querySelector('#messagebox');
-        
-    }
-    
+    var messagebox = document.querySelector('.messagebox');
     messagebox.innerHTML = "Connecting to Raspberry Pi";
+    
     oSocket.onerror = function(event) {
         messagebox.innerHTML = "Error Communicating with RPi";
         window.setTimeout(function(){messagebox.innerHTML = "";}, 5000);
-        oSocket.close();
     };
     
     oSocket.onopen = function (event) {
+        messagebox.innerHTML = "Sending Code to RPi";
         oSocket.send(JSON.stringify({"command":"run","code":script})); 
+        oSocket.bConnected = true;
+    };
+    
+    
+    oSocket.onclose = function (event) {
+        if(oSocket.bConnected)
+        {
+            if(event.code !== 1000)
+            {
+                wb.resetrun("Server Closed Unexpectedly");
+            }
+        }
+        else
+        {
+            wb.resetrun("Server Unavailable");
+        }
     };
     
     oSocket.onmessage = function(event) {
         var msg = JSON.parse(event.data);
+        //console.log("msg =", msg);
         switch(msg.type) {
             case "recieved":
                 messagebox.innerHTML = "Code recieved on RPi";
                 break;
             case "running":
                 messagebox.innerHTML = "Code running on RPi "+ msg.pid;
-                document.querySelector('.run-scripts').style.display = 'none';
-                document.querySelector('.stop-scripts').style.display = 'inline-block';
+                var runbutton= document.querySelector('.run-remote');
+                wb.hide(runbutton);
+                wb.show(document.querySelector('.stop-remote'));
                 
-                Event.once('.stop-scripts', 'click', null, function(){
+                Event.once('.stop-remote', 'click', null, function(){
                       oSocket.send(JSON.stringify({"command":"kill","pid":msg.pid}));
                 });
 
                 break;
             case "completed":
                 wb.resetrun("Code Completed Successfully");
-                oSocket.close();
+                oSocket.close(1000, "Code Completed");
                 break;
             case "exit":
-                wb.resetrun("Code Exited");
-                oSocket.close();
+                wb.resetrun("Code Stopped");
+                oSocket.close(1000, "Code Stopped");
                 break;
             case "error":
                 wb.resetrun("Code Failed " + msg.data.toString());
-                oSocket.close();
+                oSocket.close(1000, "Code Failed");
                 break;
             case "sterr":
-                messagebox.innerHTML = "Error Recieved " + msg.data;
+                messagebox.innerHTML = "Error Recieved " + stringFromData(msg.data);
                 break;    
             case "stdout":
-                messagebox.innerHTML = "Data Recieved ";// + msg.data;
-                console.log("msg.data =", msg.data.toString());
+                messagebox.innerHTML = "Data Recieved " + stringFromData(msg.data);
                 break;    
         }
-  
     };
 };
 
@@ -5360,7 +5684,8 @@ wb.prettyScript = function(elements){
             return req;
         }
         return "";
-    }).join(" ");
+    }).join(" ")+"\n process.on('SIGINT', function(){process.exit(0);});";
+    //"process.on('exit', function(){console.log(\"Ending\");});";
     
     var script = elements.map(function(elem){
         return wb.codeFromBlock(elem);
@@ -5422,30 +5747,99 @@ https://npmjs.org/package/raspicam
 /*end languages/node/control.js*/
 
 /*begin languages/node/piface.js*/
-//wb.choiceLists.digitalinputpins = {"0":'Pin 0',"1":'Pin 1',"2":'Pin 2',"3":'Pin 3',"4":'Pin 4',"5":'Pin 5',"6":'Pin 6',"7":'Pin 7',"8":'Pin 8',"9":'Pin 9',"10":'Pin 10',"11":'Pin 11',"12":'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
-wb.choiceLists.pifacein = ["0","1" ,"2" ,"3" ,"4" ,"5" ,"6" ,"7"];
-wb.choiceLists.pifacebutton = [0,1 ,2 ,3];
-wb.choiceLists.pifacerelays = [0,1 ];
-wb.choiceLists.pifaceout = ["0", 1 ,2 ,3 ,4 ,5 ,6 ,7];
-wb.choiceLists.pifaceonoff = ["0", "1"];
+wb.choiceLists.pifacein = {0:'Pin 0', 1:'Pin 1', 2:'Pin 2', 3:'Pin 3', 4:'Pin 4', 5:'Pin 5', 6:'Pin 6', 7:'Pin 7'};
+//wb.choiceLists.pifacein = [0, 1, 2, 3, 4, 5, 6, 7];
+wb.choiceLists.pifacebutton = [0, 1, 2, 3];
+wb.choiceLists.pifacerelays = [0, 1];
+wb.choiceLists.pifaceout = [0, 1, 2, 3, 4, 5, 6, 7];
+wb.choiceLists.pifaceonoff = [0, 1];
 
 
 
 wb.requiredjs.before.piface = "var pfio = require('piface-node');\npfio.init();\n";
-wb.requiredjs.after.piface =  "\nprocess.on('SIGINT',function(){console.log(\"Caught SIGINT\");pfio.write_output(0);pfio.deinit(); process.exit();});process.on('exit',function(){console.log(\"exit\");pfio.write_output(0);pfio.deinit();});";
+wb.requiredjs.after.piface =  "\nprocess.on('exit',function(){console.log(\"exit\");pfio.write_output(0);pfio.deinit();});";
 
 /*end languages/node/piface.js*/
+
+/*begin languages/node/pibrella_simple.js*/
+
+//PiBrella 
+/*
+gpio export 27 out
+gpio export 17 out
+gpio export 4 out
+gpio export 22 out
+gpio export 23 out
+gpio export 24 out
+gpio export 25 out
+gpio export 18 out
+
+gpio export 11 in
+gpio export 9 in
+gpio export 7 in
+gpio export 8 in
+gpio export 10 in
+
+gpio -g mode 11 down
+gpio -g mode 9 down
+gpio -g mode 7 down
+gpio -g mode 8 down
+gpio -g mode 10 down
+
+*/
+
+
+wb.choiceLists.pibrellaout = {27:"Red LED", 17:"Amber LED", 4:"Green LED", 22:"Output E", 23:"Output F", 24:"Output G", 25:"Output H", 18: "Buzzer"}
+wb.choiceLists.pibrellain = {11:"Red Button", 9:"Input A", 7:"Input B", 8:"Input C", 10:"Input D"}
+
+wb.choiceLists.pibrellaedge = {'both': 'Change', 'rising':'Turn On', 'falling':'Turn Off'}
+
+
+//PB_PIN_BUZZER = 18
+
+
+wb.requiredjs.before.pibrella = "var Gpio = require('onoff').Gpio;\n";
+wb.requiredjs.after.pibrella =  "";
+
+
+/*Run the following commands to export GPIO #17 and #18:
+
+gpio export 17 out
+gpio export 18 in
+
+Step 2 - Run the application
+
+Now the application can be executed without superuser privileges. Note that unlike the initial led/button example, the applications exit function does not attempt to unexport the GPIOs when it terminates.
+
+var Gpio = require('onoff').Gpio,
+    led = new Gpio(17, 'out'),
+    button = new Gpio(18, 'in', 'both');
+
+button.watch(function(err, value) {
+    if (err) exit();
+    led.writeSync(value);
+});
+
+function exit() {
+    process.exit();
+}
+
+process.on('SIGINT', exit);
+
+Step 3 - Unxport GPIOs with gpio
+
+After the application has terminated, run the following commands to unexport GPIO #17 and #18:
+
+gpio unexport 17
+gpio unexport 18
+
+*/
+
+/*end languages/node/pibrella_simple.js*/
 
 /*begin languages/node/firmata.js*/
 //arduino firmata  https://npmjs.org/search?q=firmata
 
-
-//wb.choiceLists.digitalinputpins = {"0":'Pin 0',"1":'Pin 1',"2":'Pin 2',"3":'Pin 3',"4":'Pin 4',"5":'Pin 5',"6":'Pin 6',"7":'Pin 7',"8":'Pin 8',"9":'Pin 9',"10":'Pin 10',"11":'Pin 11',"12":'Pin 12','A0':'Pin A0','A1':'Pin A1','A2':'Pin A2','A3':'Pin A3','A4':'Pin A4','A5':'A5'};
-wb.choiceLists.firmatain = ["0","1" ,"2" ,"3" ,"4" ,"5" ,"6" ,"7"];
-wb.choiceLists.firmatabutton = [0,1 ,2 ,3];
-wb.choiceLists.firmatarelays = [0,1 ];
-wb.choiceLists.firmataout = ["0", 1 ,2 ,3 ,4 ,5 ,6 ,7];
-wb.choiceLists.firmataonoff = ["0", "1"];
 
 wb.choiceLists.highlow = ['HIGH', 'LOW'];
 wb.choiceLists.inoutput= ['INPUT', 'OUTPUT'];
@@ -5465,9 +5859,9 @@ wb.requiredjs.after.firmata =  "";
 /*begin languages/node/mc_game.js*/
    
 
-wb.requiredjs.before.minecraftgame = "var Minecraft = require('./minecraft-pi/lib/minecraft.js');\nvar v= require('vec3');";
+wb.requiredjs.before.minecraftgame = "var Minecraft = require('minecraft-pi-vec3');\nvar v= require('vec3');";
 
-wb.requiredjs.after.minecraftgame =  "\nprocess.on('SIGINT',function(){console.log(\"Caught SIGINT\");client.end(); process.exit();});process.on('exit',function(){console.log(\"Caught exit\");client.end();});";
+wb.requiredjs.after.minecraftgame =  "\nprocess.on('exit',function(){console.log(\"Caught exit\");client.end();});";
 
 
 // TODO : fix blocktypes to number or text not both
@@ -5537,7 +5931,9 @@ wb.choiceLists.cameramode = ['normal','thirdPerson','fixed'];
 
 /*begin languages/node/control.json*/
 wb.menu({
+	"sectionkey": "control",
     "name": "Control",
+    "help": "Contains control flow, variables, setters, and messaging blocks.",
     "blocks": [
         {
             "blocktype": "eventhandler",
@@ -5751,7 +6147,9 @@ wb.menu({
 
 /*begin languages/node/piface.json*/
 wb.menu({
+	"sectionkey": "piface",
     "name": "PiFace",
+    "help": "Physical Input and Output for the Raspberry Pi using a PiFace board.",
     "blocks": [
         {
             "blocktype": "expression",
@@ -5762,9 +6160,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Input",
-                    "type": "choice",
+                    "type": "number",
                     "options": "pifacein",
-                    "value": "choice"
+                    "value": 0
                 }
             ]
         },
@@ -5772,7 +6170,7 @@ wb.menu({
             "blocktype": "expression",
             "id": "f6fee9db-64c8-42fc-9285-f8c99c069bfa",
             "script": "pfio.read_input()",
-            "type": "int",
+            "type": "number",
             "help": "All 8 Pins as a Digital Input",
             "sockets": [
                 {
@@ -5788,9 +6186,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Set output",
-                    "type": "choice",
+                    "type": "number",
                     "options": "pifaceout",
-                    "value": "choice"
+                    "value": 0
                 },
                 {
                     "name": "to",
@@ -5807,7 +6205,7 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Set outputs to",
-                    "type": "int",
+                    "type": "number",
                     "value": "0"
                 }
             ]
@@ -5821,9 +6219,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create output## using Output Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "pifaceout",
-                    "value": "choice"
+                    "value": 0
                 }
             ],
             "locals": [
@@ -5864,9 +6262,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create input## using Input Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "pifacein",
-                    "value": "choice"
+                    "value": 0
                 }
             ]
         }
@@ -5875,9 +6273,119 @@ wb.menu({
 });
 /*end languages/node/piface.json*/
 
+/*begin languages/node/pibrella_simple.json*/
+wb.menu({
+	"sectionkey": "pibrella",
+    "name": "PiBrella",
+    "help": "Physical Input and Output for the Raspberry Pi using a PiBrella board.",
+    "blocks": [
+        {
+            "blocktype": "step",
+            "id": "cecd70c5-e733-4f36-83f3-aec34a70f75b",
+            "script": "output## = new Gpio({{1}}, 'out');",
+            "help": "Create a named pin set to output",
+            "sockets": [
+                {
+                    "name": "Create output## using",
+                    "type": "number",
+                    "options": "pibrellaout",
+                    "value": null
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "step",
+                    "sockets": [
+                        {
+                            "name": "output##"
+                        },
+                        {
+                            "name": "=",
+                            "type": "boolean",
+                            "value": null
+                        }
+                    ],
+                    "script": "output##.writeSync(({{1}})?1:0);"
+                }
+            ]
+        },
+        {
+            "blocktype": "step",
+            "id": "f2c60382-47b4-40d7-8117-c790a866c104",
+            "script": "input## = new Gpio({{1}}, 'in');",
+            "help": "Create a named pin set to input",
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "input##"
+                        }
+                    ],
+                    "script": "(input##.readSync() === 1)",
+                    "help": "Is the digital input pin ON",
+                    "type": "boolean"
+                }
+            ],
+            "sockets": [
+                {
+                    "name": "Create input## using Input Pin",
+                    "type": "number",
+                    "options": "pibrellain",
+                    "value": 11
+                }
+            ]
+        },
+        {
+            "blocktype": "context",
+            "id": "e57b641a-3de8-4ecd-90bc-77a1277b8066",
+            "script": "watcher## = new Gpio({{1}}, 'in', {{2}}, {\"debounceTimeout\":{{3}}}); watcher##.watch(function(err, watcherval){[[1]]})",
+            "help": "Create a named pin set to input",
+            "sockets": [
+                {
+                    "name": "Watch for",
+                    "type": "number",
+                    "options": "pibrellain",
+                    "value": 11
+                },
+                {
+                    "name": "to",
+                    "type": "string",
+                    "options": "pibrellaedge",
+                    "value": "both"
+                },
+                {
+                    "name": "debounce",
+                    "type": "number",
+                    "value": 100,
+                    "suffix": "ms"
+                }
+            ],
+            "locals": [
+                {
+                    "blocktype": "expression",
+                    "sockets": [
+                        {
+                            "name": "value"
+                        }
+                    ],
+                    "script": "(watcherval === 1)",
+                    "help": "value from input",
+                    "type": "boolean"
+                }
+            ]
+        }
+        
+        
+    ]
+});
+/*end languages/node/pibrella_simple.json*/
+
 /*begin languages/node/firmata.json*/
 wb.menu({
+	"sectionkey": "firmata",
     "name": "Firmata",
+    "help": "Physical Input and Output for the Raspberry Pi using an Arduino loaded with Firmata.",
     "blocks": [
         {
             "blocktype": "context",
@@ -5898,9 +6406,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create digital_output## on Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "digitalpins",
-                    "value": "choice"
+                    "value": 0
                 }
             ],
             "locals": [
@@ -5941,9 +6449,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create digital_input## on Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "digitalpins",
-                    "value": "choice"
+                    "value": 0
                 }
             ]
         },
@@ -5956,9 +6464,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create analog_output## on Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "pwmpins",
-                    "value": "choice"
+                    "value": 3
                 }
             ],
             "locals": [
@@ -5987,9 +6495,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create servo## on Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "pwmpins",
-                    "value": "choice"
+                    "value": 3
                 }
             ],
             "locals": [
@@ -6031,9 +6539,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "Create analog_input## on Pin",
-                    "type": "choice",
+                    "type": "number",
                     "options": "analoginpins",
-                    "value": "choice"
+                    "value": "A0"
                 }
             ]
         }
@@ -6044,7 +6552,9 @@ wb.menu({
 
 /*begin languages/node/mc_game.json*/
 wb.menu({
+	"sectionkey": "minecraft",
     "name": "Minecraft Game",
+    "help": "Blocks which connect to and manipulate Minecraft Pi Edition",
     "blocks": [
         
         {
@@ -6109,7 +6619,9 @@ wb.menu({
 
 /*begin languages/node/mc_player.json*/
 wb.menu({
+	"sectionkey": "mcplayer",
     "name": "Player",
+    "help": "Find and move Steve the Minecraft player",
     "blocks": [
         {
             "blocktype": "context",
@@ -6218,7 +6730,9 @@ wb.menu({
 
 /*begin languages/node/mc_position.json*/
 wb.menu({
+	"sectionkey": "mcposition",
     "name": "Position",
+    "help": "Find and change Minecraft Positions",
     "blocks": [
         {
             "blocktype": "expression",
@@ -6500,9 +7014,9 @@ wb.menu({
                 },
                 {
                     "name": " ",
-                    "type": "choice",
+                    "type": "string",
                     "options": "directions",
-                    "value": "choice"
+                    "value": "up"
                 }
             ],
             "script": "var position##=client.directioncalcs[{{3}}]({{1}},{{2}});",
@@ -6550,7 +7064,9 @@ wb.menu({
 
 /*begin languages/node/mc_blocks.json*/
 wb.menu({
+	"sectionkey": "mcblocks",
     "name": "Blocks",
+    "help": "Find and set Minecraft Blocks",
     "blocks": [
         {
             "blocktype": "context",
@@ -6593,9 +7109,9 @@ wb.menu({
             "sockets": [
                     {
                     "name":"block",
-                    "type": "choice",
+                    "type": "string",
                     "options": "blocks",
-                    "value": "choice"
+                    "value": "AIR"
                 }
                 ],
             "script": "client.blocks[{{1}}]",
@@ -6613,9 +7129,9 @@ wb.menu({
                 },
                 {
                     "name": "to",
-                    "type": "choice",
+                    "type": "string",
                     "options": "blocks",
-                    "value": "choice"
+                    "value": "AIR"
                 }
             ],
             "script": "client.setBlock({{1}}, client.blocks[{{2}}]);",
@@ -6639,9 +7155,9 @@ wb.menu({
                 },
                 {
                     "name": "to",
-                    "type": "choice",
+                    "type": "string",
                     "options": "blocks",
-                    "value": "choice"
+                    "value": "AIR"
                 }
             ],
             "script": "client.setBlocks({{1}}, {{2}}, client.blocks[{{3}}]);",
@@ -6654,7 +7170,7 @@ wb.menu({
                 {
                     "name": "block type name",
                     "type": "number",
-                    "value": "0"
+                    "value": 0
                 }
             ],
             "script": "client.getBlockName({{1}})",
@@ -6668,7 +7184,9 @@ wb.menu({
 
 /*begin languages/node/mc_camera.json*/
 wb.menu({
+	"sectionkey": "mccamera",
     "name": "Camera",
+    "help": "Manipulating the Minecraft Camera",
     "blocks": [
       
       
@@ -6678,9 +7196,9 @@ wb.menu({
             "sockets": [
                 {
                     "name": "set camera mode to",
-                    "type": "choice",
+                    "type": "string",
                     "options": "cameramode",
-                    "value": "choice"
+                    "value": ""
                 }
                 
             ],
@@ -6706,7 +7224,9 @@ wb.menu({
 
 /*begin languages/node/array.json*/
 wb.menu({
+	"sectionkey": "arrays",
     "name": "Arrays",
+    "help": "Arrays are lists of items. Items can be added and removed, located, sorted and more.",
     "blocks": [
         {
             "blocktype": "step",
@@ -6964,7 +7484,9 @@ wb.menu({
 
 /*begin languages/node/boolean.json*/
 wb.menu({
+	"sectionkey": "boolean",
     "name": "Boolean",
+    "help": "Booleans are true or false and expressions which evaluate to true or false",
     "blocks": [
         {
             "blocktype": "expression",
@@ -7043,7 +7565,9 @@ wb.menu({
 
 /*begin languages/node/math.json*/
 wb.menu({
+	"sectionkey": "math",
     "name": "Math",
+    "help": "Math blocks are for manipulating numbers",
     "blocks": [
         {
             "blocktype": "step",
@@ -7524,7 +8048,9 @@ wb.menu({
 
 /*begin languages/node/string.json*/
 wb.menu({
+	"sectionkey": "strings",
     "name": "Strings",
+    "help": "String blocks represent or manipulate bits of text (strings of characters)",
     "blocks": [
         {
             "blocktype": "expression",
@@ -7729,3 +8255,63 @@ wb.menu({
     ]
 });
 /*end languages/node/string.json*/
+
+/*begin l10n.js*/
+(function(wb){
+
+/* old Obj will be overwritten by newObj */
+function overwriteAttributes(oldObj, newObj) {
+ 
+    if (!newObj || ! oldObj)
+        return;
+
+    var oldObjQueue = [];
+    var newObjQueue = [];
+    oldObjQueue.push(oldObj);
+    newObjQueue.push(newObj);
+
+    while (oldObjQueue.length && newObjQueue.length) {
+
+        // pop object to investigate. 
+        var currOldObj = oldObjQueue.pop();
+        var currNewObj = newObjQueue.pop();
+
+        // Objects: get strings values of keys in current object     
+        // Arrays:  get the integer values of all indexes into array 
+        //          (this is obviously 0...n)     
+        // 
+        // This isn't the cleanest approach, but it keeps me from creating
+        // a more complex structure with typeof array or typeof object
+        var keys = Object.keys(currNewObj);
+
+        // iterate through all keys 
+        for (var idx in keys) {
+            var key = keys[idx];
+
+            if (typeof currNewObj[key] === "object" && currNewObj[key] !== null) {
+
+                // if it's an object, queue it to dive into it later
+                newObjQueue.push(currNewObj[key]);
+                oldObjQueue.push(currOldObj[key]);
+
+            } else {
+
+                // if anything but object, overwrite value from new object in old object 
+                currOldObj[key] = currNewObj[key];
+            }
+        }
+    }
+}
+
+wb.overwriteAttributes = overwriteAttributes;
+
+})(wb);
+
+if (wb.l10nHalfDone) {
+    // console.log("l10n populating");
+    wb.populateMenu();
+} else {
+    // console.log("l10n done");
+    wb.l10nHalfDone = true;
+}
+/*end l10n.js*/

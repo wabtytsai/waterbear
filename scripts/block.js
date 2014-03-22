@@ -17,7 +17,7 @@
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
 (function(wb){
-
+'use strict';
     var elem = wb.elem;
 
     var nextSeqNum = 0;
@@ -27,19 +27,24 @@
     function newSeqNum(){
         nextSeqNum++;
         return nextSeqNum;
-    };
+    }
 
     function registerSeqNum(seqNum){
         // When reifying saved blocks, call this for each block to make sure we start new blocks
         // that do not overlap with old ones.
-        if (!seqNum) return;
+        if (!seqNum)
+        {
+            return;
+        }
         nextSeqNum = Math.max(parseInt(seqNum, 10), nextSeqNum);
     }
 
     function resetSeqNum(){
+        console.log('resetSeqNum (and also block registry)');
         nextSeqNum = 0;
-        blockRegistry = {};
-        wb.blockRegistry = blockRegistry;
+        // the lines below were breaking loading from files, and probably any load after the menus were built
+        // blockRegistry = {};
+        // wb.blockRegistry = blockRegistry;
     }
 
     function registerBlock(blockdesc){
@@ -116,6 +121,7 @@
                 'data-local-source': obj.localSource || null, // help trace locals back to their origin
                 'data-sockets': JSON.stringify(obj.sockets),
                 'data-locals': JSON.stringify(obj.locals),
+                'data-keywords': JSON.stringify(obj.keywords),
                 'title': obj.help || getHelp(obj.scriptId || obj.id)
             },
             elem('div', {'class': 'label'}, createSockets(obj))
@@ -158,7 +164,7 @@
         //     console.log('instantiated block %o from description %o', block, obj);
         //}
         return block;
-    }
+    };
 
     // Block Event Handlers
 
@@ -291,7 +297,7 @@
         if (desc.type){
             socket.dataset.type = desc.type;
             var holder = elem('div', {'class': 'holder'}, [Default(desc)]);
-            socket.appendChild(holder)
+            socket.appendChild(holder);
         }
         if (desc.block){
             socket.dataset.block = desc.block;
@@ -323,15 +329,15 @@
             socket.appendChild(elem('span', {'class': 'suffix'}, desc.suffix));
         }
         return socket;
-    }
+    };
 
 
     function socketDesc(socket){
         var parentBlock = wb.closest(socket, '.block');
         var isTemplate = !!parentBlock.dataset.isTemplateBlock;
         var desc = {
-            name: socket.dataset.name,
-        }
+            name: socket.dataset.name
+        };
         // optional defined settings
         if (socket.dataset.type){
             desc.type = socket.dataset.type;
@@ -349,9 +355,12 @@
             desc.suffix = socket.dataset.suffix;
         }
         // User-specified settings
-        if (isTemplate) return desc;
+        if (isTemplate) 
+        {
+            return desc;
+        }
         var uName = wb.findChild(socket, '.name').textContent;
-        var uEle = wb.findChild(socket, '.name')
+        var uEle = wb.findChild(socket, '.name');
         
         if (desc.name.replace(/##/, ' ' + socket.dataset.seqNum) !== uName){
             desc.uName = uName;
@@ -390,13 +399,15 @@
             scopeId: block.dataset.scopeId,
             scriptId: block.dataset.scriptId,
             sockets: sockets.map(socketDesc)
-        }
+        };
+
         if (block.dataset.group === 'scripts_workspace'){
             desc.blocktype = block.dataset.blocktype;
             desc.group = block.dataset.group;
             desc.help = block.dataset.help;
             desc.type = block.dataset.type;            
         }
+
         if (block.dataset.seqNum){
             desc.seqNum  = block.dataset.seqNum;
         }
@@ -460,6 +471,52 @@
         // return a block for block types
         var value;
         var type = obj.type;
+        
+        if(type === 'boolean')
+        {
+            obj.options = 'boolean';
+        }
+        
+        if(typeof obj.options !== 'undefined')
+        {
+            // DONE : #24
+            // DONE : #227
+            var choice = elem('select');
+            var list = wb.choiceLists[obj.options];
+            
+            if(Array.isArray(list))
+            {
+                wb.choiceLists[obj.options].forEach(function(opt){
+                    var option = elem('option', {}, opt);
+                    var value = obj.uValue || obj.value;
+                    
+                    if (value !== undefined && value !== null && value == opt){
+                        option.setAttribute('selected', 'selected');
+                    }
+                    
+                    choice.appendChild(option);
+                });
+            }
+            else
+            {
+                var values = Object.keys(list);
+                
+                values.forEach(function(val){
+                    var option = elem('option', {"value":val}, list[val]);
+                    var value = obj.uValue || obj.value;
+                    
+                    if (value !== undefined && value !== null && value == val){
+                        option.setAttribute('selected', 'selected');
+                    }
+                    
+                    choice.appendChild(option);
+                });
+            }
+            
+            return choice;
+        
+        }
+        
         if (type === 'int' || type === 'float'){
             type = 'number';
         }
@@ -489,19 +546,6 @@
                 value = obj.uValue || obj.value || '604-555-1212'; break;
             case 'email':
                 value = obj.uValue || obj.value || 'waterbear@waterbearlang.com'; break;
-            case 'boolean':
-                obj.options = 'boolean';
-            case 'choice':
-                var choice = elem('select');
-                wb.choiceLists[obj.options].forEach(function(opt){
-                    var option = elem('option', {}, opt);
-                    var value = obj.uValue || obj.value;
-                    if (value && value === opt){
-                        option.setAttribute('selected', 'selected');
-                    }
-                    choice.appendChild(option);
-                });
-                return choice;
             default:
                 value = obj.uValue || obj.value || '';
         }
@@ -516,7 +560,7 @@
 
         wb.resize(input);
         return input;
-    }
+    };
 
     function socketValue(holder){
         if (holder.children.length > 1){
@@ -524,7 +568,9 @@
         }else{
             var value = wb.findChild(holder, 'input, select').value;
             var type = holder.parentElement.dataset.type;
-            if (type === 'string' || type === 'choice' || type === 'color' || type === 'url'){
+
+            // DONE : #227
+            if (type === 'string' || type === 'color' || type === 'url'){
                 if (value[0] === '"'){value = value.slice(1);}
                 if (value[value.length-1] === '"'){value = value.slice(0,-1);}
                 value = value.replace(/"/g, '\\"');
@@ -569,7 +615,7 @@
         var _code = scriptTemplate.replace(/\{\{\d\}\}/g, replace_values);
         var _code2 = _code.replace(/\[\[\d\]\]/g, replace_values);
         return _code2;
-    };
+    }
 
     function changeName(event){
         var nameSpan = event.wbTarget;
@@ -595,37 +641,38 @@
         input.parentElement.removeChild(input);
         nameSpan.style.display = 'initial';
         function propagateChange(newName) {
-			// console.log('now update all instances too');
-			var source = wb.closest(nameSpan, '.block');
-			var instances = wb.findAll(wb.closest(source, '.context'), '[data-local-source="' + source.dataset.localSource + '"]');
-			instances.forEach(function(elem){
-				wb.find(elem, '.name').textContent = newName;
-			});
+            // console.log('now update all instances too');
+            var source = wb.closest(nameSpan, '.block');
+            var instances = wb.findAll(wb.closest(source, '.context'), '[data-local-source="' + source.dataset.localSource + '"]');
+            instances.forEach(function(elem){
+                wb.find(elem, '.name').textContent = newName;
+                wb.find(elem, '.socket').dataset.name = newName;
+            });
 
-			//Change name of parent
-			var parent = document.getElementById(source.dataset.localSource);
-			var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
-			nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
+            //Change name of parent
+            var parent = document.getElementById(source.dataset.localSource);
+            var nameTemplate = JSON.parse(parent.dataset.sockets)[0].name;
+            nameTemplate = nameTemplate.replace(/[^' ']*##/g, newName);
 
-			//Change locals name of parent
-			var parentLocals = JSON.parse(parent.dataset.locals);
-			var localSocket = parentLocals[0].sockets[0];
-			localSocket.name = newName;
-			parent.dataset.locals = JSON.stringify(parentLocals);
+            //Change locals name of parent
+            var parentLocals = JSON.parse(parent.dataset.locals);
+            var localSocket = parentLocals[0].sockets[0];
+            localSocket.name = newName;
+            parent.dataset.locals = JSON.stringify(parentLocals);
 
-			wb.find(parent, '.name').textContent = nameTemplate;
-    	    Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
-		}
-		var action = {
-			undo: function() {
-				propagateChange(oldName);
-			},
-			redo: function() {
-				propagateChange(newName);
-			},
-		}
-		wb.history.add(action);
-		action.redo();
+            wb.find(parent, '.name').textContent = nameTemplate;
+            Event.trigger(document.body, 'wb-modified', {block: event.wbTarget, type: 'nameChanged'});
+        }
+        var action = {
+            undo: function() {
+                propagateChange(oldName);
+            },
+            redo: function() {
+                propagateChange(newName);
+            }
+        };
+        wb.history.add(action);
+        action.redo();
     }
 
     function cancelUpdateName(event){
@@ -642,16 +689,142 @@
         if (event.keyCode === 0x1B /* escape */ ){
             event.preventDefault();
             input.value = input.previousSibling.textContent;
-            input.blur()
+            input.blur();
         }else if(event.keyCode === 0x0D /* return or enter */ || event.keyCode === 0x09 /* tab */){
             event.preventDefault();
             input.blur();
         }
     }
 
+    /** Search filter */
+
+    var oldQuery = '';
+
+    function searchBlock(event) {
+        // Clear input if the clear button is pressed
+        var searchTextNode = document.getElementById('search_text');
+
+        if (event.target.id == 'search_clear') {
+            searchTextNode.value = '';
+        }
+
+        // Proceed if the query is changed
+        var query = searchTextNode.value.trim().toLowerCase();
+
+        if (oldQuery == query) {
+            return;
+        } else {
+            oldQuery = query;
+        }
+
+        var searchResultsNode = document.getElementById('search_results');
+        var blockMenuNode = document.getElementById('block_menu');
+
+        // For non-empty query, show all blocks; otherwise, hide all blocks
+        if (query) {
+            wb.show(searchResultsNode);
+            wb.hide(blockMenuNode);
+
+            while (searchResultsNode.firstChild) {
+                searchResultsNode.removeChild(searchResultsNode.firstChild);
+            }
+        } else {
+            wb.hide(searchResultsNode);
+            wb.show(blockMenuNode);
+            return;
+        }
+
+        // Clear suggestions
+        var suggestions = [];
+        var suggestionsNode = document.getElementById('search_suggestions');
+        while (suggestionsNode.firstChild) {
+            suggestionsNode.removeChild(suggestionsNode.firstChild);
+        }
+
+        var groups = document.querySelectorAll('.block-menu');
+     
+        for (var i = 0; i < groups.length; i++) {
+            var blocks = groups[i].getElementsByClassName('block');
+
+            for (var j = 0; j < blocks.length; j++) {
+                // Construct an array of keywords
+                var keywords = [];
+
+                var group = blocks[j].getAttribute('data-group');
+                if (group) {
+                    keywords.push(group);
+                }
+
+                var keywordsAttr = blocks[j].getAttribute('data-keywords');
+                if (keywordsAttr) {
+                    keywords = keywords.concat(JSON.parse(keywordsAttr));
+                }
+
+                // Find a match
+                var matchingKeywords = [];
+
+                for (var k = 0; k < keywords.length; k++) {
+                    if (keywords[k].indexOf(query) == 0) {
+                        matchingKeywords.push(keywords[k]);
+
+                        if (suggestions.indexOf(keywords[k]) == -1) {
+                            suggestions.push(keywords[k]);
+
+                            var suggestionNode = document.createElement('option');
+                            suggestionNode.value = keywords[k];
+                            suggestionsNode.appendChild(suggestionNode);
+                        }
+                    }
+                }
+
+                // Show/hide blocks
+                if (matchingKeywords.length > 0) {
+                    var resultNode = document.createElement('div');
+                    resultNode.classList.add('search_result');
+                    resultNode.classList.add(group);
+                    resultNode.style.backgroundColor = 'transparent';
+
+                    // Block
+                    resultNode.appendChild(blocks[j].cloneNode(true));
+
+                    // Fix result height
+                    var clearNode = document.createElement('div');
+                    clearNode.style.clear = 'both';
+                    resultNode.appendChild(clearNode);
+
+                    // Keyword name
+                    var keywordNode = document.createElement('span');
+                    keywordNode.classList.add('keyword');
+                    var keywordNodeContent = '<span class="keyword">';
+                    keywordNodeContent += '<span class="match">';
+                    keywordNodeContent += matchingKeywords[0].substr(0, query.length);
+                    keywordNodeContent += '</span>';
+                    keywordNodeContent += matchingKeywords[0].substr(query.length);
+
+                    for (var k = 1; k < matchingKeywords.length; k++) {
+                        keywordNodeContent += ', <span class="match">';
+                        keywordNodeContent += matchingKeywords[k].substr(0, query.length);
+                        keywordNodeContent += '</span>';
+                        keywordNodeContent += matchingKeywords[k].substr(query.length);
+                    }
+
+                    keywordNodeContent += '</span>';
+                    keywordNode.innerHTML = keywordNodeContent;
+                    resultNode.appendChild(keywordNode);
+
+                    searchResultsNode.appendChild(resultNode);
+                }
+            }
+        }
+    }
+
     Event.on(document.body, 'wb-remove', '.block', removeBlock);
     Event.on(document.body, 'wb-add', '.block', addBlock);
     Event.on(document.body, 'wb-delete', '.block', deleteBlock);
+
+    Event.on('#search_text', 'keyup', null, searchBlock);
+    Event.on('#search_text', 'input', null, searchBlock);
+    Event.on('#search_clear', 'click', null, searchBlock);
 
     wb.blockRegistry = blockRegistry;
 

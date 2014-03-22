@@ -310,14 +310,28 @@
                     "uValue": "500"
                   },
                   {
+                    "name": "width units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
+                  },
+                  {
                     "name": "height",
                     "type": "number",
                     "value": "32",
                     "uValue": "50"
+                  },
+                  {
+                    "name": "height units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
                   }
                 ],
                 "seqNum": "410",
-                "script": "{w: {{1}}, h: {{2}} }",
+                "script": "{w: convert({{1}}, {{2}}, true), h: convert({{3}}, {{4}}, false)}",
                 "type": "size"
               }
             },
@@ -439,14 +453,28 @@
                     "uValue": "500"
                   },
                   {
+                    "name": "width units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
+                  },
+                  {
                     "name": "height",
                     "type": "number",
                     "value": "32",
                     "uValue": "50"
+                  },
+                  {
+                    "name": "height units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
                   }
                 ],
                 "seqNum": "414",
-                "script": "{w: {{1}}, h: {{2}} }",
+                "script": "{w: convert({{1}}, {{2}}, true), h: convert({{3}}, {{4}}, false)}",
                 "type": "size"
               }
             },
@@ -568,14 +596,28 @@
                     "uValue": "500"
                   },
                   {
+                    "name": "width units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
+                  },
+                  {
                     "name": "height",
                     "type": "number",
                     "value": "32",
                     "uValue": "50"
+                  },
+                  {
+                    "name": "height units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
                   }
                 ],
                 "seqNum": "418",
-                "script": "{w: {{1}}, h: {{2}} }",
+                "script": "{w: convert({{1}}, {{2}}, true), h: convert({{3}}, {{4}}, false)}",
                 "type": "size"
               }
             },
@@ -735,14 +777,28 @@
                         "uValue": "20"
                       },
                       {
+                        "name": "width units",
+                        "type": "string",
+                        "value": "choice",
+                        "options": "relativeUnit",
+                        "uValue": "px"
+                      },
+                      {
                         "name": "height",
                         "type": "number",
                         "value": "32",
                         "uValue": "20"
+                      },
+                      {
+                        "name": "height units",
+                        "type": "string",
+                        "value": "choice",
+                        "options": "relativeUnit",
+                        "uValue": "px"
                       }
                     ],
                     "seqNum": "237",
-                    "script": "{w: {{1}}, h: {{2}} }",
+                    "script": "{w: convert({{1}}, {{2}}, true), h: convert({{3}}, {{4}}, false)}",
                     "type": "size"
                   }
                 },
@@ -951,14 +1007,28 @@
                         "uValue": "10"
                       },
                       {
+                        "name": "width units",
+                        "type": "string",
+                        "value": "choice",
+                        "options": "relativeUnit",
+                        "uValue": "px"
+                      },
+                      {
                         "name": "height",
                         "type": "number",
                         "value": "32",
                         "uValue": "10"
+                      },
+                      {
+                        "name": "height units",
+                        "type": "string",
+                        "value": "choice",
+                        "options": "relativeUnit",
+                        "uValue": "px"
                       }
                     ],
                     "seqNum": "237",
-                    "script": "{w: {{1}}, h: {{2}} }",
+                    "script": "{w: convert({{1}}, {{2}}, true), h: convert({{3}}, {{4}}, false)}",
                     "type": "size"
                   }
                 },
@@ -1186,14 +1256,28 @@
                     "uValue": "20"
                   },
                   {
+                    "name": "width units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
+                  },
+                  {
                     "name": "height",
                     "type": "number",
                     "value": "32",
                     "uValue": "20"
+                  },
+                  {
+                    "name": "height units",
+                    "type": "string",
+                    "value": "choice",
+                    "options": "relativeUnit",
+                    "uValue": "px"
                   }
                 ],
                 "seqNum": "31",
-                "script": "{w: {{1}}, h: {{2}} }",
+                "script": "{w: convert({{1}}, {{2}}, true), h: convert({{3}}, {{4}}, false)}",
                 "type": "size"
               }
             },
@@ -1482,8 +1566,8 @@
                 },
                 {
                   "name": "",
-                  "type": "choice",
-                  "value": "choice",
+                  "type": "string",
+                  "value": "px",
                   "options": "unit",
                   "uValue": "px"
                 },
@@ -3887,8 +3971,8 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
-                        "value": "choice",
+                        "type": "string",
+                        "value": "a",
                         "options": "keys",
                         "uValue": "a"
                       },
@@ -4008,8 +4092,8 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
-                        "value": "choice",
+                        "type": "string",
+                        "value": "b",
                         "options": "keys",
                         "uValue": "b"
                       },
@@ -4129,8 +4213,8 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
-                        "value": "choice",
+                        "type": "string",
+                        "value": "c",
                         "options": "keys",
                         "uValue": "c"
                       },
@@ -5090,8 +5174,8 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
-                        "value": "choice",
+                        "type": "string",
+                        "value": "up",
                         "options": "keys",
                         "uValue": "up"
                       },
@@ -5207,8 +5291,8 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
-                        "value": "choice",
+                        "type": "string",
+                        "value": "down",
                         "options": "keys",
                         "uValue": "down"
                       },
@@ -5324,8 +5408,8 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
-                        "value": "choice",
+                        "type": "string",
+                        "value": "left",
                         "options": "keys",
                         "uValue": "left"
                       },
@@ -5441,7 +5525,7 @@
                     "sockets": [
                       {
                         "name": "key",
-                        "type": "choice",
+                        "type": "string",
                         "value": "choice",
                         "options": "keys",
                         "uValue": "right"

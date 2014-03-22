@@ -1,4 +1,5 @@
 {
+	"sectionkey": "colors",
     "name": "Colors",
     "blocks": [
         {
@@ -82,9 +83,9 @@
             "sockets": [
                 {
                     "name": "color mode",
-                    "type": "choice",
+                    "type": "string",
                     "options": "mode",
-                    "value": "choice"
+                    "value": ""
                 },
                 {
                     "name": "range",
