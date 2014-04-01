@@ -1,5 +1,5 @@
 (function(global) {
-    //var currentUser = 'bob@example.com';
+    var currentUser;
 
     var signinLink = document.getElementById('signin');
     if (signinLink) {
@@ -20,6 +20,9 @@
         return function() {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200) {
+                    console.log('haha');
+                    currentUser = xhr.response.currentUser;
+                    console.log(currentUser);
                     window.location.reload();
                 } else {
                     navigator.id.logout();
@@ -42,7 +45,7 @@
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "/auth/persona?assertion=" + assertion.toString(), true);
         //xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = signSentinel(xhr);
+        xhr.onreadystatechange = signinSentinel(xhr);
         xhr.send();
     }
 
@@ -54,7 +57,7 @@
     }
 
     navigator.id.watch({
-        //loggedInUser: currentUser,
+        loggedInUser: currentUser,
         onlogin: verifyAssertion,
         onlogout: signoutUser
     });

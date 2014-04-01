@@ -12,10 +12,11 @@
 
 // global variable wb is initialized in the HTML before any javascript files
 // are loaded (in template/template.html)
-(function(wb){
-'use strict';
-    function saveCurrentScripts(){
-        if (!wb.scriptModified){
+(function(wb) {
+    'use strict';
+
+    function saveCurrentScripts() {
+        if (!wb.scriptModified) {
             // console.log('nothing to save');
             // nothing to save
             return;
@@ -25,12 +26,53 @@
     }
 
     // Save script to gist;
-    function saveCurrentScriptsToGist(event){
+    function saveCurrentScriptsToGist(event) {
         event.preventDefault();
         // console.log("Saving to Gist");
+
+        // var xhr = new XMLHttpRequest();
+        // xhr.open("GET", "/isAuthenticated", true);
+        // xhr.onreadystatechange = function(xhr) {
+        //     if (xhr.readyState == 4) {
+        //         if (xhr.state == 200) {
+
+        //         } else {
+
+        //         }
+        //     }
+
+
+        // };
+        // xhr.send();
+
+        var makeObj = {
+            email: "eddy3334@gmail.com",
+            url: "http://www.google.com",
+            contentType: "application/what",
+        };
+
+        // var el = document.getElementsByClassName("overlay");
+        // console.log("%o", el);
+        // console.log("%o", el[0]);
+        // el[0].style.visibility = (el[0].style.visibility == "visible") ? "hidden" : "visible";
+
+
         var title = prompt("Save to an anonymous Gist titled: ");
-        if ( !title ) return;
-        ajax.post("https://api.github.com/gists", function(data){
+        if (!title) return;
+        makeObj.title = title;
+
+        console.log(makeObj);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                alert("SUCCESS!");
+            }
+        };
+        xhr.open("POST", "/make/create", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(makeObj));
+
+        ajax.post("https://api.github.com/gists", function(data) {
             //var raw_url = JSON.parse(data).files["script.json"].raw_url;
             var gistID = JSON.parse(data).url.split("/").pop();
             prompt("This is your Gist ID. Copy to clipboard: Ctrl+C, Enter", gistID);
@@ -49,7 +91,7 @@
                     "content": scriptsToString(title, '', title)
                 },
             }
-        }), function(statusCode, x){
+        }), function(statusCode, x) {
             alert("Can't save to Gist:\n" + statusCode + " (" + x.statusText + ") ");
         });
     }
@@ -75,7 +117,7 @@
             node.appendChild(button);
             gistContainer.appendChild(node);
 
-            button.addEventListener('click', function(){
+            button.addEventListener('click', function() {
                 wb.loadScriptsFromGistId(this.dataset.gist);
             });
         }
@@ -83,10 +125,16 @@
 
     //Potential FIXME: I feel that title should be the filename, but uName || name
     //determines what is shown in the workspace.
-    function scriptsToString(title, description, name){
-        if (!title){ title = ''; }
-        if (!description){ description = ''; }
-        if (!name){ name = 'Workspace';}
+    function scriptsToString(title, description, name) {
+        if (!title) {
+            title = '';
+        }
+        if (!description) {
+            description = '';
+        }
+        if (!name) {
+            name = 'Workspace';
+        }
         var blocks = wb.findAll(document.body, '.workspace .scripts_workspace');
         var json = {
             title: title,
@@ -96,9 +144,9 @@
             blocks: blocks.map(wb.blockDesc)
         };
 
-        if(json.blocks[0].sockets[0].name){
+        if (json.blocks[0].sockets[0].name) {
             json.blocks[0].sockets[0].name = name;
-        }else if(json.blocks[0].sockets[0].uName){
+        } else if (json.blocks[0].sockets[0].uName) {
             json.blocks[0].sockets[0].uName = name;
         }
 
@@ -106,15 +154,17 @@
     }
 
 
-    function createDownloadUrl(evt){
+    function createDownloadUrl(evt) {
         evt.preventDefault();
         var name = prompt("Save file as: ");
-        if( !name ) return;
+        if (!name) return;
         var URL = window.webkitURL || window.URL;
-        var file = new Blob([scriptsToString('','',name)], {type: 'application/json'});
+        var file = new Blob([scriptsToString('', '', name)], {
+            type: 'application/json'
+        });
         var reader = new FileReader();
         var a = document.createElement('a');
-        reader.onloadend = function(){
+        reader.onloadend = function() {
             a.href = reader.result;
             a.download = name + '.json';
             a.target = '_blank';
@@ -124,14 +174,16 @@
         reader.readAsDataURL(file);
     }
 
-    function loadScriptsFromGistId(id){
+    function loadScriptsFromGistId(id) {
         //we may get an event passed to this function so make sure we have a valid id or ask for one
-        var gistID = isNaN(parseInt(id)) ? prompt("What Gist would you like to load? Please enter the ID of the Gist: ")  : id;
+        var gistID = isNaN(parseInt(id)) ? prompt("What Gist would you like to load? Please enter the ID of the Gist: ") : id;
         // console.log("Loading gist " + id);
-        if( !gistID ) return;
-        ajax.get("https://api.github.com/gists/"+gistID, function(data){
-            loadScriptsFromGist({data:JSON.parse(data)});
-        }, function(statusCode, x){
+        if (!gistID) return;
+        ajax.get("https://api.github.com/gists/" + gistID, function(data) {
+            loadScriptsFromGist({
+                data: JSON.parse(data)
+            });
+        }, function(statusCode, x) {
             alert("Can't load from Gist:\n" + statusCode + " (" + x.statusText + ") ");
         });
         var path = location.href.split('?')[0];
@@ -139,30 +191,30 @@
         history.pushState(null, '', path);
     }
 
-    function loadScriptsFromFilesystem(event){
+    function loadScriptsFromFilesystem(event) {
         var input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', 'application/json');
-        input.addEventListener('change', function(evt){
+        input.addEventListener('change', function(evt) {
             var file = input.files[0];
             loadScriptsFromFile(file);
         });
         input.click();
     }
 
-    function loadScriptsFromObject(fileObject){
+    function loadScriptsFromObject(fileObject) {
         // console.info('file format version: %s', fileObject.waterbearVersion);
         // console.info('restoring to workspace %s', fileObject.workspace);
         if (!fileObject) return wb.createWorkspace();
         var blocks = fileObject.blocks.map(wb.Block);
-        if (!blocks.length){
+        if (!blocks.length) {
             return wb.createWorkspace();
         }
-        if (blocks.length > 1){
+        if (blocks.length > 1) {
             console.error('not really expecting multiple blocks here right now');
             console.error(blocks);
         }
-        blocks.forEach(function(block){
+        blocks.forEach(function(block) {
             wb.wireUpWorkspace(block);
             Event.trigger(block, 'wb-add');
         });
@@ -170,58 +222,60 @@
         Event.trigger(document.body, 'wb-script-loaded');
     }
 
-    function loadScriptsFromGist(gist){
+    function loadScriptsFromGist(gist) {
         var keys = Object.keys(gist.data.files);
         var file;
-        keys.forEach(function(key){
-            if (/.*\.json/.test(key)){
+        keys.forEach(function(key) {
+            if (/.*\.json/.test(key)) {
                 // it's a json file
                 file = gist.data.files[key].content;
             }
         });
-        if (!file){
+        if (!file) {
             console.error('no json file found in gist: %o', gist);
             return;
         }
         loadScriptsFromJson(file);
     }
 
-    function loadScriptsFromExample(name){
-        ajax.get('examples/' + wb.language + '/' + name + '.json?b=' + Math.random(), function(exampleJson){
+    function loadScriptsFromExample(name) {
+        ajax.get('examples/' + wb.language + '/' + name + '.json?b=' + Math.random(), function(exampleJson) {
             loadScriptsFromJson(exampleJson);
-        }, function(statusCode, xhr){
+        }, function(statusCode, xhr) {
             console.error(statusCode + xhr);
         });
     }
 
-    function loadScriptsFromJson(jsonblob){
+    function loadScriptsFromJson(jsonblob) {
         // wb.clearScripts(null, true);
         wb.loaded = true;
         loadScriptsFromObject(JSON.parse(jsonblob));
         wb.scriptModified = true;
     }
 
-    function loadCurrentScripts(queryParsed){
+    function loadCurrentScripts(queryParsed) {
         // console.log('loadCurrentScripts(%s)', JSON.stringify(queryParsed));
         if (wb.loaded) return;
         wb.scriptLoaded = false;
-        if (queryParsed.gist){
+        if (queryParsed.gist) {
             //console.log("Loading gist %s", queryParsed.gist);
-            ajax.get("https://api.github.com/gists/"+queryParsed.gist, function(data){
-                loadScriptsFromGist({data:JSON.parse(data)});
-            }, function(statusCode, x){
-              alert("Can't save to gist:\n" + statusCode + " (" + x.statusText + ") ");
+            ajax.get("https://api.github.com/gists/" + queryParsed.gist, function(data) {
+                loadScriptsFromGist({
+                    data: JSON.parse(data)
+                });
+            }, function(statusCode, x) {
+                alert("Can't save to gist:\n" + statusCode + " (" + x.statusText + ") ");
             });
-        }else if (queryParsed.example){
+        } else if (queryParsed.example) {
             //console.log('loading example %s', queryParsed.example);
             loadScriptsFromExample(queryParsed.example);
-        }else if (localStorage['__' + wb.language + '_current_scripts']){
+        } else if (localStorage['__' + wb.language + '_current_scripts']) {
             //console.log('loading current script from local storage');
             var fileObject = JSON.parse(localStorage['__' + wb.language + '_current_scripts']);
-            if (fileObject){
+            if (fileObject) {
                 loadScriptsFromObject(fileObject);
             }
-        }else{
+        } else {
             //console.log('no script to load, starting a new script');  
             wb.scriptLoaded = true;
             wb.createWorkspace('Workspace');
@@ -230,24 +284,24 @@
         Event.trigger(document.body, 'wb-loaded');
     }
 
-	function loadScriptsFromFile(file){
-		var fileName = file.name;
-		if (fileName.indexOf('.json', fileName.length - 5) === -1) {
-			console.error("File is not a JSON file");
-			return;
-		}
-		var reader = new FileReader();
-		reader.readAsText( file );
-		reader.onload = function (evt){
+    function loadScriptsFromFile(file) {
+        var fileName = file.name;
+        if (fileName.indexOf('.json', fileName.length - 5) === -1) {
+            console.error("File is not a JSON file");
+            return;
+        }
+        var reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = function(evt) {
             loadScriptsFromJson(evt.target.result);
-		};
-	}
+        };
+    }
 
-    function getFiles(evt){
+    function getFiles(evt) {
         evt.stopPropagation();
         evt.preventDefault();
         var files = evt.dataTransfer.files;
-        if ( files.length > 0 ){
+        if (files.length > 0) {
             // we only support dropping one file for now
             var file = files[0];
             loadScriptsFromFile(file);

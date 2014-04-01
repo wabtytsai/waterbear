@@ -7,7 +7,9 @@
     "doc": "docs",
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "makeapi-client": "~0.5.19"
+  },
   "devDependencies": {
     "uglify-js": "~2.3.6",
     "clean-css": "~1.0.10",

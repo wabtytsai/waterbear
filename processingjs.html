@@ -10,7 +10,7 @@
 	<meta name="viewport" content="width=device-width">
 	<!--link rel="apple-touch-icon-precomposed" href="icon.png"--><!-- 57x57 icon -->
 	<!--link rel="apple-touch-startup-image" href="default.png"--><!-- 320x460 image -->
-	<!--script src="/lib/modernizr-1.6.min.js"></script-->
+	<script src="../lib/make-api.js"></script>
 	<script src="https://login.persona.org/include.js"></script>
 	<script>
 		var wb = {
@@ -168,6 +168,28 @@
 	}, false);
 </script>
 
+	</div>
+	<div class="overlay" style="visibility:hidden">
+		<div class="makeform">
+			<form>
+				<div>
+					<label for="title">Title: </label>
+					<input type="text" id="title"/>
+				</div>
+				<div>
+					<label for="author">Author: </label>
+					<input type="text" id="author"/>
+				</div>
+				<div>
+					<label for="tags">Tags: </label>
+					<input type="text" id="tags"/>
+				</div>
+				<div>
+					<label for="description">Description: </label>
+					<textarea id="description"></textarea>
+				</div>
+			</form>
+		</div>
 	</div>
 	<svg class="sekrit-svg"><text class="resize-tester"></text></svg>
 	<script src="dist/processingjs.js"></script>
