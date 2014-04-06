@@ -97,7 +97,7 @@
 
 (define (treeInsert tree item)
 	(if (equal? (cdr tree) ())
-
+		(if ())
 	)
 )
 
