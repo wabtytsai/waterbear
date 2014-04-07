@@ -128,6 +128,14 @@
 	(car tree)
 )
 
+(define (lTreeNull tree) 
+	(not (equal? (lTree tree) ())))
+
+(define (rTreeNull tree)
+	(not (equal? (rTree tree) ())))
+
+(define (isLeaf tree) (or (equal? tree ()) (equal? (cdr tree) ())))
+
 (define (binarySearch tree item)
 	(if (equal? tree ())
 		#f
