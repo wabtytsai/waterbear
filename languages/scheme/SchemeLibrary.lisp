@@ -116,6 +116,18 @@
 	(fold_left treeInsert (list car lst) (cdr lst))
 )
 
+(define (data tree) 
+	(if (equals? (cdr tree) ()) (car tree) (cadr tree))
+)
+
+(define (lTree tree)
+	(caddr tree)
+)
+
+(define (rTree tree)
+	(car tree)
+)
+
 (define (binarySearch tree item)
 	(if (equal? tree ())
 		#f

@@ -12,7 +12,8 @@
             "sockets": [
                 {
                     "name": "left subtree",
-                    "type": "tree"
+                    "type": "tree",
+                    "value":"()"
                 },
                 {
                     "name": "data",
@@ -20,7 +21,8 @@
                 },
                 {
                     "name": "right subtree",
-                    "type": "tree"
+                    "type": "tree",
+                    "value":"()"
                 }
             ]
         },
@@ -69,7 +71,7 @@
             "id": "53b0ff25-3761-4597-870e-76ffc4afeacf",
             "script": "(caddr {{1}})",
             "type": "tree",
-            "help": "get the right subtree. The free cannot be a leaf",
+            "help": "get the right subtree. The tree cannot be a leaf",
             "sockets": [
                 {
                     "name": "right subtree of",
