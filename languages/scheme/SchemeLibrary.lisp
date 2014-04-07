@@ -117,7 +117,9 @@
 )
 
 (define (binarySearch tree item)
-	(if (equal? (cdr tree) ()) 
+	(if (equal? tree ())
+		#f
+	(if (equal? (cdr tree) ())
 		(equal? item  (car tree))
 		(if (> (cadr tree))
 			(binarySearch (car tree) item)
@@ -129,3 +131,6 @@
 
 		)
 	)
+)
+
+(define tree (cons))
