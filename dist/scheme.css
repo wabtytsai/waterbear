@@ -2656,9 +2656,9 @@ a .icon-flip-vertical:before {
 /*end languages/scheme/tree.css*/
 
 /*begin languages/scheme/control.css*/
-.control, .control .holder{
-    background-color: #FFCC00;
-    border-color: red;
+.controls, .controls .holder{
+    border-color: hsl(44, 81%, 49%);
+    background-color: hsl(44, 81%, 85%);
 }
 
 
