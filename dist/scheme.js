@@ -5981,8 +5981,8 @@ wb.menu({
             "blocktype": "expression",
             "id": "dc2be559-bbf5-423e-a396-e331c14eb535",
             "type": "number",
-            "script": "(min {{1}} {{2}})",
-            "help": "the smaller of the two arguments",
+            "script": "{{1}}",
+            "help": "Create an integer",
             "sockets": [
                 {
                     "name": "number",
@@ -6092,7 +6092,8 @@ wb.menu({
             "sockets": [
                 {
                     "name": "left subtree",
-                    "type": "tree"
+                    "type": "tree",
+                    "value":"()"
                 },
                 {
                     "name": "data",
@@ -6100,7 +6101,8 @@ wb.menu({
                 },
                 {
                     "name": "right subtree",
-                    "type": "tree"
+                    "type": "tree",
+                    "value":"()"
                 }
             ]
         },
@@ -6149,7 +6151,7 @@ wb.menu({
             "id": "53b0ff25-3761-4597-870e-76ffc4afeacf",
             "script": "(caddr {{1}})",
             "type": "tree",
-            "help": "get the right subtree. The free cannot be a leaf",
+            "help": "get the right subtree. The tree cannot be a leaf",
             "sockets": [
                 {
                     "name": "right subtree of",

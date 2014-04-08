@@ -78,7 +78,7 @@
 			(+ prev1 prev2)
 			(fib_helper (- n 1) prev2 (+ prev2 prev1))
 			)
-		)
+	)
 )
 
 (define (fold_left f acc lst)
@@ -129,28 +129,26 @@
 )
 
 (define (lTreeNull tree) 
-	(not (equal? (lTree tree) ())))
+	(equal? (lTree tree) ()))
 
 (define (rTreeNull tree)
-	(not (equal? (rTree tree) ())))
+	(equal? (rTree tree) ()))
 
-(define (isLeaf tree) (or (equal? tree ()) (equal? (cdr tree) ())))
+(define (isLeaf tree) (equal? () (cdr tree)))
+
+(define (isNullTree tree) (equal? () tree))
 
 (define (binarySearch tree item)
-	(if (equal? tree ())
+	(if (isNullTree tree)
 		#f
-	(if (equal? (cdr tree) ())
-		(equal? item  (car tree))
-		(if (> (cadr tree))
-			(binarySearch (car tree) item)
-			(if (< cadr tree)
-				(binarySearch (caddr tree) item)
+		(let ((dat (data tree)))
+			(if (= item dat)
 				#t
+				(if (> item dat)
+					(binarySearch (rTree tree) item)
+					(binarySearch (lTree tree) item)
+				)
 			)
-		)
-
 		)
 	)
 )
-
-(define tree (cons))
