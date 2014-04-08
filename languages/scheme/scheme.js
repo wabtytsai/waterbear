@@ -9,11 +9,13 @@
     var bscheme = new BiwaScheme.Interpreter(function(e, state) {
         document.querySelector('.stageframe').contentWindow.document.write(e.message);
     });
+    //You could run your SchemeLibrary.lisp file right here and all functions
+    //will be accessible
     wb.runScript = function(script){
         var run = function(){
             wb.script = script;
             var scriptArray = script.split(";;end");
-            
+            document.querySelector('.stageframe').contentWindow.document.body.innerHTML = '';  
             for(var i = 0; i < scriptArray.length; i++) {
                 console.log('THIS IS IMPORTANT:' + scriptArray[i]);
                 bscheme.evaluate(scriptArray[i], function(result) {
